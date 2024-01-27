@@ -28,6 +28,10 @@ urlpatterns = [
         views.update_slide
     ),
     re_path(
+        r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/final$',
+        views.view_final_slide
+    ),
+    re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)$',
         views.slide_details
     ),

@@ -48,6 +48,7 @@ class Webhook(models.Model):
         return f'Webhook: {self.webhook_id}'
 
 
+# TODO: Change to DataSource
 class Sheet(models.Model):
     """A sheet is a connection to a csv file
     or a Google Sheet spreadsheet. A sheet can
@@ -84,18 +85,26 @@ class Sheet(models.Model):
         null=True
     )
     endpoint_url = models.URLField(
-        help_text=_("The endpoint to use to create a new sheet"),
+        help_text=_(
+            "The endpoint to use to create a new "
+            "local csv file source or a Google sheet"
+        ),
         blank=True,
         null=True
     )
     endpoint_data_key = models.CharField(
         max_length=100,
-        help_text=_("The key under which the data is stored"),
+        help_text=_(
+            "The key under which the actual "
+            "data is stored ex. {'count': 14, 'results: []'}"),
         blank=True,
         null=True
     )
     columns = models.JSONField(
-        help_text=_("Available columns in the data source"),
+        help_text=_(
+            "All the actual columns present "
+            "in the initial data"
+        ),
         blank=True,
         null=True
     )

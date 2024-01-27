@@ -1,11 +1,15 @@
 
+from django.shortcuts import get_object_or_404
 from rest_framework import fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer
 
+from sheets import models as sheets_models
+from slides import models as slides_models
 from sheets.api.serializers import SheetSerializer
 from sheets.models import Sheet
 from slides.api import validators
+from slides.api.utils import list_adder, list_manager, list_remover
 from slides.choices import (AccessChoices, ColumnTypeChoices, ComponentTypes,
                             InputTypeChoices, OperatorChoices, SortingChoices,
                             UnionChoices)
@@ -55,13 +59,17 @@ class PermissionsConditionForm(Serializer):
 
 
 class ConditionsForm(Serializer):
-    """Validates slide conditions"""
+    """Validates block conditions"""
     filters = DataFiltersConditionForm(many=True)
+    columns_visibility = fields.ListField()
 
 
 class BlockForm(Serializer):
     """Form that validates the creation of
-    a new block for the given slide"""
+    a new block for the given slide. Block can
+    be created in two different manners:
+        * Simple creation: just component type
+    """
 
     name = fields.CharField(required=False, allow_null=True)
     component = fields.ChoiceField(
@@ -71,14 +79,52 @@ class BlockForm(Serializer):
     record_creation_columns = fields.ListField()
     record_update_columns = fields.ListField()
     search_columns = fields.ListField()
-    columns_visibility = fields.ListField()
     block_data_source = fields.URLField(
-        required=False, 
+        required=False,
         allow_null=True
     )
     conditions = ConditionsForm()
     user_filters = UserFiltersConditionForm(many=True)
     active = fields.BooleanField(default=True)
+
+    def save(self, request, slide_id, **kwargs):
+        setattr(self, 'request', request)
+        setattr(self, 'slide_id', slide_id)
+        return super().save(**kwargs)
+
+    def create(self, validated_data):
+        # TODO: Use authentication request.user
+        user = get_object_or_404(sheets_models.USER_MODEL, pk=1)
+        slide = get_object_or_404(
+            slides_models.Slide,
+            user=user,
+            slide_id=self.slide_id
+        )
+
+        block = slide.blocks.create(**validated_data)
+        try:
+            # In case the slide has no data sources,
+            # just ignore the error that would occur here
+            # since we have created the block using just
+            # the component name
+            sheet_connection = slide.sheets.latest('created_on')
+        except:
+            pass
+        else:
+            # Set these fields to be able to implement
+            # specific actions (visibility, updating...)
+            # on the columns individually
+            block.record_creation_columns = sheet_connection.columns
+            block.record_update_columns = sheet_connection.columns
+            block.search_columns = sheet_connection.columns
+            block.save()
+        return block
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
 
 class UpdateBlockColumnForm(Serializer):
@@ -94,36 +140,58 @@ class UpdateBlockColumnForm(Serializer):
         SortingChoices.choices,
         default=SortingChoices.NO_SORT
     )
-    columns_visibility = fields.BooleanField(default=True)
+    column_visibility = fields.BooleanField(default=True)
     allow_record_creation = fields.BooleanField(default=True)
     allow_record_update = fields.BooleanField(default=True)
+    allow_record_search = fields.BooleanField(default=True)
 
     def update(self, instance, validated_data):
-        def filterout_current_column(columns):
-            return list(filter(lambda x: x != validated_data['name'], columns))
+        instance = list_manager(
+            instance,
+            'record_creation_columns',
+            validated_data['name']
+        )
 
-        # Add or remove the field to the record creation field
-        record_creation_columns = instance.record_creation_columns
-        if validated_data['allow_record_creation']:
-            record_creation_columns.append(validated_data['name'])
-            instance.record_creation_columns = list(
-                set(record_creation_columns))
-        else:
-            if validated_data['name'] in record_creation_columns:
-                instance.record_creation_columns = filterout_current_column(
-                    record_creation_columns
-                )
+        instance = list_manager(
+            instance,
+            'record_update_columns',
+            validated_data['name']
+        )
 
-        # Add or remove the field to the record update field
-        record_update_columns = instance.record_creation_columns
-        if validated_data['allow_record_update']:
-            record_update_columns.append(validated_data['name'])
-            instance.record_update_columns = list(set(record_update_columns))
-        else:
-            if validated_data['name'] in record_update_columns:
-                instance.record_update_columns = filterout_current_column(
-                    record_creation_columns
-                )
+        instance = list_manager(
+            instance,
+            'visible_columns',
+            validated_data['name']
+        )
+
+        # # Add or remove the field to the record creation field
+        # record_creation_columns = instance.record_creation_columns
+        # if validated_data['allow_record_creation']:
+        #     record_creation_columns.append(validated_data['name'])
+        # else:
+        #     index_of_column = record_creation_columns.index(
+        #         validated_data['name'])
+        #     record_creation_columns.pop(index_of_column)
+
+        # instance.record_creation_columns = record_creation_columns
+
+        # # Add or remove the field to the record update field
+        # record_update_columns = instance.record_update_columns
+        # if validated_data['allow_record_creation']:
+        #     record_update_columns.append(validated_data['name'])
+        # else:
+        #     index_of_column = record_update_columns.index(
+        #         validated_data['name'])
+        #     record_update_columns.pop(index_of_column)
+
+        # # Add or remove the field to the record update field
+        # visible_columns = instance.visible_columns
+        # if validated_data['columns_visibility']:
+        #     visible_columns.append(validated_data['name'])
+        # else:
+        #     index_of_column = visible_columns.index(
+        #         validated_data['name'])
+        #     visible_columns.pop(index_of_column)
 
         instance.save()
         return instance
@@ -158,7 +226,8 @@ class BlockSerializer(Serializer):
 
 
 class UpdateSlideForm(Serializer):
-    """Serializer for updating a slide"""
+    """Serializer for updating the data for 
+    a given slide"""
 
     name = fields.CharField(
         required=True,

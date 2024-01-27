@@ -14,12 +14,24 @@ from sheets.api import serializers
 
 @api_view(http_method_names=['post'])
 def upload_csv_file(request, **kwargs):
-    """Upload a new csv file to create a new connection"""
+    """Upload a new data source which can be a csv file,
+    an API endpoint that will become a CSV file
+    to create a new connection"""
     serializer = serializers.UploadSheetForm(data=request.data)
     serializer.is_valid(raise_exception=True)
     instance = serializer.save(request=request)
     serialized_data = serializers.SheetSerializer(instance=instance)
     return Response(serialized_data.data)
+
+
+@api_view(http_method_names=['post'])
+def delete_csv_file(request, sheet_id, **kwargs):
+    """Deletes an existing data source"""
+    sheet = get_object_or_404(models.Sheet, user__id=1, sheet_id=sheet_id)
+    sheet.delete()
+    data_sources = models.Sheet.objects.filter(user__id=1)
+    serializer = serializers.SheetSerializer(instance=data_sources, many=True)
+    return Response(serializer.data)
 
 
 @api_view(http_method_names=['get'])

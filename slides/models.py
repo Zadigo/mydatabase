@@ -13,8 +13,10 @@ USER_MODEL = get_user_model()
 
 
 class Slide(models.Model):
-    """A slide is an element that holds a set of pages
-    which themself hold different blocks of data"""
+    """A slide can be considered as a page that 
+    holds a set of blocks which contain either data
+    from the overall slide or specific data unique to
+    the block"""
 
     user = models.ForeignKey(USER_MODEL, models.CASCADE)
     # TODO: Determine whether a slide should have one data
@@ -58,9 +60,9 @@ class Slide(models.Model):
 
 class Block(models.Model):
     """A block represents a section that
-    holds data - either page level data
-    or  block level data. A block or page
-    is linked to a sheet"""
+    holds data. It can hold either page/slide 
+    level data or  block level data. A block
+    is automatically linked to a page or a slide"""
 
     name = models.CharField(
         max_length=100,
@@ -80,12 +82,18 @@ class Block(models.Model):
         choices=ComponentTypes.choices
     )
     record_creation_columns = models.JSONField(
-        help_text=_("Columns to consider when creating a new record"),
+        help_text=_(
+            "Columns to consider when the user "
+            "attemps to create a new record"
+        ),
         blank=True,
         null=True
     )
     record_update_columns = models.JSONField(
-        help_text=_("Columns to consider when updating a new record"),
+        help_text=_(
+            "Columns to consider when the user attemps "
+            "to update a new record"
+        ),
         blank=True,
         null=True
     )
@@ -97,10 +105,13 @@ class Block(models.Model):
     block_data_source = models.URLField(
         blank=True,
         null=True,
-        help_text=_('Block level data source')
+        help_text=_('Link this specific block to a specific data source')
     )
     search_columns = models.JSONField(
-        help_text=_("The columns to use for searching data"),
+        help_text=_(
+            "The columns to use when the user "
+            "attemps to search for data"
+        ),
         blank=True,
         null=True
     )
@@ -138,11 +149,10 @@ class Block(models.Model):
 
     @property
     def data_source(self):
-        """We can have both page level data
-        source and block level data source.
-        When both a present, take the block
-        level data source first and then 
-        eventually move to the page level"""
+        """We can have both page level and block 
+        level data source. When both a present,
+        consider the block level first and then
+        the slide data source in second"""
         if self.block_data_source is None:
             return self.slide_set.latest('created_on').slide_data_source
         return self.block_data_source

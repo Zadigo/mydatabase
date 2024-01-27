@@ -7,6 +7,10 @@ urlpatterns = [
         views.send_to_webhook
     ),
     re_path(
+        r'^(?P<sheet_id>sh_[a-zA-Z0-9]+)/remove$',
+        views.delete_csv_file
+    ),
+    re_path(
         r'^(?P<sheet_id>sh\_[a-zA-Z0-9]+)$',
         views.load_csv_file_data
     ),
