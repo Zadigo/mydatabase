@@ -44,7 +44,7 @@
 
                   <q-menu>
                     <q-list style="min-width: 100px">
-                      <q-item v-for="item in connectionMenuItems" :key="item" clickable v-close-popup @click="handleMenuActions(item, dataSource)">
+                      <q-item v-for="item in connectionMenuItems" :key="item" v-close-popup clickable @click="handleMenuActions(item, dataSource)">
                         <q-item-section>{{ item }}</q-item-section>
                       </q-item>
                     </q-list>
@@ -72,7 +72,7 @@
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn color="primary" flat label="Cancel" v-close-popup />
+          <q-btn v-close-popup color="primary" flat label="Cancel" />
           <q-btn color="primary" label="Save" @click="handleDataUpload" />
         </q-card-actions>
       </q-card>

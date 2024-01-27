@@ -22,7 +22,7 @@
           <q-list bordered separator>
             <q-item v-for="slide in searchedSlides" :key="slide.slide_id" class="q-pa-md">
               <q-item-section avatar>
-                <q-avatar :color="[slide.access === 'Public' ? 'green' : 'danger']" text-color="white">
+                <q-avatar :color="slide.access === 'Public' ? 'green' : 'danger'" text-color="white">
                   <span v-if="slide.access === 'Public'">Pu</span>
                   <span v-else>Pr</span>
                 </q-avatar>
@@ -61,7 +61,7 @@
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn color="primary" flat label="Cancel" v-close-popup />
+          <q-btn v-close-popup color="primary" flat label="Cancel" />
           <q-btn color="primary" label="Save" @click="handleCreateSlide" />
         </q-card-actions>
       </q-card>
@@ -106,15 +106,6 @@ export default defineComponent({
       maxLength
     }
   },
-  watch: {
-    newSlideAccess (n) {
-      if (n) {
-        this.requestData.access = 'Private'
-      } else {
-        this.requestData.access = 'Public'
-      }
-    }
-  },
   computed: {
     searchedSlides () {
       // Returns the slides which names match
@@ -128,6 +119,15 @@ export default defineComponent({
         })
       } else {
         return this.slides
+      }
+    }
+  },
+  watch: {
+    newSlideAccess (n) {
+      if (n) {
+        this.requestData.access = 'Private'
+      } else {
+        this.requestData.access = 'Public'
       }
     }
   },
@@ -156,7 +156,7 @@ export default defineComponent({
         this.slidesStore.slides.push(response.data)
         this.notifications.notify({
           message: 'New slide created',
-          color: 'success'
+          color: 'green'
         })
         this.showNewSlideModal = false
       } catch (error) {

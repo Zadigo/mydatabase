@@ -1,5 +1,61 @@
-import { defineProps } from 'vue'
+import { computed, ref } from 'vue'
+import { useSlides } from 'src/stores/slides'
+import { api } from '../boot/axios'
+import { session } from '../boot/vue-storages'
 
-export function useBlocksComposable () {
-  defineProps(['block'])
+export function useBlocksComposable (app) {
+  const slidesStore = useSlides()
+  const cachedDataSource = ref({})
+  const dataResults = ref([])
+
+  const useBlockDataSource = computed(() => {
+    // Checks whether we have a data at the block level
+    // or at the slide level. If we have data at the 
+    // block level, then we will be using it, otherwise
+    // we will be using the global slide data
+    return app.ctx.block.block_data_source !== null
+  })
+
+  const hasSlideDataSource = computed(() => {
+    // Checks whether we have a data source to work
+    // with from the slide level
+    return slidesStore.currentSlide.slide_data_source !== null
+  })
+
+  const dataSourceId = computed(() => {
+    // Returns the correct data source ID to use to
+    // retrieve the data from the database
+    return slidesStore.currentSlide.slide_data_source || app.ctx.block.slide_data_source
+  })
+
+  function setDataSource (data) {
+    // Sets the data using the initial response
+    // from the backend
+    cachedDataSource.value = data
+    dataResults.value = data.results
+  }
+
+  async function requestDataSource () {
+    // Returns the actual data for the given
+    // data source ID (slide or block level)
+    try {
+      if (dataSourceId.value !== null) {
+        const response = await api.get(`/sheets/${dataSourceId.value}`)
+        setDataSource(response.data)
+        session.dictSet('sources', dataSourceId.value, response.data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  return {
+    dataResults,
+    dataSourceId,
+    cachedDataSource,
+    setDataSource,
+    requestDataSource,
+    hasSlideDataSource,
+    useBlockDataSource
+  }
 }
