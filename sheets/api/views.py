@@ -1,6 +1,7 @@
 import json
 
 import pandas
+from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
@@ -8,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotAcceptable, ValidationError
 from rest_framework.response import Response
 
-from sheets import models
+from sheets import models, utils
 from sheets.api import serializers
 
 
@@ -19,7 +20,7 @@ def upload_csv_file(request, **kwargs):
     to create a new connection"""
     serializer = serializers.UploadSheetForm(data=request.data)
     serializer.is_valid(raise_exception=True)
-    instance = serializer.save(request=request)
+    instance = serializer.save(request)
     serialized_data = serializers.SheetSerializer(instance=instance)
     return Response(serialized_data.data)
 
@@ -105,3 +106,35 @@ def send_to_webhook(request, webhook_id, **kwargs):
         'colums': columns
     }
     return Response(data=return_data)
+
+
+@api_view(http_method_names=['post'])
+def update_column_data_types(request, sheet_id, **kwargs):
+    """Update the column data types for the specified
+    data source"""
+    serializer = serializers.ColumnDataTypesForm(data=request.data, many=True)
+    serializer.is_valid(raise_exception=True)
+
+    with transaction.atomic():
+        data_source = get_object_or_404(
+            models.Sheet,
+            sheet_id=sheet_id,
+            user__id=1
+        )
+        data_source.column_types = serializer.validated_data
+        data_source.save()
+        sid1 = transaction.savepoint()
+
+        # df = pandas.DataFrame(data_source.csv_file.path)
+        # renaming_mapper = {}
+        # for item in serializer.validated_data:
+        #     rename_to = item.get('renamed_to', None)
+        #     if rename_to is None:
+        #         continue
+        #     renaming_mapper[item['column']] = item['renamed_to']
+
+        # df = df.rename(columns=renaming_mapper)
+        # df.to_csv(data_source.csv_file.path)
+
+        transaction.savepoint_commit(sid1)
+    return Response({'state': True})

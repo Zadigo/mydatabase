@@ -91,3 +91,10 @@ class CSVData:
         """Apply a function to the dataframe calling `df.apply`"""
         for column in columns:
             self.dataframe[column] = self.dataframe[column].apply(func)
+
+
+def create_column_data_types(columns):
+    """Function that creates a list that stores the
+    column types for each column on the dataset"""
+    # TODO: Rename: column -> name, type -> column_type
+    return [{'column': column, 'type': 'Text'} for column in columns]

@@ -1,5 +1,6 @@
 import pathlib
 
+from django.utils.functional import cached_property
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_delete, post_save, pre_save
@@ -48,11 +49,11 @@ class Webhook(models.Model):
         return f'Webhook: {self.webhook_id}'
 
 
-# TODO: Change to DataSource
+# TODO: Rename: DataSource
 class Sheet(models.Model):
-    """A sheet is a connection to a csv file
-    or a Google Sheet spreadsheet. A sheet can
-    be created either by uploading a csv file,
+    """A data source is a connection to a local
+    csv file or a Google Sheet spreadsheet. A data
+    source can be created either by uploading a csv file,
     by creating a csv file via an API endpoint or
     by linking to a Google spreadsheet"""
 
@@ -81,6 +82,7 @@ class Sheet(models.Model):
         verbose_name='CSV file',
         help_text=_("The csv file to use to create a new sheet"),
         upload_to=create_file_name,
+        validators=[],
         blank=True,
         null=True
     )
@@ -100,6 +102,11 @@ class Sheet(models.Model):
         blank=True,
         null=True
     )
+    # TODO: Remove this specific field and only
+    # keep the column_types -> renamed to columns.
+    # Then used a property field on the model to
+    # only return the column names. This should
+    # simplify the model to only one "columns" field
     columns = models.JSONField(
         help_text=_(
             "All the actual columns present "
@@ -123,14 +130,19 @@ class Sheet(models.Model):
 
     @property
     def csv_based(self):
-        """Returns whether the sheet is a
-        csv based one aka started by uploading
-        a csv file"""
-        return self.csv_file is not None
+        """Returns whether the data source
+        was created by uploading a csv file"""
+        return self.endpoint_url is None
 
     @property
     def is_endpoint(self):
         return self.endpoint_url != None
+
+    @cached_property
+    def data_source_columns(self):
+        # TODO: Rename this to columns
+        # to replace the database field
+        return [item['column'] for item in self.column_types]
 
 
 @receiver(pre_save, sender=Sheet)

@@ -23,6 +23,9 @@ class Slide(models.Model):
     # single data source or multiple data sources. In which
     # case fields like search_columns cannot be on one single
     # Slide model
+    # FIXME: Not sure what the purpose of this field is.
+    # Just create one foreign key to a given sheet as
+    # opposed to using a ManyToManyField
     sheets = models.ManyToManyField(Sheet, blank=True)
     name = models.CharField(
         max_length=100,
@@ -102,6 +105,8 @@ class Block(models.Model):
         blank=True,
         null=True
     )
+    # FIXME: This should be a foreign key to
+    # Sheet -> DataSource
     block_data_source = models.URLField(
         blank=True,
         null=True,
