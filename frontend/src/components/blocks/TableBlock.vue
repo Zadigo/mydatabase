@@ -25,7 +25,7 @@
       <v-table fixed-header>
         <thead>
           <tr>
-            <th v-for="column in currentConnection.columns" :key="column" class="text-left">
+            <th v-for="column in blockDetails.visible_columns" :key="column" class="text-left">
               <v-btn variant="tonal" rounded @click="handleShowColumnActionModal(column)">{{ column }}</v-btn>
             </th>
           </tr>
@@ -155,19 +155,18 @@ export default {
     const { listManager } = useUtilities()
     const { columnTypeChoices, columnSortingChoices } = useBlocksComposable(app)
     const slidesStore = useSlides()
-    const { currentSlide, blockRequestData } = storeToRefs(slidesStore)
+    const { currentSlide, blockRequestData, currentBlock } = storeToRefs(slidesStore)
     const connectionsStore = useConnections()
     const { currentConnection } = storeToRefs(connectionsStore)
     const columnsRequestData = ref({})
     // const blockRequestData = ref({})
-    // const isSelected = ref(false)
     const showCreateRecordModal = ref(false)
     const showSearchRecordsModal = ref(false)
     const showColumnActionsModal = ref(false)
     const currentUpdatedColumn = ref({})
 
     return {
-      // isSelected,
+      currentBlock,
       currentSlide,
       listManager,
       currentConnection,
@@ -186,22 +185,24 @@ export default {
   beforeMount () {
     this.connectionsStore.loadFromCache()
     this.connectionsStore.setCurrentConnection(this.blockDetails.block_data_source || this.currentSlide.slide_data_source)
-    
-    // For each column create a template that will be used
-    // to track configuration updates
-    // _.forEach(this.connectionsStore.currentConnection.columns, (column) => {
-    //   this.columnsRequestData[column] = {
-    //     name: column,
-    //     column_type: 'Text',
-    //     column_sort: 'No sort',
-    //     column_visibility: this.blockDetails.visible_columns.includes(column),
-    //     allow_column_creation: this.blockDetails.record_creation_columns.includes(column),
-    //     allow_column_update: this.blockDetails.record_update_columns.includes(column),
-    //     allow_column_search: this.blockDetails.search_columns.includes(column)
-    //   }
-    // })
   },
   methods: {
+    async handleUpdateColumn () {
+      // Updates the current column conffiguration
+      // for the current block
+      try {
+        const path = `slides/${this.currentSlide.slide_id}/blocks/${this.currentBlock.block_id}/column/update`
+        const response = await this.$http.post(path, this.columnsRequestData[this.currentUpdatedColumn.name])
+        this.currentBlock.visible_columns = response.data.visible_columns
+        this.currentBlock.search_columns = response.data.search_columns
+        this.currentBlock.record_update_columns = response.data.record_update_columns
+        this.currentBlock.record_creation_columns = response.data.record_creation_columns
+        this.showColumnActionsModal = false
+        response.data
+      } catch (e) {
+        console.log(e)
+      }
+    },
     handleShowColumnActionModal (columnName) {
       // Shows the modal to set specific actions
       // on a give column (search, visibility...)

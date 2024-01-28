@@ -243,6 +243,7 @@ const useSlides = defineStore('slides', {
       }
     },
     setCurrentSlideData (slideId, data) {
+      // Sets the current slide data
       this.currentSlideData = data.results
       this.$session.create(slideId, data.results)
     },

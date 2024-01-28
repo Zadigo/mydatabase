@@ -17,6 +17,16 @@ body {
     }
 }
 
+@media (min-width: 991.98px) {
+    .dashboard.no-sidebar main {
+        padding-left: 0px;
+    }
+
+    .dashboard.no-sidebar footer {
+        padding-left: 0px;
+    }
+}
+
 .sidebar {
     position: fixed;
     top: 0;

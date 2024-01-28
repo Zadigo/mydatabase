@@ -43,9 +43,9 @@ const router = createRouter({
       ]
     },
     {
-      path: '/page/:id(pg\\_[a-zA-Z0-9]+)/preview',
+      path: '/slide/:id(sl\\_[a-zA-Z0-9]+)/preview',
       name: 'page_preview_view',
-      component: loadView('PagePreviewView')
+      component: loadView('SlidePreviewView')
     }
   ]
 })

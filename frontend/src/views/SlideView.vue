@@ -1,60 +1,75 @@
 <template>
   <section id="slide">
-    <div class="container">
-      <div class="row">
-        <!-- Header -->
-        <section id="block-selection" class="col-12">
-          <base-card class="shadow-sm mb-5">
-            <template #body>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex justify-content-start gap-2">
-                  <base-button v-for="blockType in blockTypes" :key="blockType.name" color="light" rounded @click="handleAddBlock(blockType)">
-                    <font-awesome-icon :icon="['fas', `${blockType.icon}`]" />
-                  </base-button>
-                </div>
-                
-                <div class="d-flex justify-content-end gap-2">
-                  <!-- <v-btn elevation="0" color="secondary" rounded>
-                    <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
-                    Publish
-                  </v-btn> -->
+    <div class="row">
+      <div class="col-3">
+        <base-card class="shadow-sm">
+          <template #body>
+            <!-- <v-breadcrumbs :items="[{ title: 'Slide', href: 'slide_view' }, { title: 'Block' }]">
+              <template v-slot:divider>
+                <v-icon icon="mdi-chevron-right"></v-icon>
+              </template>
+            </v-breadcrumbs> -->
 
-                  <v-btn :to="{ name: 'page_preview_view', params: { id: currentSlide.slide_id } }" elevation="0" color="info" rounded>
-                    <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
-                    Preview
+            <component :is="activeSidebarComponent" />
+          </template>
+        </base-card>
+      </div>
+      
+      <section class="col-9">
+        <div class="row">
+          <!-- Header -->
+          <section id="block-selection" class="col-12">
+            <base-card class="shadow-sm mb-5">
+              <template #body>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex justify-content-start gap-2">
+                    <base-button v-for="blockType in blockTypes" :key="blockType.name" color="light" rounded @click="handleAddBlock(blockType)">
+                      <font-awesome-icon :icon="['fas', `${blockType.icon}`]" />
+                    </base-button>
+                  </div>
+                  
+                  <div class="d-flex justify-content-end gap-2">
+                    <!-- <v-btn elevation="0" color="secondary" rounded>
+                      <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
+                      Publish
+                    </v-btn> -->
+  
+                    <v-btn :to="{ name: 'page_preview_view', params: { id: currentSlide.slide_id } }" elevation="0" color="info" rounded>
+                      <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
+                      Preview
+                    </v-btn>
+                  </div>
+                </div>
+              </template>
+            </base-card>
+          </section>
+          
+          <!-- Blocks -->
+          <section id="blocks" class="col-12">
+            <div v-if="slidesStore.hasActiveBlocks">
+              <component :is="block.component" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" />
+            </div>
+  
+            <div v-else class="text-center text-body-tertiary">
+              <div class="row">
+                <div class="col-md-6 offset-md-3">
+                  <font-awesome-icon :icon="['fas', 'home']" class="fa-6x" />
+                  <p class="my-3">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                    Enim cupiditate aliquid vero fuga rem suscipit ducimus in 
+                    exercitationem architecto, dolorem, sint libero quae hic quidem 
+                    reiciendis rerum. Natus, voluptas aliquam!
+                  </p>
+                  
+                  <v-btn color="primary" variant="tonal" size="x-large" rounded @click="showBlocksModal = true">
+                    Add your first block
                   </v-btn>
                 </div>
               </div>
-            </template>
-          </base-card>
-        </section>
-        
-        <!-- Blocks -->
-        <section id="blocks" class="col-12">
-          <div v-if="slidesStore.hasActiveBlocks">
-            Blocks here
-            <!-- <component :is="block.component" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" /> -->
-          </div>
-
-          <div v-else class="text-center text-body-tertiary">
-            <div class="row">
-              <div class="col-md-6 offset-md-3">
-                <font-awesome-icon :icon="['fas', 'home']" class="fa-6x" />
-                <p class="my-3">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                  Enim cupiditate aliquid vero fuga rem suscipit ducimus in 
-                  exercitationem architecto, dolorem, sint libero quae hic quidem 
-                  reiciendis rerum. Natus, voluptas aliquam!
-                </p>
-                
-                <v-btn color="primary" variant="tonal" size="x-large" rounded @click="showBlocksModal = true">
-                  Add your first block
-                </v-btn>
-              </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </section>
     </div>
 
     <!-- Modals -->
@@ -86,20 +101,25 @@ import { useSheetsComposable } from '@/composables/page'
 import BaseButton from '../layouts/bootstrap/buttons/BaseButton.vue'
 import BaseCard from '../layouts/bootstrap/cards/BaseCard.vue'
 // import ChartBlock from '../components/blocks/ChartBlock.vue'
+import DefaultSlideSidebar from '@/components/sidebar/DefaultSlideSidebar.vue'
 // import GridByTwoBlock from '../components/blocks/GridByTwoBlock.vue'
-// import TableBlock from '../components/blocks/TableBlock.vue'
+import TableBlock from '../components/blocks/TableBlock.vue'
+import TableSidebar from '@/components/sidebar/TableSidebar.vue'
 
 export default {
   name: 'SlideView',
   components: {
     BaseButton,
     BaseCard,
+    DefaultSlideSidebar,
     // ChartBlock,
     // GridByTwoBlock,
-    // TableBlock
+    TableBlock,
+    TableSidebar
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
+      console.log('SlideView before route enter (1)')
       vm.setCurrentSlide(to.params.id)
       vm.getSlideData()
       vm.connectionsStore.loadFromCache()
@@ -108,13 +128,14 @@ export default {
   },
   setup () {
     const slidesStore = useSlides()
-    const { slides, currentSlide, currentBlock } = storeToRefs(slidesStore)
+    const { slides, currentSlide, currentBlock, activeSidebarComponent } = storeToRefs(slidesStore)
     const connectionsStore = useConnections()
     const showBlocksModal = ref(false)
     const { getConnections } = useSheetsComposable()
     const blockSelections = ref({})
     
     return {
+      activeSidebarComponent,
       currentSlide,
       currentBlock,
       showBlocksModal,

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 my-4">
+  <div id="inner-sidebar" class="my-1">
     <!-- Sheets -->
     <v-select id="sheet-selection" v-model="blockRequestData.block_data_source" :items="connections" item-title="name" item-value="sheet_id" placeholder="Select block data source" variant="outlined" clearable hide-details @update:model-value="handleBlockUpdate"></v-select>
     <div v-if="slideHasData" class="mt-2 alert alert-warning">
@@ -14,6 +14,7 @@
     <!-- Filters -->
     <h3 class="h6">Filters</h3>
     <active-filter v-for="item in currentBlock.conditions.filters" :key="item.id" :filter-data="item" />
+    
     <v-btn class="mt-1" variant="tonal" density="compact" rounded @click="showDataFiltersModal = true">
       Add data filters
     </v-btn>

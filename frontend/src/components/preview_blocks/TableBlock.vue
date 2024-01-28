@@ -57,7 +57,7 @@
 <script>
 import _ from 'lodash'
 import { ref } from 'vue'
-import { usePublishedPages } from '@/store/published_pages'
+import { usePublishedSlides } from '@/store/published_slides'
 import { useUtilities } from '@/composables/utils'
 
 import BaseCard from '../../layouts/bootstrap/cards/BaseCard.vue'
@@ -80,7 +80,7 @@ export default {
   },
   setup () {
     const { listManager } = useUtilities()
-    const publishedPages = usePublishedPages()
+    const publishedSlides = usePublishedSlides()
     const search = ref(null)
     const currentPage = ref(1)
     const showCreateRecordModal = ref(false)
@@ -90,7 +90,7 @@ export default {
       currentPage,
       search,
       listManager,
-      publishedPages
+      publishedSlides
     }
   },
   data () {

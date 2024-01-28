@@ -79,16 +79,7 @@ emits: {
   },
   methods: {
     async handleUpdateColumn () {
-      // Updates the current column conffiguration
-      // for the current block
-      try {
-        const path = `sheets/pages/${this.pageStore.currentPage.page_id}/blocks/${this.pageStore.currentBlock.block_id}/column/update`
-        const response = await this.$http.post(path, this.tableColumnsRequestData[this.currentUpdatedColumn.name])
-        this.showColumnActionModal = false
-        response.data
-      } catch (e) {
-        console.log(e)
-      }
+      
     },
     handleSelection () {
       // Highlights the block when the user

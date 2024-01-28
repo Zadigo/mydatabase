@@ -1,16 +1,12 @@
 <template>
-  <section class="dashboard">
+  <section :class="{ 'no-sidebar': $route.name === 'slide_view' }" class="dashboard">
     <div class="sidebar-overlay"></div>
 
     <!-- Header -->
     <header>
       <!-- Sidebar -->
-      <nav id="sidebar" link="sidebar" class="collapse d-lg-block sidebar collapse bg-white">
-        <div v-if="(blockSelected && $route.name === 'slide_view') || $route.name === 'slide_view'" class="position-sticky">
-          <component :is="activeSidebarComponent" />
-        </div>
-        
-        <div v-else class="position-sticky">
+      <nav v-if="$route.name !== 'slide_view'" id="sidebar" link="sidebar" class="collapse d-lg-block sidebar collapse bg-white">        
+        <div class="position-sticky">
           <keep-alive>
             <div class="list-group list-group-flush mx-3 mt-4">
               <router-link v-for="(link, i) in adminLinks" :key="i" :to="{ name: link.to }" class="list-group-item list-group-item-action py-2 ripple" aria-current="true">
@@ -43,7 +39,7 @@
 
     <!-- Main -->
     <main>
-      <div :class="bodyClasses" class="container pt-4">
+      <div :class="bodyClasses" class="pt-4">
         <router-view></router-view>
       </div>
     </main>
@@ -63,24 +59,12 @@ import { useScroll } from '@vueuse/core'
 import { useSlides } from '@/store/slides'
 import { mapState } from 'pinia'
 
-import ChartSidebar from '@/components/sidebar/ChartSidebar.vue'
-import DefaultSlideSidebar from '@/components/sidebar/DefaultSlideSidebar.vue'
 import NavItem from './bootstrap/nav/NavItem.vue'
-import TableSidebar from '../components/sidebar/TableSidebar.vue'
 
 export default {
   name: 'DashboardLayout',
   components: {
-    ChartSidebar,
-    DefaultSlideSidebar,
-    NavItem,
-    TableSidebar
-  },
-  props: {
-    bodyClasses: {
-      type: String,
-      required: false
-    }
+    NavItem
   },
   setup () {
     const slidesStore = useSlides()
@@ -97,6 +81,14 @@ export default {
   },
   computed: {
     ...mapState(useSlides, ['blockSelected', 'activeSidebarComponent']),
+    bodyClasses () {
+      return [
+        {
+          'container-fluid': this.$route.name === 'slide_view',
+          'container': this.$route.name !== 'slide_view'
+        }
+      ]
+    },
     pageLinks () {
       return [
         {
