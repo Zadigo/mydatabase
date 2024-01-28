@@ -1,15 +1,16 @@
 import pathlib
 
-from django.utils.functional import cached_property
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
-from sheets.utils import create_file_name, create_id
-from sheets.validators import validate_id
+from datasources.utils import create_file_name
+from datasources.validators import validate_id
+from my_database.utils import create_id
 
 USER_MODEL = get_user_model()
 
@@ -19,7 +20,7 @@ class Webhook(models.Model):
     data can be updated or added in a sheet"""
 
     sheet = models.ForeignKey(
-        'Sheet',
+        'datasources.DataSource',
         on_delete=models.CASCADE,
         blank=True
     )
@@ -49,8 +50,7 @@ class Webhook(models.Model):
         return f'Webhook: {self.webhook_id}'
 
 
-# TODO: Rename: DataSource
-class Sheet(models.Model):
+class DataSource(models.Model):
     """A data source is a connection to a local
     csv file or a Google Sheet spreadsheet. A data
     source can be created either by uploading a csv file,
@@ -63,16 +63,15 @@ class Sheet(models.Model):
         blank=True,
         null=True
     )
-    sheet_id = models.CharField(
-        verbose_name='Sheet ID',
+    data_source_id = models.CharField(
+        verbose_name='Data source ID',
         max_length=100,
         unique=True,
         blank=True,
         null=True,
         validators=[validate_id]
     )
-    url = models.URLField(
-        verbose_name='URL',
+    google_sheet_url = models.URLField(
         unique=True,
         help_text=_("The Google sheet's url"),
         blank=True,
@@ -102,20 +101,7 @@ class Sheet(models.Model):
         blank=True,
         null=True
     )
-    # TODO: Remove this specific field and only
-    # keep the column_types -> renamed to columns.
-    # Then used a property field on the model to
-    # only return the column names. This should
-    # simplify the model to only one "columns" field
     columns = models.JSONField(
-        help_text=_(
-            "All the actual columns present "
-            "in the initial data"
-        ),
-        blank=True,
-        null=True
-    )
-    column_types = models.JSONField(
         help_text=_("The data type for each column"),
         blank=True,
         null=True
@@ -123,10 +109,7 @@ class Sheet(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Sheet: {self.sheet_id}'
-
-    def clean(self):
-        return super().clean()
+        return f'DataSource: {self.data_source_id}'
 
     @property
     def csv_based(self):
@@ -139,16 +122,15 @@ class Sheet(models.Model):
         return self.endpoint_url != None
 
     @cached_property
-    def data_source_columns(self):
-        # TODO: Rename this to columns
-        # to replace the database field
-        return [item['column'] for item in self.column_types]
+    def column_names(self):
+        """Return the column names as strings"""
+        return [item['name'] for item in self.columns]
 
 
-@receiver(pre_save, sender=Sheet)
-def create_sheet_id(instance, **kwargs):
-    if instance.sheet_id is None:
-        instance.sheet_id = create_id('sh')
+@receiver(pre_save, sender=DataSource)
+def create_data_source_id(instance, **kwargs):
+    if instance.data_source_id is None:
+        instance.data_source_id = create_id('ds')
 
 
 @receiver(pre_save, sender=Webhook)
@@ -157,7 +139,7 @@ def create_webhook_id(instance, **kwargs):
         instance.webhook_id = create_id('wk')
 
 
-@receiver(post_delete, sender=Sheet)
+@receiver(post_delete, sender=DataSource)
 def delete_csv_file_on_delete(instance, **kwargs):
     """Deletes a csv file that was previously uploaded
     by a user once the instance is deleted"""
@@ -167,23 +149,27 @@ def delete_csv_file_on_delete(instance, **kwargs):
         except:
             return
         if path.exists() and path.is_file():
-            path.unlink()
+            parent = path.parent.absolute()
+            files = parent.glob('**/*.csv')
+            for file in files:
+                file.unlink()
+            parent.rmdir()
 
 
-@receiver(pre_save, sender=Sheet)
+@receiver(pre_save, sender=DataSource)
 def change_csv_file_on_delete(instance, **kwargs):
     """Checks if a file is the same as the current
     one saved in the database and deletes the old file
     to replace it by the new uploaded one if needed"""
     if instance.pk:
         try:
-            user_sheet = Sheet.objects.get(user__id=instance.pk)
+            data_source = DataSource.objects.get(user__id=instance.pk)
         except:
             return
 
-        if user_sheet and user_sheet.csv_file == instance.csv_file:
+        if data_source and data_source.csv_file == instance.csv_file:
             try:
-                path = user_sheet.csv_file.path
+                path = data_source.csv_file.path
             except:
                 return
 
@@ -192,7 +178,7 @@ def change_csv_file_on_delete(instance, **kwargs):
                 path.unlink()
 
 
-@receiver(post_save, sender=Sheet)
+@receiver(post_save, sender=DataSource)
 def clean_csv_data(instance, **kwargs):
     # Work the CSV file based on the elemnents
     # that the user has provided to us

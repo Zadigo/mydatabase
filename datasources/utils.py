@@ -13,12 +13,7 @@ def create_file_name(instance, filename):
     """Creates a simple file name for an
     uploaded file"""
     new_name = get_random_string(length=20)
-    return f'sheets/{instance.sheet_id}/{new_name}.csv'
-
-
-def create_id(prefix):
-    """Creates a simple ID"""
-    return f"{prefix}_{get_random_string(length=5)}"
+    return f'sheets/{instance.data_source_id}/{new_name}.csv'
 
 
 class CSVData:
@@ -38,7 +33,8 @@ class CSVData:
             if self.filepath.exists() and self.filepath.is_file():
                 self.base_dataframe = pandas.read_csv(self.filepath)
                 if self.columns_to_keep:
-                    self.dataframe = self.base_dataframe[[self.columns_to_keep]]
+                    self.dataframe = self.base_dataframe[[
+                        self.columns_to_keep]]
 
     def __repr__(self):
         return f'<CSVData {self.filepath}>'
@@ -74,15 +70,15 @@ class CSVData:
         """Save a new version of the file either as a copy
         or either as an overwrite of the current file"""
         if create_copy:
-            filename = f'{self.instance.sheet_id}/{self.filepath.stem}_copy.csv'
+            filename = f'{self.instance.data_source_id}/{self.filepath.stem}_copy.csv'
 
             self.dataframe.to_csv(settings.MEDIA_ROOT / filename)
             reader = open(filename, mode='r', encoding='utf-8')
-            
+
             file = File(reader, name=filename)
             self.instance.csv_file = file
             self.instance.save()
-            
+
             reader.close()
         else:
             self.dataframe.to_csv(self.filepath)
@@ -96,5 +92,4 @@ class CSVData:
 def create_column_data_types(columns):
     """Function that creates a list that stores the
     column types for each column on the dataset"""
-    # TODO: Rename: column -> name, type -> column_type
-    return [{'column': column, 'type': 'Text'} for column in columns]
+    return [{'name': column, 'column_type': 'Text'} for column in list(columns)]

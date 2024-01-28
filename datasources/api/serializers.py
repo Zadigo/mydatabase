@@ -10,8 +10,8 @@ from rest_framework import fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer
 from my_database.choices import ColumnTypeChoices
-
-from sheets.models import USER_MODEL, Sheet
+from datasources import utils
+from datasources.models import USER_MODEL, DataSource
 
 
 class UserSerializer(Serializer):
@@ -19,22 +19,23 @@ class UserSerializer(Serializer):
     id = fields.IntegerField()
 
 
-class SheetSerializer(Serializer):
+class DataSourceSerializer(Serializer):
     """Serializer for sheets"""
 
     id = fields.IntegerField(read_only=True)
     user = UserSerializer(read_only=True)
     name = fields.CharField()
-    sheet_id = fields.CharField()
-    url = fields.URLField()
+    data_source_id = fields.CharField()
+    google_sheet_url = fields.URLField()
     csv_based = fields.BooleanField(read_only=True)
     csv_file = fields.FileField(read_only=True)
     columns = fields.JSONField(read_only=True)
-    column_types = fields.JSONField(read_only=True)
+    column_names = fields.JSONField(read_only=True)
     created_on = fields.DateTimeField()
 
 
 class WebhookSerializer(Serializer):
+    id = fields.IntegerField(read_only=True)
     data = fields.JSONField()
 
 
@@ -50,15 +51,16 @@ class APIForm(Serializer):
     columns = fields.ListField()
 
 
-class UploadSheetForm(Serializer):
-    """Form that allows the user to upload a
-    csv file to his database"""
+class UploadDataSourceForm(Serializer):
+    """Form that allows the user to either
+    upload a csv file or call an API endpoint
+    to create a local CSV file"""
 
     name = fields.CharField(validators=[])
     csv_file = fields.FileField(required=False, allow_null=True)
     endpoint_url = fields.URLField(required=False, allow_null=True)
     endpoint_data_key = fields.CharField(required=False, allow_null=True)
-    columns = fields.ListField(required=False, allow_null=True)
+    columns_to_keep = fields.ListField(required=False, allow_null=True)
 
     def save(self, request, **kwargs):
         setattr(self, 'request', request)
@@ -72,7 +74,7 @@ class UploadSheetForm(Serializer):
         user = get_object_or_404(USER_MODEL, pk=1)
 
         endpoint_url = validated_data.get('endpoint_url')
-        if endpoint_url:
+        if endpoint_url is not None:
             headers = {'content-type': 'application/json'}
             response = requests.get(endpoint_url, headers=headers)
             if response.status_code == 200:
@@ -86,31 +88,25 @@ class UploadSheetForm(Serializer):
                         raise fields.ValidationError({
                             'endpoint_data_key': "Column does not exist in dataset"
                         })
-            instance = Sheet.objects.create(user=user, **validated_data)
+            instance = DataSource.objects.create(user=user, **validated_data)
 
             df = pandas.DataFrame(data)
-            columns = validated_data.get('columns', [])
-            if columns:
+            columns_to_keep = validated_data.get('columns_to_keep', [])
+            if columns_to_keep:
                 actual_columns = set(df.columns)
-                received_columns = set(columns)
+                received_columns = set(columns_to_keep)
                 invalid_columns = received_columns.difference(actual_columns)
                 if invalid_columns:
                     raise ValidationError({
                         'columns': 'The column names are not valid'
                     })
-                df = df[columns]
+                df = df[columns_to_keep]
 
-            # TODO: Use a unique function to normalize
-            # the creation of the column_types
-            column_types = [
-                {'column': column, 'type': 'Text'}
-                for column in list(df.columns)
-            ]
-            instance.columns = list(df.columns)
-            instance.column_types = column_types
+            column_types = utils.create_column_data_types(df.columns)
+            instance.columns = column_types
 
             path = pathlib.Path(settings.MEDIA_ROOT)
-            path = path.joinpath('sheets', instance.sheet_id)
+            path = path.joinpath('sheets', instance.data_source_id)
             if not path.exists():
                 path.mkdir()
 
@@ -123,7 +119,7 @@ class UploadSheetForm(Serializer):
                 instance.csv_file = file
                 instance.save()
         else:
-            instance = Sheet.objects.create(user=user, **validated_data)
+            instance = DataSource.objects.create(user=user, **validated_data)
         return instance
 
 

@@ -9,54 +9,61 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotAcceptable, ValidationError
 from rest_framework.response import Response
 
-from sheets import models, utils
-from sheets.api import serializers
+from datasources import models, utils
+from datasources.api import serializers
 
 
 @api_view(http_method_names=['post'])
-def upload_csv_file(request, **kwargs):
+def upload_new_data_source(request, **kwargs):
     """Upload a new data source which can be a csv file,
     an API endpoint that will become a CSV file
     to create a new connection"""
-    serializer = serializers.UploadSheetForm(data=request.data)
+    serializer = serializers.UploadDataSourceForm(data=request.data)
     serializer.is_valid(raise_exception=True)
     instance = serializer.save(request)
-    serialized_data = serializers.SheetSerializer(instance=instance)
+    serialized_data = serializers.DataSourceSerializer(instance=instance)
     return Response(serialized_data.data)
 
 
 @api_view(http_method_names=['post'])
-def delete_csv_file(request, sheet_id, **kwargs):
+def delete_data_source(request, data_source_id, **kwargs):
     """Deletes an existing data source"""
-    sheet = get_object_or_404(models.Sheet, user__id=1, sheet_id=sheet_id)
-    sheet.delete()
-    data_sources = models.Sheet.objects.filter(user__id=1)
-    serializer = serializers.SheetSerializer(instance=data_sources, many=True)
+    data_source = get_object_or_404(
+        models.DataSource,
+        user__id=1,
+        data_source_id=data_source_id
+    )
+    data_source.delete()
+
+    data_sources = models.DataSource.objects.filter(user__id=1)
+    serializer = serializers.DataSourceSerializer(instance=data_sources, many=True)
     return Response(serializer.data)
 
 
 @api_view(http_method_names=['get'])
-def load_csv_file_data(request, sheet_id, **kwargs):
+def load_data_source_data(request, data_source_id, **kwargs):
     """Load and return the content of previously uploaded
     CSV file. This is mainly done to reload data to
     the frontend without passing via the Google sheet"""
-    instance = get_object_or_404(models.Sheet, sheet_id=sheet_id)
+    instance = get_object_or_404(
+        models.DataSource,
+        data_source_id=data_source_id
+    )
 
-    serializer = serializers.SheetSerializer(instance=instance)
+    serializer = serializers.DataSourceSerializer(instance=instance)
     return_data = serializer.data
+
     file = instance.csv_file.open(mode='r')
     df = pandas.read_csv(file)
 
     sort_by = request.GET.get('sort_by')
-    # unique_values = request.GET.get('unique_values', 0)
-    # unique_values = True if unique_values == 1 else False
 
     if sort_by is not None:
         if sort_by not in df.columns:
             raise ValidationError({'sort_by': 'Column does not exist'})
         df = df.sort_values(sort_by)
 
-    return_data['columns'] = df.columns
+    # return_data['columns'] = df.columns
     return_data['count'] = df[df.columns[0]].count()
     return_data['results'] = json.loads(
         df.to_json(
@@ -70,12 +77,12 @@ def load_csv_file_data(request, sheet_id, **kwargs):
 
 
 @api_view(http_method_names=['get'])
-def user_sheets(request, **kwargs):
+def list_user_data_sources(request, **kwargs):
     """Returns all the sheets that a user has linked
     to his pages"""
-    user = get_object_or_404(models.USER_MODEL, pk=1)
-    queryset = models.Sheet.objects.filter(user=user)
-    serializer = serializers.SheetSerializer(instance=queryset, many=True)
+    # TODO: Use request.user
+    queryset = models.DataSource.objects.filter(user__id=1)
+    serializer = serializers.DataSourceSerializer(instance=queryset, many=True)
     return Response(data=serializer.data)
 
 
@@ -109,7 +116,7 @@ def send_to_webhook(request, webhook_id, **kwargs):
 
 
 @api_view(http_method_names=['post'])
-def update_column_data_types(request, sheet_id, **kwargs):
+def update_column_data_types(request, data_source_id, **kwargs):
     """Update the column data types for the specified
     data source"""
     serializer = serializers.ColumnDataTypesForm(data=request.data, many=True)
@@ -117,8 +124,8 @@ def update_column_data_types(request, sheet_id, **kwargs):
 
     with transaction.atomic():
         data_source = get_object_or_404(
-            models.Sheet,
-            sheet_id=sheet_id,
+            models.DataSource,
+            data_source_id=data_source_id,
             user__id=1
         )
         data_source.column_types = serializer.validated_data
@@ -138,3 +145,5 @@ def update_column_data_types(request, sheet_id, **kwargs):
 
         transaction.savepoint_commit(sid1)
     return Response({'state': True})
+
+
