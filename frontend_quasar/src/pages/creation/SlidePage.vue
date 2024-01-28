@@ -13,23 +13,25 @@
               </div>
             </div>
 
+            <!-- Columns -->
             <div class="row">
               <div class="col-12 q-mt-lg">
                 <p class="q-font-weight-bold">Columns</p>
                 <q-list bordered separator>
                   <q-item v-for="column in dataSourcesStore.currentSlideDataSource.columns" :key="column">
                     <q-item-section>
-                      <q-item-label>{{ column }}</q-item-label>
+                      <q-item-label><q-icon name="fas fa-font"></q-icon></q-item-label>
+                      <q-item-label>{{ conditionalTruncate(column, 20, 15) }}</q-item-label>
                     </q-item-section>
 
                     <q-item-section side>
                       <div class="row">
-                        <q-btn size="sm" rounded flat>
+                        <!-- <q-btn size="sm" rounded flat>
                           <q-icon name="chat_bubble" color="grey" />
-                        </q-btn>
+                        </q-btn> -->
 
-                        <q-btn size="sm" rounded flat>
-                          <q-icon name="chat_bubble" color="grey" />
+                        <q-btn size="sm" round flat @click="handleShowColumnSettings(column)">
+                          <q-icon name="fas fa-cog" size="1.3em" />
                         </q-btn>
                       </div>
                     </q-item-section>
@@ -56,6 +58,9 @@
             </q-btn>
 
             <q-btn v-if="requiresSaving" color="primary" @click="requestUpdateSlide">Save</q-btn>
+            <q-btn :to="{ name: 'slide_visualization', params: { id: currentSlide.slide_id }, query: { preview: true }}" color="primary">
+              Preview
+            </q-btn>
           </q-card-section>
         </q-card>
 
@@ -63,19 +68,37 @@
         <component :is="block.component" v-for="block in currentSlide.blocks" :key="block.block_id" :block="block" />
       </div>
     </div>
+
+    <!-- Modals -->
+    <q-dialog v-model="showColumnSettingsModal" persistent>
+      <q-card style="width: 400px;">
+        <q-card-section>
+          <q-input v-model="currentUpdatedColumn.name" outlined></q-input>
+          <q-toggle v-model="currentUpdatedColumn.visibility" label="Column is visible"></q-toggle>
+          <q-select v-model="currentUpdatedColumn.column_type" :options="columnTypes" outlined></q-select>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat @click="handleCancelColumnSettings">Cancel</q-btn>
+          <q-btn color="dark" flat @click="handleSaveColumnSettings">Save</q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import _ from 'lodash'
+import columnTypes from '../../data/column_types.json'
+import { useUtilities } from '../../composables/utils'
+import { useQuasar } from 'quasar'
 import { defineComponent } from 'vue'
-import { useRules } from '../composables/rules'
 import { ref, getCurrentInstance } from 'vue'
 import { storeToRefs, mapState } from 'pinia'
-import { useSlides } from '../stores/slides'
-import { useDataUpdating } from '../composables/updating'
+import { useRules } from '../../composables/rules'
+import { useSlides } from '../../stores/slides'
+import { useDataUpdating } from '../../composables/updating'
 import { useDataSources } from 'src/stores/connections'
-import { useQuasar } from 'quasar'
 // import { useBlocksComposable } from '../composables/blocks'
 
 import GraphBlock from 'src/components/GraphBlock.vue'
@@ -90,7 +113,15 @@ export default defineComponent({
     TableBlock
   },
   setup () {
+    const { conditionalTruncate } = useUtilities()
     const notifications = useQuasar()
+
+    const showColumnSettingsModal = ref(false)
+    const currentUpdatedColumn = ref({
+      name: null,
+      visibility: true,
+      column_type: 'Text'
+    })
 
     const app = getCurrentInstance()
     const { requiresSaving, canBeSaved, isSaved } = useDataUpdating(app, ['name', 'slide_data_source'])
@@ -128,6 +159,7 @@ export default defineComponent({
       }
     ]
     return {
+      columnTypes,
       notifications,
       blockActions,
       requiresSaving,
@@ -136,11 +168,14 @@ export default defineComponent({
       filteredSourceIds,
       dataSourcesStore,
       currentSlideDataSource,
+      showColumnSettingsModal,
+      currentUpdatedColumn,
       slidesStore,
       currentSlide,
       requestData,
       blockRequestData,
-      maxLength
+      maxLength,
+      conditionalTruncate
     }
   },
   computed: {
@@ -155,6 +190,9 @@ export default defineComponent({
     this.requestData.slide_data_source = this.currentSlide.slide_data_source
   },
   methods: {
+    async requestUpdateColumns () {
+
+    },
     async requestUpdateSlide () {
       // Update pieces of information for the current slide
       // Once the inforamation is updated, another api call
@@ -181,6 +219,8 @@ export default defineComponent({
       }
     },
     async handleCreateBlock () {
+      // Creates a new block for the current
+      // slide in the backend
       try {
         const response = await this.$api.post(`slides/${this.currentSlide.slide_id}/blocks/create`, this.blockRequestData)
         this.currentSlide.blocks.push(response.data)
@@ -195,22 +235,37 @@ export default defineComponent({
         })
       }
     },
-    selectFilter (val, update) {
-      if (val === "") {
-        update(() => {
-          this.filteredSourceIds = this.sourcesIds
-        })
-        return
-      }
+    handleCancelColumnSettings () {
+      this.currentUpdatedColumn.name = null
+      this.currentUpdatedColumn.visibility = true
+      this.currentUpdatedColumn.column_type = 'Text'
+      this.showColumnSettingsModal = false
+    },
+    handleSaveColumnSettings () {
+      this.handleCancelColumnSettings()
+    },
+    handleShowColumnSettings (column) {
+      // Handles the display of the 
+      // column settings modal
+      this.currentUpdatedColumn.name = column
+      this.showColumnSettingsModal = true
+    },
+    // selectFilter (val, update) {
+    //   if (val === "") {
+    //     update(() => {
+    //       this.filteredSourceIds = this.sourcesIds
+    //     })
+    //     return
+    //   }
 
-      update(() => {
-        const name = val.toLowerCase()
-        this.filteredSourceIds = _.filter(this.sourceIds, (source) => {
-          return source.name.toLowerCase().indexOf(name) > -1
-        })
-        // options.value = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    }
+    //   update(() => {
+    //     const name = val.toLowerCase()
+    //     this.filteredSourceIds = _.filter(this.sourceIds, (source) => {
+    //       return source.name.toLowerCase().indexOf(name) > -1
+    //     })
+    //     // options.value = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+    //   })
+    // }
   }
 })
 </script>

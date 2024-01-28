@@ -1,7 +1,7 @@
 <template>
   <q-card :id="`block_${block.block_id}`">
     <q-card-section>
-      <q-table :columns="tableColumns" :rows="dataResults" />
+      <q-table :columns="tableColumns" :rows="dataResults" flat />
     </q-card-section>
   </q-card>
 </template>

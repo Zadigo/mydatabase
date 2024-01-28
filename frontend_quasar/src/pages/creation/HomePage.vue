@@ -9,7 +9,8 @@
         <q-card-section class="q-gutter-md q-px-md">
           <div class="row q-flex justify-between">
             <q-input v-model="search" placeholder="Search slides..." standout="bg-grey-1" style="width: 30%;" clearable></q-input>
-            <q-btn color="primary" @click="showNewSlideModal = true">
+            <q-btn color="primary" unelevated rounded @click="showNewSlideModal = true">
+              <q-icon name="fas fa-plus" class="q-mr-sm" size="1em"></q-icon>
               Create slide
             </q-btn>
           </div>
@@ -71,12 +72,12 @@
 
 <script>
 import _ from 'lodash'
-import { useSlides } from '../stores/slides'
-import { useDataSources } from '../stores/connections'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
-import { useRules } from '../composables/rules'
 import { defineComponent, ref } from 'vue'
+import { useSlides } from '../../stores/slides'
+import { useDataSources } from '../../stores/connections'
+import { useRules } from '../../composables/rules'
 
 export default defineComponent({
   name: 'HomePage',
