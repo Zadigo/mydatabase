@@ -8,20 +8,21 @@
             <div class="row">
               <div class="col-12">
                 <q-input v-model="requestData.name" :rules="[maxLength]" class="q-mb-md" label="Name" outlined></q-input>
-                <!-- @filter="filterFn" -->
-                <q-select v-model="requestData.slide_data_source" label="Data source" :options="sourcesIds" option-label="name" option-value="source_id" input-debounce="0" behavior="menu" emit-value use-input outlined></q-select>
+                <q-select v-model="requestData.slide_data_source" :options="dataSourcesStore.dataSources" option-label="name" option-value="data_source_id" emit-value outlined></q-select>
+                <!-- TODO: This emits the whole object on requestData -->
+                <!-- <q-select v-model="requestData.slide_data_source" label="Data source" :options="dataSourcesStore.dataSources" option-label="name" option-value="data_source_id" emit-value use-input outlined></q-select> -->
               </div>
             </div>
 
             <!-- Columns -->
-            <div class="row">
+            <div v-if="currentSlideDataSource" class="row">
               <div class="col-12 q-mt-lg">
                 <p class="q-font-weight-bold">Columns</p>
                 <q-list bordered separator>
                   <q-item v-for="column in dataSourcesStore.currentSlideDataSource.columns" :key="column">
                     <q-item-section>
                       <q-item-label><q-icon name="fas fa-font"></q-icon></q-item-label>
-                      <q-item-label>{{ conditionalTruncate(column, 20, 15) }}</q-item-label>
+                      <q-item-label>{{ conditionalTruncate(column.name, 20, 15) }}</q-item-label>
                     </q-item-section>
 
                     <q-item-section side>
@@ -42,30 +43,48 @@
 
             <div class="row q-mt-xl">
               <div class="col-12">
-                <q-btn color="primary" block flat rounded>Delete</q-btn>
+                <q-btn class="text-black" color="red-1" style="width: 100%;" block unelevated rounded>
+                  {{ $t('Delete') }}
+                </q-btn>
               </div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Header -->
       <div class="col-9">
-        <q-card class="q-mb-sm">
+        <!-- Header -->
+        <q-card tag="header" class="q-mb-sm">
           <q-card-section>
-            <q-btn v-for="action in blockActions" :key="action.component" color="primary" flat @click="handleCreateBlock">
-              {{ action.icon }}
-            </q-btn>
-
-            <q-btn v-if="requiresSaving" color="primary" @click="requestUpdateSlide">Save</q-btn>
-            <q-btn :to="{ name: 'slide_visualization', params: { id: currentSlide.slide_id }, query: { preview: true }}" color="primary">
-              Preview
-            </q-btn>
+            <div class="flex justify-between align-center">
+              <div class="actions left">
+                <q-btn v-for="action in blockActions" :key="action.component" color="grey-3" class="text-black q-mr-sm" round unelevated @click="handleCreateBlock">
+                  <q-icon :name="action.icon" size="1em"></q-icon>
+                </q-btn>
+              </div>
+  
+              <div class="actions-right">
+                <q-btn v-if="requiresSaving" class="q-mr-sm" color="primary" rounded unelevated @click="requestUpdateSlide">
+                  <q-icon name="fas fa-save" class="q-mr-sm" size="1em"></q-icon>
+                  {{ $t('Save') }}
+                </q-btn>
+                
+                <q-btn :to="{ name: 'slide_visualization', params: { id: currentSlide.slide_id }, query: { preview: true }}" color="secondary" rounded unelevated>
+                  <q-icon name="fas fa-eye" class="q-mr-sm" size="1em"></q-icon>
+                  {{ $t('Preview') }}
+                </q-btn>
+              </div>
+            </div>
           </q-card-section>
         </q-card>
 
         <!-- Blocks -->
         <component :is="block.component" v-for="block in currentSlide.blocks" :key="block.block_id" :block="block" />
+        <q-card>
+          <q-card-section>
+            <h3>No data source</h3>
+          </q-card-section>
+        </q-card>
       </div>
     </div>
 
@@ -89,17 +108,18 @@
 
 <script>
 import _ from 'lodash'
-import columnTypes from '../../data/column_types.json'
 import { useUtilities } from '../../composables/utils'
 import { useQuasar } from 'quasar'
 import { defineComponent } from 'vue'
 import { ref, getCurrentInstance } from 'vue'
-import { storeToRefs, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { useRules } from '../../composables/rules'
 import { useSlides } from '../../stores/slides'
 import { useDataUpdating } from '../../composables/updating'
 import { useDataSources } from 'src/stores/connections'
 // import { useBlocksComposable } from '../composables/blocks'
+
+import columnTypes from '../../data/column_types.json'
 
 import GraphBlock from 'src/components/GraphBlock.vue'
 import KanbanBlock from 'src/components/KanbanBlock.vue'
@@ -155,7 +175,11 @@ export default defineComponent({
     const blockActions = [
       {
         component: 'table-block',
-        icon: 'table'
+        icon: 'fas fa-table'
+      },
+      {
+        component: 'chart-block',
+        icon: 'fas fa-chart-simple'
       }
     ]
     return {
@@ -179,15 +203,16 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState(useDataSources, ['sourcesIds'])
+    // ...mapState(useDataSources, ['sourcesIds'])
   },
   created () {
     this.slidesStore.setCurrentSlide(this.$route.params.id)
-    this.dataSourcesStore.setCurrentDataSource(this.currentSlide.slide_data_source)
+    // TODO: Check if needed
+    this.dataSourcesStore.currentSlideDataSource = this.currentSlide.slide_data_source
   },
   beforeMount () {
     this.requestData.name = this.currentSlide.name
-    this.requestData.slide_data_source = this.currentSlide.slide_data_source
+    this.requestData.slide_data_source = this.dataSourcesStore.currentSlideDataSource?.data_source_id
   },
   methods: {
     async requestUpdateColumns () {
@@ -203,18 +228,25 @@ export default defineComponent({
         this.currentSlide = response.data
         this.isSaved = true
 
-        const response_two = await this.$api.get(`sheets/${this.currentSlide.slide_data_source}`)
+        const response_two = await this.$api.get(`datasources/${this.currentSlide.slide_data_source.data_source_id}`)
         this.currentSlideDataSource = response_two.data
-        this.$session.dictSet('sources', this.currentSlide.sheet_id, dataResults)
+        this.$session.dictSet('sources', this.currentSlide.sheet_id, this.currentSlideDataSource)
 
         this.notifications.notify({
           message: 'Slide updated',
-          color: 'green'
+          color: 'green-4',
+          position: 'top',
+          timeout: 1000,
+          closeBtn: true
         })
       } catch (error) {
+        console.log(error)
         this.notifications.notify({
           message: 'Could not update slide',
-          color: 'danger'
+          position: 'top',
+          color: 'red-4',
+          timeout: 1000,
+          closeBtn: true
         })
       }
     },
@@ -247,7 +279,7 @@ export default defineComponent({
     handleShowColumnSettings (column) {
       // Handles the display of the 
       // column settings modal
-      this.currentUpdatedColumn.name = column
+      this.currentUpdatedColumn.name = column.name
       this.showColumnSettingsModal = true
     },
     // selectFilter (val, update) {

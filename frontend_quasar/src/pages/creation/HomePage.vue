@@ -8,7 +8,12 @@
       <q-card style="width: 100%;">
         <q-card-section class="q-gutter-md q-px-md">
           <div class="row q-flex justify-between">
-            <q-input v-model="search" placeholder="Search slides..." standout="bg-grey-1" style="width: 30%;" clearable></q-input>
+            <q-input v-model="search" placeholder="Search..." standout="bg-grey-1" style="width: 30%;" outlined clearable>
+              <template v-slot:prepend>
+                <q-icon name="fas fa-search" size="1em"></q-icon>
+              </template>
+            </q-input>
+
             <q-btn color="primary" unelevated rounded @click="showNewSlideModal = true">
               <q-icon name="fas fa-plus" class="q-mr-sm" size="1em"></q-icon>
               Create slide
@@ -20,12 +25,12 @@
 
         <!-- Slides -->
         <q-card-section>
-          <q-list bordered separator>
+          <q-list v-if="slides.length > 0" bordered separator>
             <q-item v-for="slide in searchedSlides" :key="slide.slide_id" class="q-pa-md">
               <q-item-section avatar>
-                <q-avatar :color="slide.access === 'Public' ? 'green' : 'danger'" text-color="white">
-                  <span v-if="slide.access === 'Public'">Pu</span>
-                  <span v-else>Pr</span>
+                <q-avatar :color="slide.access === 'Public' ? 'grey-5' : 'danger'" text-color="white">
+                  <q-icon v-if="slide.access === 'Public'" name="fas fa-unlock"></q-icon>
+                  <q-icon v-else name="fas fa-lock"></q-icon>
                 </q-avatar>
               </q-item-section>
 
@@ -36,14 +41,24 @@
               </q-item-section>
 
               <q-item-section side>
-                <q-btn color="primary" flat>
-                  Menu
+                <q-btn flat round>
+                  <q-icon name="fas fa-ellipsis-vertical"></q-icon>
 
                   <q-menu>
-
+                    <q-list>
+                      <q-item v-close-popup clickable>
+                        <q-item-section>Remove</q-item-section>
+                      </q-item>
+                    </q-list>
                   </q-menu>
                 </q-btn>
               </q-item-section>
+            </q-item>
+          </q-list>
+
+          <q-list v-else>
+            <q-item>
+              <h2 class="text-h5">There are no slides to display</h2>
             </q-item>
           </q-list>
         </q-card-section>
@@ -141,7 +156,7 @@ export default defineComponent({
       // by the current user
       try {
         const response = await this.$api.get('/slides')
-        const responseDataSources = await this.$api.get('/sheets')
+        const responseDataSources = await this.$api.get('/datasources')
         this.dataSources = responseDataSources.data
         this.slidesStore.$patch((state) => {
           state.slides = response.data

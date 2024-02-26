@@ -12,6 +12,10 @@
         </div>
 
         <div class="col-6 text-right">
+          <q-btn v-if="block.allow_record_creation" class="q-mr-sm" color="primary" unelevated rounded>
+            Create
+          </q-btn>
+          
           <q-btn class="q-mr-md" color="secondary" rounded @click="showBlockSettings = true">
             <q-icon name="fas fa-cog" size="1em"></q-icon>
           </q-btn>
@@ -22,7 +26,7 @@
 
             <q-menu>
               <q-list>
-                <q-item v-for="column in tableColumns" :key="column.name" v-close-popup clickable @click="handleAddFilter(column)">
+                <q-item v-for="(column, x) in tableColumns" :key="x" v-close-popup clickable @click="handleAddFilter(column)">
                   <q-item-section>
                     {{ column.name }}
                   </q-item-section>
@@ -51,23 +55,24 @@
         </div>
       </div>
 
+      <!-- Filters -->
       <div v-if="hasFilters" class="row q-mt-md">
         <div class="col-12">
           <q-btn v-for="(item, i) in blockFilters" :key="i" class="q-mr-sm" color="primary" outline rounded>
-            {{ item.name }}: {{ item.value }} <q-icon name="fas fa-caret-down q-ml-sm" size="1em"></q-icon>
+            {{ item.column }}: {{ item.value }} <q-icon name="fas fa-caret-down q-ml-sm" size="1em"></q-icon>
 
             <q-menu>
               <q-list>
                 <q-item>
                   <q-item-section>
                     <q-btn size="sm" flat>
-                      {{ item.condition }}
+                      {{ item.operator }}
 
                       <q-menu>
                         <q-list>
-                          <q-item v-for="condition in filteringConditions" :key="condition" v-close-popup clickable @click="() => { item.condition = condition }">
+                          <q-item v-for="operator in filteringOperators" :key="operator" clickable @click="() => { item.operator = operator }">
                             <q-item-section>
-                              {{ condition }}
+                              {{ operator }}
                             </q-item-section>
                           </q-item>
                         </q-list>
@@ -75,8 +80,8 @@
                     </q-btn>
                   </q-item-section>
 
-                  <q-item-section>
-                    <q-input v-model="item.value" outlined clearable></q-input>
+                  <q-item-section v-if="item.operator !== 'Empty' && item.operator !== 'Not empty'">
+                    <q-input v-model="item.value" outlined clearable @keypress="requestDataFiltering"></q-input>
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -88,7 +93,7 @@
 
     <!-- Table -->
     <q-card-section>
-      <q-table v-model:pagination="pagination" :rows-per-page-options="[0]" :columns="tableColumns" :rows="slideDataResults.results" :elevation="0" virtual-scroll flat></q-table>
+      <q-table v-model:pagination="pagination" :rows-per-page-options="[0]" :columns="tableColumns" :rows="actualBlockData.results" :elevation="0" virtual-scroll flat></q-table>
     </q-card-section>
 
     <!-- Modals -->
@@ -148,6 +153,7 @@
 
 <script>
 import _ from 'lodash'
+import { useQuasar } from 'quasar'
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
@@ -161,16 +167,17 @@ export default defineComponent({
     }
   },
   setup () {
+    const quasar = useQuasar()
     const pagination = ref({
       rowsPerPage: 10
     })
     const splitterModel = ref(30)
-    // const tableColumns = ref([])
+
     const visibleTableColumns = ref([])
     const showBlockSettings = ref(false)
     const blockFilters = ref([])
 
-    const filteringConditions = [
+    const filteringOperators = [
       'Is',
       'Is not',
       'Contains',
@@ -201,9 +208,13 @@ export default defineComponent({
           ]
         }
       ]
+
+      const actualBlockData = ref({})
     return {
+      quasar,
+      actualBlockData,
       splitterModel,
-      filteringConditions,
+      filteringOperators,
       visibleTableColumns,
       selected,
       simple,
@@ -214,56 +225,6 @@ export default defineComponent({
     }
   },
   computed: {
-    _filteredResults () {
-      if (this.hasFilters) {
-        let filteredResults = []
-
-        function isFilter (f, data) {
-          return _.filter(data, (item) => {
-            return item[f.name] === f.value
-          })    
-        }
-
-        function containsFilter (f, data) {
-          return _.filter(data, (item) => {
-            return item[f.name].includes(f.value)
-          })
-        }
-
-        _.forEach(this.blockFilters, (blockFilter) => {
-          if (filteredResults.length > 0) {
-            switch (blockFilter.condition) {
-              case 'Is':
-                filteredResults = isFilter(blockFilter, filteredResults)
-                break
-
-              case 'Contains':
-                filteredResults = containsFilter(blockFilter, filteredResults)
-                break
-            
-              default:
-                break
-            }
-          } else {
-            switch (blockFilter.condition) {
-              case 'Is':
-                filteredResults = isFilter(blockFilter, this.slideDataResults.results)
-                break
-
-              case 'Contains':
-                filteredResults = containsFilter(blockFilter, filteredResults)
-                break
-
-              default:
-                break
-            }
-          }
-        })
-        return filteredResults
-      } else {
-        return this.slideDataResults.results
-      }
-    },
     hasFilters () {
       // Checks if the block has filters to
       // be used to display the data
@@ -277,7 +238,8 @@ export default defineComponent({
           a.push({
             name: item.name,
             label: item.name,
-            field: item.name
+            field: item.name,
+            sortable: true
           })
         }
       })
@@ -285,8 +247,15 @@ export default defineComponent({
     }
   },
   created () {
+    
     setTimeout(() => {
-      this.visibleTableColumns = _.map(this.slideDataResults.columns, (column) => {
+      // Since we might have two different data
+      // sources, copy the slide data source to
+      // actualBlockData which we can then modify
+      // freely
+      Object.assign(this.actualBlockData, this.slideDataResults)
+
+      this.visibleTableColumns = _.map(this.block.active_data_source.column_names, (column) => {
         return {
           name: column,
           visible: true
@@ -295,19 +264,37 @@ export default defineComponent({
     }, 500)
   },
   beforeMount () {
-    if (!this.block.block_data_source) {
-      this.requestBlockDataSource()
-    }
+    this.requestBlockDataSource()
   },
   methods: {
     async requestBlockDataSource () {
       // pass
     },
+    requestDataFiltering: _.debounce(async function () {
+      try {
+        const slideId = this.$route.params.id
+        const blockId = this.block.block_id
+        const response = await this.$api.post(`/slides/${slideId}/blocks/${blockId}/filter`, {
+          slide_id: slideId,
+          block_id: blockId,
+          data_source_id: this.slideDataResults.data_source_id,
+          conditions: this.blockFilters,
+          data: this.slideDataResults
+        })
+        this.actualBlockData.results = response.data.results
+      } catch (e) {
+        // this.quasar.$notify({
+        //   message: 'Could not run filter'
+        // })
+        console.log(e)
+      }
+    }, 1000),
     handleAddFilter (column) {
       this.blockFilters.push({
-        name: column.name,
-        condition: 'Is',
-        value: null
+        column: column.name,
+        operator: 'Is',
+        value: null,
+        union: 'and'
       })
     }
   }

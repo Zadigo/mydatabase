@@ -101,14 +101,14 @@
         <q-card-section>
           <div v-for="(column, i) in columnUpdateRequestData" :key="i" class="row">
             <div class="col-12 flex justify-start q-mb-sm">
-              <q-input v-model="column.column" class="q-mr-sm" outlined></q-input>
-              <q-select v-model="column.type" :options="columnTypes" outlined></q-select>
+              <q-input v-model="column.name" class="q-mr-sm disabled" outlined></q-input>
+              <q-select v-model="column.column_type" :options="columnTypes" outlined></q-select>
             </div>
           </div>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat>Cancel</q-btn>
+          <q-btn v-close-popup flat>Cancel</q-btn>
           <q-btn color="primary" flat @click="requestUpdateColumnTypes">Save</q-btn>
         </q-card-actions>
       </q-card>
@@ -138,7 +138,7 @@ export default defineComponent({
 
     const requestData = ref({
       name: null,
-      endpoint_url: null,
+      endpoint_url: '',
       endpoint_data_key: null,
       columns: [] // TODO: Rename - Columns to keep in the data source
     })
@@ -182,7 +182,7 @@ export default defineComponent({
       // Returns the list of available data sources
       // for the given user
       try {
-        const response = await this.$api.get('/sheets')
+        const response = await this.$api.get('datasources')
         this.dataSourcesStore.$patch((state) => {
           state.dataSources = response.data
           this.$session.create('data_sources', response.data)
@@ -203,13 +203,13 @@ export default defineComponent({
           _.forEach(Object.keys(this.requestData), (key) => {
             data.append(key, this.requestData[key])
           })
-          response = await this.$api.post('/sheets/upload', data, {
+          response = await this.$api.post('/datasources/upload', data, {
             headers: {
               'Content-Type': 'multipart/form-data',
             }
           })
         } else {
-          response = await this.$api.post('/sheets/upload', this.requestData)
+          response = await this.$api.post('/datasources/upload', this.requestData)
         }
         this.dataSources.push(response.data)
         this.showApiModal = false
@@ -231,7 +231,7 @@ export default defineComponent({
       } catch (error) {
         this.notifications.notify({
           message: 'Data source could not be created',
-          caption: error,
+          caption: errro.response.data,
           color: 'red-4',
           position: 'top',
           timeout: 1000
@@ -242,7 +242,7 @@ export default defineComponent({
     async handleRemoveConnection (id) {
       // Handles the deleting of a data source
       try {
-        const response = await this.$api.post(`sheets/${id}/remove`)
+        const response = await this.$api.post(`datasources/${id}/remove`)
         this.dataSourcesStore.dataSources = response.data
 
         this.notifications.notify({
@@ -263,7 +263,7 @@ export default defineComponent({
     async handleRefreshConnection (id) {
       // Handles the refreshing of a data source
       try {
-        const response = await this.$api.get(`sheets/${id}`)
+        const response = await this.$api.get(`datasources/${id}`)
         this.$session.dictSet('sources', id, response.data)
 
         this.notifications.notify({
@@ -286,7 +286,7 @@ export default defineComponent({
       // Handles showing the modal for updating
       // the column types for the data source
       this.currentUpdatedDataSource = dataSource
-      this.columnUpdateRequestData = dataSource.column_types
+      this.columnUpdateRequestData = dataSource.columns
       this.showUpdateColumnTypesModal = true
     },
     handleMenuActions (action, dataSource) {

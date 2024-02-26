@@ -21,10 +21,8 @@ export default defineComponent({
   setup () {
     const slide = ref({})
     const slideDataResults = ref([])
-    const columns = ref([])
     return {
       slide,
-      columns,
       slideDataResults
     }
   },
@@ -37,7 +35,7 @@ export default defineComponent({
         const response = await this.$api.get(`slides/${this.$route.params.id}`)
         this.slide = response.data
 
-        const response2 = await this.$api.get(`sheets/${response.data.slide_data_source}`)
+        const response2 = await this.$api.get(`datasources/${response.data.slide_data_source.data_source_id}`)
         this.slideDataResults = response2.data
       } catch (error) {
         // pass

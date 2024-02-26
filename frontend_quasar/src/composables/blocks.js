@@ -35,14 +35,30 @@ export function useBlocksComposable (app) {
     dataResults.value = data.results
   }
 
-  async function requestDataSource () {
+  async function requestDataSource (callback) {
     // Returns the actual data for the given
     // data source ID (slide or block level)
     try {
-      if (dataSourceId.value !== null) {
-        const response = await api.get(`/sheets/${dataSourceId.value}`)
-        setDataSource(response.data)
-        session.dictSet('sources', dataSourceId.value, response.data)
+      // if (dataSourceId.value !== null) {
+      //   const response = await api.get(`/datasources/${dataSourceId.value}`)
+      //   setDataSource(response.data)
+      //   session.dictSet('sources', dataSourceId.value, response.data)
+      // }
+      const slideId = slidesStore.currentSlide.slide_id
+      const blockId = app.ctx.block.block_id
+
+      // if (session.dictExists('sources', blockId)) {
+      //   const data = session.dictGet('sources', blockId)
+      //   dataResults.value = data
+      // } else {
+      // }
+      const response = await api.get(`/slides/${slideId}/blocks/${blockId}`)
+      const response2 = await api.get(`/datasources/${response.data.active_data_source.data_source_id}`)
+      cachedDataSource.value = response2.data
+      dataResults.value = response2.data.results
+      session.dictSet('sources', blockId, response2.data)
+      if (callback) {
+        callback()
       }
     } catch (error) {
       console.log(error)

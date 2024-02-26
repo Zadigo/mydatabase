@@ -1,16 +1,16 @@
 <template>
-  <q-card :id="`block_${block.block_id}`">
+  <q-card :id="`block_${block.block_id}`" class="q-mb-sm">
     <q-card-section>
-      <q-table :columns="tableColumns" :rows="dataResults" flat />
+      <q-table :columns="tableColumns" :rows="dataResults" :loading="loading" flat />
     </q-card-section>
   </q-card>
 </template>
 
 <script>
-import { defineComponent, getCurrentInstance } from 'vue'
-import { ref } from 'vue'
-import { useBlocksComposable } from '../composables/blocks'
 import _ from 'lodash'
+import { ref } from 'vue'
+import { defineComponent, getCurrentInstance } from 'vue'
+import { useBlocksComposable } from '../composables/blocks'
 
 export default defineComponent({
   name: 'TableBlock',
@@ -24,7 +24,9 @@ export default defineComponent({
     const app = getCurrentInstance()
     const { dataSourceId, cachedDataSource, dataResults, setDataSource, requestDataSource } = useBlocksComposable(app)
     const tableColumns = ref([])
+    const loading = ref(true)
     return {
+      loading,
       tableColumns,
       dataResults,
       cachedDataSource,
@@ -34,21 +36,26 @@ export default defineComponent({
     }
   },
   created () {
+    const self = this
     if (this.$session.dictExists('sources', this.dataSourceId)) {
       this.setDataSource(this.$session.dictGet('sources', this.dataSourceId))
     } else {
-      this.requestDataSource()
+      this.requestDataSource(() => {
+        self.loading = false
+      })
     }
   },
   mounted () {
-    this.tableColumns = _.map(this.cachedDataSource.columns || [], (column) => {
-      return {
-        name: column,
-        label: column,
-        field: column,
-        sortable: true
-      }
-    })
+    setTimeout(() => {
+      this.tableColumns = _.map(this.cachedDataSource.column_names || [], (column) => {
+        return {
+          name: column,
+          label: column,
+          field: row => row[column],
+          sortable: true
+        }
+      }) 
+    }, 1000)
   }
 })
 </script>
