@@ -9,10 +9,10 @@ function runCallback (func, response) {
 
 export function useSheetsComposable () {
   async function getConnections (callback) {
-    // Returns all the sheets that were
+    // Returns all the data sources that were
     // linked to the app by the user
     try {
-      const response = await client.get('sheets')
+      const response = await client.get('datasources')
       runCallback(callback, response)
     } catch (e) {
       console.log(e)
@@ -23,7 +23,7 @@ export function useSheetsComposable () {
     // Returns the data for a specific given
     // sheet using the "sheet_id"
     try {
-      const response = await client.get(`sheets/${id}`)
+      const response = await client.get(`datasources/${id}`)
       runCallback(callback, response)
     } catch (e) {
       console.log(e)

@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'slides',
     'connections',
-    'sheets'
+    'datasources'
 ]
 
 MIDDLEWARE = [

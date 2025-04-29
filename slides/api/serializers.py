@@ -1,15 +1,16 @@
 
+import pandas
 from django.shortcuts import get_object_or_404
 from rest_framework import fields
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.serializers import Serializer
 
-from sheets import models as sheets_models
+from datasources import models as sheets_models
+from datasources.api.serializers import DataSourceSerializer
+from datasources.models import DataSource
 from slides import models as slides_models
-from sheets.api.serializers import SheetSerializer
-from sheets.models import Sheet
-from slides.api import validators
-from slides.api.utils import list_adder, list_manager, list_remover
+from slides.api import utils, validators
+from slides.api.utils import list_manager
 from slides.choices import (AccessChoices, ColumnTypeChoices, ComponentTypes,
                             InputTypeChoices, OperatorChoices, SortingChoices,
                             UnionChoices)
@@ -42,6 +43,7 @@ class UserFiltersConditionForm(Serializer):
 
 class DataFiltersConditionForm(Serializer):
     """Validates slide data filters"""
+
     column = fields.CharField(required=True)
     operator = fields.ChoiceField(
         OperatorChoices.choices,
@@ -102,22 +104,18 @@ class BlockForm(Serializer):
         )
 
         block = slide.blocks.create(**validated_data)
-        try:
-            # In case the slide has no data sources,
-            # just ignore the error that would occur here
-            # since we have created the block using just
-            # the component name
-            sheet_connection = slide.sheets.latest('created_on')
-        except:
-            pass
-        else:
-            # Set these fields to be able to implement
-            # specific actions (visibility, updating...)
-            # on the columns individually
-            block.record_creation_columns = sheet_connection.columns
-            block.record_update_columns = sheet_connection.columns
-            block.search_columns = sheet_connection.columns
-            block.save()
+        # Set these fields to be able to implement
+        # specific actions (visibility, updating...)
+        # on the columns for this block individually
+        true_false_dictionnaries = utils.flatten_dictionnaries(
+            slide.slide_data_source.columns
+        )
+        block.record_creation_columns = true_false_dictionnaries
+        block.record_update_columns = true_false_dictionnaries
+        block.search_columns = true_false_dictionnaries
+        block.visible_columns = true_false_dictionnaries
+        block.save()
+
         return block
 
     def update(self, instance, validated_data):
@@ -207,8 +205,8 @@ class BlockSerializer(Serializer):
     record_creation_columns = fields.ListField()
     record_update_columns = fields.ListField()
     visible_columns = fields.ListField()
-    block_data_source = fields.URLField()
-    data_source = fields.URLField()
+    block_data_source = DataSourceSerializer()
+    active_data_source = DataSourceSerializer()
     conditions = fields.JSONField()
     allow_record_creation = fields.BooleanField()
     allow_record_update = fields.BooleanField()
@@ -242,14 +240,20 @@ class UpdateSlideForm(Serializer):
     def update(self, instance, validated_data):
         instance.name = validated_data['name']
 
-        sheet_id = validated_data['slide_data_source']
-        queryset = Sheet.objects.filter(sheet_id=sheet_id)
+        data_source_id = validated_data['slide_data_source']
+        queryset = DataSource.objects.filter(data_source_id=data_source_id)
         if not queryset.exists():
-            raise ValidationError({
+            raise NotFound({
                 'sheet_data_source': 'Data source doest not exist'
             })
-        instance.slide_data_source = sheet_id
-        instance.save()
+        try:
+            instance.slide_data_source = queryset.get()
+        except:
+            raise ValidationError({
+                'sheet_data_source': 'Could not get a valid data source'
+            })
+        else:
+            instance.save()
         return instance
 
 
@@ -280,9 +284,22 @@ class SlideSerializer(Serializer):
     user = UserSerializer(read_only=True)
     slide_id = fields.CharField(read_only=True)
     name = fields.CharField()
-    sheets = SheetSerializer(many=True)
     blocks = BlockSerializer(many=True)
-    slide_data_source = fields.URLField()
+    slide_data_source = DataSourceSerializer()
     access = fields.CharField()
     modified_on = fields.DateTimeField()
     created_on = fields.DateTimeField()
+
+
+class SlideFilteringForm(Serializer):
+    """Validates the requests for filtering
+    the data from a given slide"""
+
+    slide_id = fields.CharField()
+    data_source_id = fields.CharField()
+    data = fields.JSONField()
+    conditions = DataFiltersConditionForm(many=True)
+
+    def create(self, validated_data):
+        slide = Slide.objects.get(slide_id=validated_data['slide_id'])
+        return slide

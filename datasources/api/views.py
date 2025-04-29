@@ -36,7 +36,8 @@ def delete_data_source(request, data_source_id, **kwargs):
     data_source.delete()
 
     data_sources = models.DataSource.objects.filter(user__id=1)
-    serializer = serializers.DataSourceSerializer(instance=data_sources, many=True)
+    serializer = serializers.DataSourceSerializer(
+        instance=data_sources, many=True)
     return Response(serializer.data)
 
 
@@ -145,5 +146,3 @@ def update_column_data_types(request, data_source_id, **kwargs):
 
         transaction.savepoint_commit(sid1)
     return Response({'state': True})
-
-

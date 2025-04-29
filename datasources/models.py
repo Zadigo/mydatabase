@@ -124,6 +124,8 @@ class DataSource(models.Model):
     @cached_property
     def column_names(self):
         """Return the column names as strings"""
+        if self.columns is None:
+            return []
         return [item['name'] for item in self.columns]
 
 

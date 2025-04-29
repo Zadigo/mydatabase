@@ -4,9 +4,8 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
+from my_database.utils import create_id
 from my_database.validators import validate_id
-from sheets.models import Sheet
-from sheets.utils import create_id
 from slides.choices import AccessChoices, ComponentTypes
 
 USER_MODEL = get_user_model()
@@ -19,14 +18,6 @@ class Slide(models.Model):
     the block"""
 
     user = models.ForeignKey(USER_MODEL, models.CASCADE)
-    # TODO: Determine whether a slide should have one data
-    # single data source or multiple data sources. In which
-    # case fields like search_columns cannot be on one single
-    # Slide model
-    # FIXME: Not sure what the purpose of this field is.
-    # Just create one foreign key to a given sheet as
-    # opposed to using a ManyToManyField
-    sheets = models.ManyToManyField(Sheet, blank=True)
     name = models.CharField(
         max_length=100,
         blank=True,
@@ -40,10 +31,9 @@ class Slide(models.Model):
         validators=[validate_id]
     )
     blocks = models.ManyToManyField('Block', blank=True)
-    # TODO: Foreign key to sheets
-    slide_data_source = models.CharField(
-        help_text=_('Top level slide data source'),
-        max_length=100,
+    slide_data_source = models.ForeignKey(
+        'datasources.DataSource',
+        models.SET_NULL,
         blank=True,
         null=True
     )
@@ -53,7 +43,7 @@ class Slide(models.Model):
         choices=AccessChoices.choices
     )
     columns_visibility = None
-    # share_url = models.URLField(blank=True, null=True)
+    share_url = models.URLField(blank=True, null=True)
     modified_on = models.DateTimeField(auto_now=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -105,12 +95,11 @@ class Block(models.Model):
         blank=True,
         null=True
     )
-    # FIXME: This should be a foreign key to
-    # Sheet -> DataSource
-    block_data_source = models.URLField(
+    block_data_source = models.ForeignKey(
+        'datasources.DataSource',
+        models.SET_NULL,
         blank=True,
-        null=True,
-        help_text=_('Link this specific block to a specific data source')
+        null=True
     )
     search_columns = models.JSONField(
         help_text=_(
@@ -153,7 +142,7 @@ class Block(models.Model):
         return f'Block: {self.block_id}'
 
     @property
-    def data_source(self):
+    def active_data_source(self):
         """We can have both page level and block 
         level data source. When both a present,
         consider the block level first and then

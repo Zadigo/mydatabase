@@ -4,6 +4,14 @@ from slides.api import views
 
 urlpatterns = [
     re_path(
+        r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/(?P<block_id>bl\_[a-zA-Z0-9\-]+)/search$',
+        views.search_slide_data
+    ),
+    re_path(
+        r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/(?P<block_id>bl\_[a-zA-Z0-9\-]+)/filter$',
+        views.filter_slide_data
+    ),
+    re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/(?P<block_id>bl\_[a-zA-Z0-9\-]+)/column/update$',
         views.update_block_column
     ),

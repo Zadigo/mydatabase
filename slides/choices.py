@@ -14,18 +14,18 @@ class ComponentTypes(Choices):
 
 
 class OperatorChoices(Choices):
-    CONTAINS = 'contains'
-    DOES_NOT_CONTAIN = 'does not contain'
-    IS = 'is'
-    IS_NOT = 'is not'
-    IS_EMPTY = 'is empty'
-    IS_NOT_EMPTY = 'is not empty'
-    EQUALS = 'equals'
-    IS_NOT_EQUAL = 'is not equal'
-    GREATER_THAN = 'greater than'
-    GREATER_THAN_OR_EQUAL_TO = 'greather than or equal to'
-    LESS_THAN = 'less than'
-    LESS_THAN_OR_EQUAL_TO = 'less than or equal to'
+    CONTAINS = 'Contains'
+    DOES_NOT_CONTAIN = 'Does not contain'
+    IS = 'Is'
+    IS_NOT = 'Is not'
+    IS_EMPTY = 'Is empty'
+    IS_NOT_EMPTY = 'Is not empty'
+    EQUALS = 'Equals'
+    IS_NOT_EQUAL = 'Is not equal'
+    GREATER_THAN = 'Greater than'
+    GREATER_THAN_OR_EQUAL_TO = 'Greather than or equal to'
+    LESS_THAN = 'Less than'
+    LESS_THAN_OR_EQUAL_TO = 'Less than or equal to'
 
 
 class InputTypeChoices(Choices):

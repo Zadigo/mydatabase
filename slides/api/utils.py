@@ -33,3 +33,18 @@ def list_adder(instance, field, value, request_value):
         result.append(value)
         setattr(instance, field, result)
     return instance
+
+
+def create_true_false_dictionnaries(columns: list[str]):
+    """Create list of True/False items using a list
+    of columns as strings"""
+    return [{'name': column, 'state': True} for column in columns]
+
+
+def flatten_dictionnaries(columns: dict[str, str]):
+    """Create list of True/False items using a list
+    of columns that are dictionnaries"""
+    data = []
+    for column in columns:
+        data.append(column['name'])
+    return create_true_false_dictionnaries(data)

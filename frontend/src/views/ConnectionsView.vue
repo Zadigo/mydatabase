@@ -177,7 +177,7 @@ export default {
     async handleCreateConnection () {
       // Creates a new connection/sheet
       try {
-        const response = await this.$http.post('sheets/upload', this.requestData)
+        const response = await this.$http.post('datasources/upload', this.requestData)
         this.$session.listPush('connections', response.data)
         this.connections.push(response.data)
         this.showCreateConnectionModal = false
@@ -189,7 +189,7 @@ export default {
       // Refresh the output data for the
       // selected connection
       try {
-        const response = await this.$http.get(`sheets/${sheetId}`)
+        const response = await this.$http.get(`datasources/${sheetId}`)
         this.$session.create(sheetId, response.data)
       } catch (e) {
         console.log(e)

@@ -1,3 +1,5 @@
+import json
+import pathlib
 
 import pandas
 from django.shortcuts import get_object_or_404
@@ -5,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
-from sheets import models as sheets_models
+from datasources import models as sheets_models
 from slides import models
 from slides.api import serializers
 
@@ -47,14 +49,14 @@ def update_slide(request, slide_id, **kwargs):
     """Update pieces of information for the
     selected slide"""
     # TODO: Use authentication request.user
-    user = get_object_or_404(models.USER_MODEL, pk=1)
-    slide = get_object_or_404(models.Slide, user=user, slide_id=slide_id)
+    slide = get_object_or_404(models.Slide, user__id=1, slide_id=slide_id)
 
     serializer = serializers.UpdateSlideForm(data=request.data, instance=slide)
     serializer.is_valid(raise_exception=True)
     updated_instance = serializer.save()
 
-    response_serializer = serializers.SlideSerializer(instance=updated_instance)
+    response_serializer = serializers.SlideSerializer(
+        instance=updated_instance)
     return Response(data=response_serializer.data)
 
 
@@ -150,7 +152,7 @@ def update_block_column(request, slide_id, block_id, **kwargs):
         slide__slide_id=slide_id,
         block_id=block_id
     )
-    sheet = models.Sheet.objects.get(sheet_id=block.data_source)
+    sheet = models.DataSource.objects.get(data_source_id=block.data_source)
 
     serializer = serializers.UpdateBlockColumnForm(
         data=request.data,
@@ -163,16 +165,21 @@ def update_block_column(request, slide_id, block_id, **kwargs):
     return Response(data=block_serializer.data)
 
 
-
 @api_view(http_method_names=['get'])
 def view_final_slide(request, slide_id, **kwargs):
+    """This shows the end user the final slide
+    with the data and the different filters that
+    were implemented by the creator on the data"""
     slide = get_object_or_404(
-        models.Slide, 
+        models.Slide,
         slide_id=slide_id,
         active=True
     )
-    sheet = get_object_or_404(sheets_models.Sheet, sheet_id=slide.sheet_id)
-    file = file = sheet.csv_file.open(mode='r')
+    sheet = get_object_or_404(
+        sheets_models.DataSource,
+        data_source_id=slide.data_source_id
+    )
+    file = sheet.csv_file.open(mode='r')
     df = pandas.read_csv(file)
     file.close()
 
@@ -193,3 +200,75 @@ def view_final_slide(request, slide_id, **kwargs):
 
             if operator == 'contains':
                 final_df = final_df[final_df[column].isin([value]) == True]
+
+
+@api_view(http_method_names=['post'])
+def filter_slide_data(request, **kwargs):
+    serializer = serializers.SlideFilteringForm(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    slide = serializer.save()
+
+    initial_data = serializer.validated_data['data'].copy()
+    try:
+        results = initial_data['results']
+    except:
+        raise ValidationError('The data to format is not formatted correctly')
+
+    query_conditions = {
+        'Is': '{column} == "{value}"',
+        'Is not': '{column} != "{value}"',
+        'Contains': '"{value}" in {column}',
+        'Does not contain': '"{value}" not in {column}'
+        # Is within
+        # Is before
+        # Is after
+        # Is on or before
+        # Is on or after
+        # Today
+        # Tomorrow
+        # Yesterday
+        # One week ago
+        # One week from now
+        # One month ago
+        # One month from now
+        # Number of days ago
+        # Number of days from now
+        # Exact date
+    }
+
+    df = pandas.DataFrame(results)
+
+    filtered_df = None
+    for item in serializer.validated_data['conditions']:
+        query_condition = query_conditions[item['operator']]
+        data_query = query_condition.format(
+            column=item['column'],
+            value=item['value']
+        )
+        if filtered_df is None:
+            filtered_df = df.query(data_query)
+        else:
+            filtered_df = filtered_df.query(data_query)
+    final_data = filtered_df.to_json(force_ascii=False, orient='records')
+    initial_data['results'] = json.loads(final_data)
+    return Response(initial_data)
+
+
+@api_view(http_method_names=['post'])
+def search_slide_data(request, slide_id, **kwargs):
+    data = []
+    search = request.data.get('q')
+
+    if search is not None:
+        slide = models.Slide.objects.get(slide_id=slide_id)
+        file = slide.slide_data_source.csv_file.open(mode='r')
+        df = pandas.read_csv(file)
+        file.close()
+
+        def search_columns(row):
+            return search in (row[column] for column in df.columns)
+
+        df['found'] = df.apply(search_columns, axis=1)
+        df = df[df['found'] == True]
+        data = json.loads(df.to_json(orient='records'))
+    return Response(data)

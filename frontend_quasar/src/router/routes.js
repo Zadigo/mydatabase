@@ -4,10 +4,37 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', redirect: '/app' },
-      { path: '/app', component: () => import('pages/creation/HomePage.vue'), name: 'home' },
-      { path: '/connections', component: () => import('pages/creation/ConnectionsPage.vue'), name: 'connections' },
-      { path: '/slide/:id(sl_[a-zA-Z0-9]+)', component: () => import('pages/creation/SlidePage.vue'), name: 'slide' }
+      { 
+        path: '', 
+        redirect: '/app',
+        meta: {
+          requiresAuthentication: true
+        }
+      },
+      { 
+        path: '/app', 
+        component: () => import('pages/creation/HomePage.vue'), 
+        name: 'home',
+        meta: {
+          requiresAuthentication: true
+        }
+      },
+      { 
+        path: '/connections', 
+        component: () => import('pages/creation/ConnectionsPage.vue'), 
+        name: 'connections',
+        meta: {
+          requiresAuthentication: true
+        }
+      },
+      { 
+        path: '/slide/:id(sl_[a-zA-Z0-9]+)', 
+        component: () => import('pages/creation/SlidePage.vue'), 
+        name: 'slide',
+        meta: {
+          requiresAuthentication: true
+        }
+      }
     ]
   },
 
