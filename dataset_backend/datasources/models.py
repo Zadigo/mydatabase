@@ -1,4 +1,5 @@
 import pathlib
+from typing import TypeVar
 
 from datasources.utils import create_file_name
 from datasources.validators import validate_id
@@ -11,6 +12,8 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from dataset_backend.utils import create_id
+
+D = TypeVar('D', 'DataSource')
 
 
 class Webhook(models.Model):
@@ -29,11 +32,15 @@ class Webhook(models.Model):
         null=True,
         validators=[validate_id]
     )
-    usage = models.PositiveIntegerField(default=0)
+    usage = models.PositiveIntegerField(
+        default=0
+    )
     last_usage = models.DateTimeField(
         default=now
     )
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         ordering = ['-created_on']
@@ -98,7 +105,8 @@ class DataSource(models.Model):
         max_length=100,
         help_text=_(
             "The key under which the actual "
-            "data is stored ex. {'count': 14, 'results: []'}"),
+            "data is stored ex. results in "
+            "{'count': 14, 'results: []'}"),
         blank=True,
         null=True
     )
@@ -107,7 +115,9 @@ class DataSource(models.Model):
         blank=True,
         null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f'DataSource: {self.data_source_id}'

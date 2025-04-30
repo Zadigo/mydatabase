@@ -2,17 +2,18 @@ import pathlib
 
 import pandas
 import requests
+from datasources import utils
+from datasources.models import DataSource
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.base import File
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from rest_framework import fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer
+
 from dataset_backend.choices import ColumnTypeChoices
-from datasources import utils
-from datasources.models import DataSource
-from django.contrib.auth import get_user_model
 
 
 class UserSerializer(Serializer):
@@ -63,14 +64,12 @@ class UploadDataSourceForm(Serializer):
     endpoint_data_key = fields.CharField(required=False, allow_null=True)
     columns_to_keep = fields.ListField(required=False, allow_null=True)
 
-    def save(self, request, **kwargs):
-        setattr(self, 'request', request)
-        return super().save(**kwargs)
-
     def validate(self, attrs):
         return attrs
 
     def create(self, validated_data):
+        request = self._context['request']
+
         data = {}
         user = get_object_or_404(get_user_model(), pk=1)
 
@@ -124,10 +123,21 @@ class UploadDataSourceForm(Serializer):
         return instance
 
 
+# class ColumnDataTypesColumns(Serializer):
+
+
 class ColumnDataTypesForm(Serializer):
     column = fields.CharField()
-    # renamed_to = fields.CharField(required=False)
-    type = fields.ChoiceField(
-        ColumnTypeChoices.choices,
-        default=ColumnTypeChoices.TEXT
+    renamed_to = fields.CharField(
+        required=False
     )
+    column_type = fields.ChoiceField(
+        ColumnTypeChoices.choices,
+        default='Text'
+    )
+
+
+class LoadedDataSerializer(Serializer):
+    columns = fields.ListField()
+    count = fields.IntegerField()
+    results = fields.JSONField()

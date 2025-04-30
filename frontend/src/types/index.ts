@@ -1,3 +1,5 @@
 export * from './slides'
 export * from './sheet'
 export * from './block'
+export * from  './data_source'
+export * from './user'

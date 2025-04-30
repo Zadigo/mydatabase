@@ -1,0 +1,17 @@
+[
+    {
+        "model": "datasources.DataSource",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "name": "My source",
+            "data_source_id": "src_a123",
+            "google_sheet_url": null,
+            "csv_file": null,
+            "endpoint_url": null,
+            "endpoint_data_key": null,
+            "columns": [],
+            "created_on": "2025-04-30 09:50:15.971881+00:00"
+        }
+    }
+]

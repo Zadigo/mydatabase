@@ -1,28 +1,49 @@
 import json
+from operator import itemgetter
+from typing import Generic, Optional, TypeVar
 
 import pandas
+from datasources import models, utils
+from datasources.api import serializers
+from django.core.cache import cache
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotAcceptable, ValidationError
 from rest_framework.response import Response
 
-from datasources import models, utils
-from datasources.api import serializers
+D = TypeVar('D', bound='models.DataSource')
 
 
-@api_view(http_method_names=['post'])
-def upload_new_data_source(request, **kwargs):
-    """Upload a new data source which can be a csv file,
-    an API endpoint that will become a CSV file
-    to create a new connection"""
-    serializer = serializers.UploadDataSourceForm(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    instance = serializer.save(request)
-    serialized_data = serializers.DataSourceSerializer(instance=instance)
-    return Response(serialized_data.data)
+class ListDataSources(Generic[D], generics.ListAPIView):
+    """Returns all the sheets that a user has linked
+    to his pages"""
+    queryset = models.DataSource.objects.all()
+    serializer_class = serializers.DataSourceSerializer
+
+    def get_queryset(self) -> QuerySet[D]:
+        qs = super().get_queryset()
+        return qs.filter(user__id=1)
+
+
+class UploadDataSource(Generic[D], generics.CreateAPIView):
+    queryset = models.DataSource.objects.all()
+    serializer_class = serializers.UploadDataSourceForm
+    cache: D | None = None
+
+    def perform_create(self, serializer):
+        self.cache = serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+        if self.cache is not None:
+            serializer = serializers.DataSourceSerializer(instance=self.cache)
+            self.cache = None
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(http_method_names=['post'])
@@ -41,50 +62,43 @@ def delete_data_source(request, data_source_id, **kwargs):
     return Response(serializer.data)
 
 
-@api_view(http_method_names=['get'])
-def load_data_source_data(request, data_source_id, **kwargs):
-    """Load and return the content of previously uploaded
-    CSV file. This is mainly done to reload data to
-    the frontend without passing via the Google sheet"""
-    instance = get_object_or_404(
-        models.DataSource,
-        data_source_id=data_source_id
-    )
+class LoadDataSource(Generic[D], generics.GenericAPIView):
+    queryset = models.DataSource.objects.all()
+    serializer_class = serializers.LoadedDataSerializer
 
-    serializer = serializers.DataSourceSerializer(instance=instance)
-    return_data = serializer.data
+    def get_queryset(self) -> QuerySet[D]:
+        qs = super().get_queryset()
+        return qs.filter(user__id=1)
 
-    file = instance.csv_file.open(mode='r')
-    df = pandas.read_csv(file)
+    def get(self, request, *args, **kwargs):
+        data_source_id = self.kwargs['data_source_id']
 
-    sort_by = request.GET.get('sort_by')
+        qs = self.get_queryset()
+        instance = get_object_or_404(qs, data_source_id=data_source_id)
 
-    if sort_by is not None:
-        if sort_by not in df.columns:
-            raise ValidationError({'sort_by': 'Column does not exist'})
-        df = df.sort_values(sort_by)
+        serializer = serializers.DataSourceSerializer(instance=instance)
+        return_data = serializer.data
 
-    # return_data['columns'] = df.columns
-    return_data['count'] = df[df.columns[0]].count()
-    return_data['results'] = json.loads(
-        df.to_json(
-            orient='records',
-            force_ascii=False
-        )
-    )
+        df: pandas.DataFrame = cache.get(f'{data_source_id}_data', None)
+        if df is None:
+            df = pandas.read_csv(instance.csv_file.path)
 
-    file.close()
-    return Response(data=return_data)
+        sortby = request.GET.get('sortby')
 
+        if sortby is not None:
+            if sortby not in df.columns:
+                raise ValidationError({'sortby': 'Column does not exist'})
+            df = df.sort_values(sortby)
 
-@api_view(http_method_names=['get'])
-def list_user_data_sources(request, **kwargs):
-    """Returns all the sheets that a user has linked
-    to his pages"""
-    # TODO: Use request.user
-    queryset = models.DataSource.objects.filter(user__id=1)
-    serializer = serializers.DataSourceSerializer(instance=queryset, many=True)
-    return Response(data=serializer.data)
+        return_data['columns'] = df.columns
+        return_data['count'] = df[df.columns[0]].count()
+
+        str_data = df.to_json(orient='records', force_ascii=False)
+        return_data['results'] = json.loads(str_data)
+
+        serializer = self.get_serializer(data=return_data)
+        serializer.is_valid(raise_exception=True)
+        return Response(data=serializer.data)
 
 
 @api_view(http_method_names=['post'])
@@ -116,33 +130,60 @@ def send_to_webhook(request, webhook_id, **kwargs):
     return Response(data=return_data)
 
 
-@api_view(http_method_names=['post'])
-def update_column_data_types(request, data_source_id, **kwargs):
+class UpdateColumnDataTypes(Generic[D], generics.GenericAPIView):
     """Update the column data types for the specified
     data source"""
-    serializer = serializers.ColumnDataTypesForm(data=request.data, many=True)
-    serializer.is_valid(raise_exception=True)
+    queryset = models.DataSource.objects.all()
+    serializer_class = serializers.ColumnDataTypesForm
 
-    with transaction.atomic():
-        data_source = get_object_or_404(
-            models.DataSource,
-            data_source_id=data_source_id,
-            user__id=1
-        )
-        data_source.column_types = serializer.validated_data
-        data_source.save()
-        sid1 = transaction.savepoint()
+    def get_queryset(self) -> QuerySet[D]:
+        qs = super().get_queryset()
+        return qs.filter(user__id=1)
 
-        # df = pandas.DataFrame(data_source.csv_file.path)
-        # renaming_mapper = {}
-        # for item in serializer.validated_data:
-        #     rename_to = item.get('renamed_to', None)
-        #     if rename_to is None:
-        #         continue
-        #     renaming_mapper[item['column']] = item['renamed_to']
+    def post(self, request, **kwargs):
+        data_source_id = self.kwargs['data_source_id']
 
-        # df = df.rename(columns=renaming_mapper)
-        # df.to_csv(data_source.csv_file.path)
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
 
-        transaction.savepoint_commit(sid1)
-    return Response({'state': True})
+        with transaction.atomic():
+            qs = self.get_queryset()
+
+            data_source = get_object_or_404(
+                qs,
+                data_source_id=data_source_id,
+                user__id=1
+            )
+
+            df = pandas.read_csv(data_source.csv_file.path)
+
+            # TODO: Utils
+            invalid_columns = []
+            for item in serializer.validated_data:
+                exists = item['column'] in df.columns
+                if not exists:
+                    invalid_columns.append(item['column'])
+                    continue
+
+            if invalid_columns:
+                raise ValidationError('Columns are not valid')
+
+            data_source.column_types = serializer.validated_data
+            data_source.save()
+            sid1 = transaction.savepoint()
+
+            renaming_mapper = {}
+            for item in serializer.validated_data:
+                rename_to = item.get('renamed_to', None)
+
+                if rename_to is None:
+                    continue
+
+                renaming_mapper[item['column']] = item['renamed_to']
+
+            if renaming_mapper:
+                df = df.rename(columns=renaming_mapper)
+                df.to_csv(data_source.csv_file.path)
+
+            transaction.savepoint_commit(sid1)
+        return Response(serializer.data)

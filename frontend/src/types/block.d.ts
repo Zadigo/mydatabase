@@ -1,4 +1,5 @@
-export type ComponentTypes = 'Table block' | 'Graph block' | 'Grid block' | 'Chart block'
+import type { ComponentTypes } from "src/data/constants"
+import type { DataSource } from "./data_source"
 
 export interface BlockItem {
   id: number
@@ -8,7 +9,7 @@ export interface BlockItem {
   record_creation_columns: string[]
   record_update_columns: string[]
   visible_columns: string[]
-  block_data_source: string | null
+  block_data_source: DataSource
   active_data_source: string | null
   conditions: string[]
   allow_record_creation: boolean
