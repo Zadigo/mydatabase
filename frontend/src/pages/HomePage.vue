@@ -1,17 +1,23 @@
 <template>
-  <q-page>
-    <div class="">
-      <h1 class="">Slides</h1>
+  <q-page class="q-px-lg q-my-lg">
+    <div>
+      <q-card>
+        <q-card-section class="q-py-xs q-mb-sm">
+          <h4 class="">
+            {{ $t('Slides') }}
+          </h4>
+        </q-card-section>
+      </q-card>
 
       <q-card>
         <q-card-section>
           <div class="flex justify-between items-center q-p-5">
             <!-- Search -->
-            <q-input id="search-slides" v-model="search" class="w-50 p-3" placeholder="Search slides..." />
+            <q-input id="search-slides" v-model="search" :placeholder="$t('Search slides...')" filled />
 
-            <q-btn id="cta-new-slide" rounded @click="showCreateSlideModal = true">
-              <IconBase icon="fa-solid:plus" class="me-2" />
-              Create slide
+            <q-btn id="cta-new-slide" rounded @click="showCreateSlideModal=true">
+              <IconBase icon="fa-solid:plus" class="q-mr-sm" />
+              {{ $t('Create slide') }}
             </q-btn>
           </div>
         </q-card-section>

@@ -1,11 +1,9 @@
 <template>
-  <q-list>
-    <q-item v-for="slide in searchedSlides" :key="slide.id">
-      <!-- <router-link :to="{ name: 'slide_view', params: { id: slide.id } }">
+  <q-list bordered separator>
+    <q-item v-for="slide in searchedSlides" :key="slide.id" clickable v-ripple>
+      <router-link :to="{ name: 'slide', params: { id: slide.id } }">
         {{ slide.name }}
-      </router-link> -->
-
-      {{ slide }}
+      </router-link>
 
       <!-- <v-menu>
         <template v-slot:activator="{ props }">
