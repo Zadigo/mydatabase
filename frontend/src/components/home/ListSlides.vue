@@ -1,9 +1,11 @@
 <template>
   <q-list>
-    <q-item v-for="slide in slides" :key="slide.id">
-      <router-link :to="{ name: 'slide_view', params: { id: slide.id } }">
+    <q-item v-for="slide in searchedSlides" :key="slide.id">
+      <!-- <router-link :to="{ name: 'slide_view', params: { id: slide.id } }">
         {{ slide.name }}
-      </router-link>
+      </router-link> -->
+
+      {{ slide }}
 
       <!-- <v-menu>
         <template v-slot:activator="{ props }">
@@ -23,45 +25,48 @@
 </template>
 
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
-import { api } from 'src/boot/axios';
+import { useStorage } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { api } from 'src/boot/axios'
+import { useSlides } from 'src/stores/slides'
+import { computed } from 'vue'
+
 import type { Slide } from 'src/types'
-import { PropType, computed } from 'vue';
 
 const props = defineProps({
   search: {
     type: String,
     default: ''
-  },
-  slides: {
-    type: Array as PropType<Slide[]>
   }
 })
+
+
+const slidesStore = useSlides()
+const { slides } = storeToRefs(slidesStore)
 
 const cachedSlides = useStorage<Slide[]>('slides', [])
 
 const searchedSlides = computed(() => {
-  // R
-  // criteria in the search parameter
-  if (props.search) {
-    return props.slides.filter((slide) => {
+  if (props.search && props.search !== '') {
+    return slides.value.filter((slide) => {
       return (
-        slide.name.toLowerCase() === props.search.value ||
-        slide.name.toLowerCase().includes(props.search.value)
+        slide.name.toLowerCase() === props.search ||
+        slide.name.toLowerCase().includes(props.search)
       )
     })
   } else {
-    return props.slides
+    return slides.value
   }
 })
 
 /**
- *  Get all the user's slides 
+ * Get all the user's slides 
  */
-async function getSlides () {
+async function getSlides() {
   try {
-    const response = await api.get<Slide[]>('slides')
+    const response = await api.get<Slide[]>('/api/v1/slides')
     cachedSlides.value = response.data
+    slides.value = cachedSlides.value
   } catch (e) {
     console.log(e)
   }

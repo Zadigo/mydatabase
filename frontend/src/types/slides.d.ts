@@ -2,6 +2,8 @@ import type { BlockItem } from './block'
 import type { DataSource } from './data_source'
 import type { User } from "./user"
 
+export type AccessTypes = 'Public' | 'Private'
+
 export interface Slide {
   id: number
   user: User
@@ -9,7 +11,7 @@ export interface Slide {
   name: string
   blocks: BlockItem[]
   slide_data_source: DataSource
-  access: 'Public' | 'Private'
+  access: AccessTypes
   modified_on: string
   created_on: string
 }

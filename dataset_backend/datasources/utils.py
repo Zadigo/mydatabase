@@ -1,5 +1,4 @@
 import pandas
-from datasources.models import D
 from django.utils.crypto import get_random_string
 from rest_framework.exceptions import ValidationError
 
@@ -90,7 +89,7 @@ def create_column_data_types(columns):
     return [{'name': column, 'column_type': 'Text'} for column in list(columns)]
 
 
-def check_columns_exists(instance: D, columns: list[str]):
+def check_columns_exists(instance, columns: list[str]):
     if instance.csv_file:
         df = pandas.read_csv(instance.csv_file.path)
 

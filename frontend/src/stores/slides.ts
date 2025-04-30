@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import type { BlockItem, BlockItemData, Sheet, Slide, SlideData } from 'src/types'
+import type { BlockItem, BlockItemData, DataSourceDataApiResponse, RowData, Sheet, Slide } from 'src/types'
 import type { BlockRequestData } from 'src/utils'
 
 export const useSlides = defineStore('slides', () => {
   const slides = ref<Slide[]>([])
   const currentSlide = ref<Slide>()
 
-  const currentSlideData = ref<SlideData>()
+  const currentSlideData = ref<RowData[]>([])
   const currentSheet = ref<Sheet>()
 
   // Block level
@@ -16,7 +16,7 @@ export const useSlides = defineStore('slides', () => {
   const currentBlockData = ref<BlockItemData>()
 
   const blockRequestData = ref<BlockRequestData>({
-    name: null,
+    name: '',
     record_creation_columns: [],
     record_update_columns: [],
     allow_record_creation: true,
@@ -30,7 +30,7 @@ export const useSlides = defineStore('slides', () => {
       filters: [],
       groups: []
     },
-    active: true,
+    active: true
   })
 
   /**
@@ -57,7 +57,11 @@ export const useSlides = defineStore('slides', () => {
    * Checks if the current slide has blocks 
    */
   const hasActiveBlocks = computed(() => {
-    return currentSlide.value.blocks.length > 0
+    if (currentSlide.value) {
+      return currentSlide.value.blocks.length > 0
+    } else {
+      return false
+    }
   })
 
   /**
@@ -105,34 +109,36 @@ export const useSlides = defineStore('slides', () => {
    * when navigating the SlideView
    */
   const activeSidebarComponent = computed(() => {
-    const component = 'default-slide-sidebar'
+    let component = 'default-slide-sidebar'
 
-    switch (currentBlock.value.component) {
-      case 'table-block':
-        component = 'table-sidebar'
-        break
-
-      case 'chart-block':
-        component = 'chart-sidebar'
-        break
-
-      default:
-        break
+    if (currentBlock.value) {
+      switch (currentBlock.value.component) {
+        case 'table-block':
+          component = 'table-sidebar'
+          break
+  
+        case 'chart-block':
+          component = 'chart-sidebar'
+          break
+  
+        default:
+          break
+      }
     }
 
     return component
   })
 
-  function loadFromCache() {
-    // TODO: When the user lands directly on /slide/2 for example
-    // the session does not have "slides" or "connections" in the
-    // cache and we need to reload from the backend
+  // function loadFromCache() {
+  //   // TODO: When the user lands directly on /slide/2 for example
+  //   // the session does not have "slides" or "connections" in the
+  //   // cache and we need to reload from the backend
 
-    // Reload some data from the cache
-    if (slides.value.length === 0) {
-      slides.value = $session.retrieve('slides') || []
-    }
-  }
+  //   // Reload some data from the cache
+  //   if (slides.value.length === 0) {
+  //     slides.value = $session.retrieve('slides') || []
+  //   }
+  // }
 
   /**
    * Set the current values for the
@@ -140,7 +146,7 @@ export const useSlides = defineStore('slides', () => {
    * selected block
    */
   function setCurrentBlockRequestData() {
-    if (blockSelected.value) {
+    if (blockSelected.value && currentBlock.value) {
       Object.keys(blockRequestData.value).forEach((key) => {
         blockRequestData.value[key] = currentBlock.value[key]
       })
@@ -154,21 +160,23 @@ export const useSlides = defineStore('slides', () => {
    * @param id 
    */
   function setCurrentSlide(id: string | number | null) {
-    loadFromCache()
+    // loadFromCache()
 
-    if (currentSlide.value) {
-      if (id) {
-        currentSlide.value = slides.value.find(x => x.id === id * 1)
-      }
+    if (currentSlide.value && id) {
+      const cleanId = typeof id === 'string' ?  parseInt(id) : id 
+      currentSlide.value = slides.value.find(x => x.id === cleanId)
     }
   }
 
   /**
    * Sets the current slide data 
+   * 
+   * @param slideId 
+   * @param data 
    */
-  function setCurrentSlideData(slideId: string | number | null, data) {
+  function setCurrentSlideData(slideId: string | number | null, data: DataSourceDataApiResponse) {
     currentSlideData.value = data.results
-    $session.create(slideId, data.results)
+    // $session.create(slideId, data.results)
   }
 
   /**
@@ -179,17 +187,21 @@ export const useSlides = defineStore('slides', () => {
     // slideRequiresSave = false
     // blockRequiresSave = false
     blockRequestData.value = {
-      name: null,
+      name: '',
+      record_creation_columns: [],
+      record_update_columns: [],
       allow_record_creation: true,
-      allow_record_updates: true,
+      allow_record_search: true,
+      allow_record_update: true,
       block_data_source: null,
       search_columns: [],
       user_filters: [],
-      active: true,
+      visible_columns: [],
       conditions: {
         filters: [],
-        columns_visibility: []
-      }
+        groups: []
+      },
+      active: true,
     }
   }
 
@@ -208,7 +220,7 @@ export const useSlides = defineStore('slides', () => {
     blockHasData,
     dataToUse,
     activeSidebarComponent,
-    loadFromCache,
+    // loadFromCache,
     setCurrentBlockRequestData,
     setCurrentSlide,
     setCurrentSlideData,

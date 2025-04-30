@@ -1,15 +1,19 @@
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
+import { ref } from "vue"
 
-const usePublishedSlides = defineStore('published_slides', {
-  state: () => ({
-    slides: [],
-    isPreview: false,
+import type { RowData, Slide } from "src/types"
 
-    currentSlide: {},
-    currentSlideData: {}
-  })
+export const usePublishedSlides = defineStore('published_slides', () => {
+  const slides = ref<Slide[]>([])
+  const isPreview = ref<boolean>(false)
+
+  const currentSlide = ref<Slide>()
+  const currentSlideData = ref<RowData[]>([])
+
+  return {
+    slides,
+    isPreview,
+    currentSlide,
+    currentSlideData
+  }
 })
-
-export {
-  usePublishedSlides
-}

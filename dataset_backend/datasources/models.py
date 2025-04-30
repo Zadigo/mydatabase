@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dataset_backend.utils import create_id
 
-D = TypeVar('D', 'DataSource')
+D = TypeVar('D', bound='DataSource')
 
 
 class Webhook(models.Model):

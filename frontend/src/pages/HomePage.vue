@@ -5,7 +5,7 @@
 
       <q-card>
         <q-card-section>
-          <div class="d-flex justify-content-between align-items-center p-2">
+          <div class="flex justify-between items-center q-p-5">
             <!-- Search -->
             <q-input id="search-slides" v-model="search" class="w-50 p-3" placeholder="Search slides..." />
 
@@ -18,7 +18,9 @@
 
         <q-card-section>
           <suspense>
-            <AsyncListSlides :search="search" />
+            <template #default>
+              <AsyncListSlides :search="search" />
+            </template>
 
             <template #fallback>
               Loading...
@@ -29,26 +31,24 @@
     </div>
 
     <!-- Modals -->
-    <teleport to="body">
-      <q-dialog id="create-slide-modal" v-model="showCreateSlideModal" width="300">
-        <q-card class="p-2">
-          <q-card-section>
-            <div class="row">
-              <div class="col-12">
-                <h2 class="h4 mb-3">New Slide</h2>
-                <q-input id="new-slide" v-model="newSlideRequestData.name" type="text" placeholder="Name" class="p-3" @keypress.enter="handleCreateNewSlide" />
-                <q-switch v-model="newSlideRequestData.private" class="my-2" label="Private slide" inset />
-              </div>
+    <q-dialog id="create-slide-modal" v-model="showCreateSlideModal" width="300">
+      <q-card class="p-2">
+        <q-card-section>
+          <div class="row">
+            <div class="col-12">
+              <h2 class="h4 mb-3">New Slide</h2>
+              <q-input id="new-slide" v-model="newSlideRequestData.name" type="text" placeholder="Name" class="p-3" @keypress.enter="handleCreateNewSlide" />
+              <q-switch v-model="newSlideRequestData.private" class="my-2" label="Private slide" inset />
             </div>
-          </q-card-section>
-  
-          <q-card-actions class="justify-content-end">
-            <q-btn @click="showCreateSlideModal = false">Cancel</q-btn>
-            <q-btn variant="tonal" @click="handleCreateNewSlide">Validate</q-btn>
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-    </teleport>
+          </div>
+        </q-card-section>
+
+        <q-card-actions class="justify-content-end">
+          <q-btn @click="showCreateSlideModal = false">Cancel</q-btn>
+          <q-btn variant="tonal" @click="handleCreateNewSlide">Validate</q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -76,16 +76,19 @@ const newSlideRequestData = ref<NewSlide>({
   private: false
 })
 
+/**
+ * 
+ */
 async function handleCreateNewSlide() {
   try {
     newSlideSchema.parse(newSlideRequestData.value)
 
     const response = await api.post<Slide>('slides/create', newSlideRequestData.value)
     
-    slides.push(response.data)
+    slides.value.push(response.data)
     
     showCreateSlideModal.value = false
-    newSlideRequestData.value = { name: null, private: false }
+    newSlideRequestData.value = { name: '', private: false }
   } catch (e) {
     console.log(e)
   }

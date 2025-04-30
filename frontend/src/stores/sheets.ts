@@ -1,12 +1,12 @@
-import { defineStore } from "pinia";
+import { defineStore } from "pinia"
+import { ref } from "vue"
 
-const useSheets = defineStore('sheets', {
-  data: () => ({
-    sheets: [],
-    currentSheet: {}
-  })
+export const useSheets = defineStore('sheets', () => {
+  const sheets = ref([])
+  const currentSheet = ref({})
+
+  return {
+    sheets,
+    currentSheet
+  }
 })
-
-export {
-  useSheets
-}

@@ -1,37 +1,44 @@
-import _ from 'lodash'
 import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
 
-const useConnections = defineStore('connections', {
-  state: () => ({
-    // Connections <-> Sheets
-    connections: [],
-    currentConnection: {}
-  }),
-  getters: {
-    hasActiveConnections () {
-      // Checks the array has connections
-      return this.connections > 0
-    },
-    connectionNames () {
-      // Return all the connection names
-      return _.map(this.connections, connection => connection.name)
-    }
-  },
-  actions: {
-    async loadFromCache () {
-      if (this.connections.length === 0) {
-        this.connections = this.$session.retrieve('connections') || []
-      }
-    },
-    setCurrentConnection (sheetId) {
-      // Sets the current connection based on the
-      // passed sheetId
-      this.currentConnection = _.find(this.connections, ['sheet_id', sheetId]) || {}
+export const useConnections = defineStore('connections', () => {
+  // Connections <-> Sheets
+  const connections = ref([])
+  const currentConnection = ref({})
+
+  const hasActiveConnections = computed(() => {
+    // Checks the array has connections
+    return connections.value.length > 0
+  })
+
+  const connectionNames = computed(() => {
+    // Return all the connection names
+    return connections.value.map(connection => connection.name)
+  })
+
+  function loadFromCache() {
+    if (connections.value.length === 0) {
+      connections.value = $session.retrieve('connections') || []
     }
   }
-})
 
-export {
-  useConnections
-}
+  /**
+   * Sets the current connection based on the
+   * passed sheetId
+   * 
+   * @param sheetId 
+   */
+  function setCurrentConnection (sheetId: string) {
+    currentConnection.value = connections.value.find(['sheet_id', sheetId]) || {}
+  }
+
+  return {
+    connections,
+    currentConnection,
+    connectionNames,
+    hasActiveConnections,
+    loadFromCache,
+    setCurrentConnection
+  }
+})
