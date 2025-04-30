@@ -35,7 +35,7 @@ def list_adder(instance, field, value, request_value):
     return instance
 
 
-def create_true_false_dictionnaries(columns: list[str]):
+def create_true_false_dictionnaries(columns: list[str]) -> list[dict[str, str | bool]]:
     """Create list of True/False items using a list
     of columns as strings"""
     return [{'name': column, 'state': True} for column in columns]

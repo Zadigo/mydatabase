@@ -27,22 +27,22 @@ urlpatterns = [
     ),
     re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/(?P<block_id>bl\_[a-zA-Z0-9\-]+)/delete$',
-        views.delete_block,
+        views.DeleteBlock.as_view(),
         name='delete_block'
     ),
     re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/(?P<block_id>bl\_[a-zA-Z0-9\-]+)$',
-        views.get_block,
+        views.GetBlock.as_view(),
         name='block'
     ),
     re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/blocks/create$',
-        views.create_block,
+        views.CreateBlock.as_view(),
         name='create_block'
     ),
     re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)/update$',
-        views.update_slide,
+        views.UpdateSlide.as_view(),
         name='update'
     ),
     re_path(
@@ -52,17 +52,17 @@ urlpatterns = [
     ),
     re_path(
         r'^(?P<slide_id>sl\_[a-zA-Z0-9\-]+)$',
-        views.slide_details,
+        views.SlideDetails.as_view(),
         name='details'
     ),
     re_path(
         r'^create$',
-        views.create_slide,
+        views.CreateSlide.as_view(),
         name='create'
     ),
     re_path(
         r'^$',
-        views.list_slides,
+        views.ListSlides.as_view(),
         name='list'
     )
 ]

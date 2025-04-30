@@ -15,6 +15,7 @@ from slides.choices import (AccessChoices, ColumnTypeChoices, ComponentTypes,
                             InputTypeChoices, OperatorChoices, SortingChoices,
                             UnionChoices)
 from slides.models import Slide
+from django.contrib.auth import get_user_model
 
 
 class UserSerializer(Serializer):
@@ -76,45 +77,42 @@ class BlockForm(Serializer):
     name = fields.CharField(required=False, allow_null=True)
     component = fields.ChoiceField(
         ComponentTypes.choices,
-        default=ComponentTypes.TABLE_BLOCK,
+        default='Table block',
     )
-    record_creation_columns = fields.ListField()
-    record_update_columns = fields.ListField()
-    search_columns = fields.ListField()
+    record_creation_columns = fields.ListField(required=False)
+    record_update_columns = fields.ListField(required=False)
+    search_columns = fields.ListField(required=False)
     block_data_source = fields.URLField(
         required=False,
         allow_null=True
     )
-    conditions = ConditionsForm()
-    user_filters = UserFiltersConditionForm(many=True)
+    conditions = ConditionsForm(required=False)
+    user_filters = UserFiltersConditionForm(many=True, required=False)
     active = fields.BooleanField(default=True)
 
-    def save(self, request, slide_id, **kwargs):
-        setattr(self, 'request', request)
-        setattr(self, 'slide_id', slide_id)
-        return super().save(**kwargs)
-
     def create(self, validated_data):
-        # TODO: Use authentication request.user
-        user = get_object_or_404(sheets_models.USER_MODEL, pk=1)
+        request = self._context['request']
+        slide_id = self._context['slide_id']
+
+        user = get_object_or_404(get_user_model(), pk=1)
         slide = get_object_or_404(
             slides_models.Slide,
             user=user,
-            slide_id=self.slide_id
+            slide_id=slide_id
         )
 
         block = slide.blocks.create(**validated_data)
         # Set these fields to be able to implement
         # specific actions (visibility, updating...)
         # on the columns for this block individually
-        true_false_dictionnaries = utils.flatten_dictionnaries(
-            slide.slide_data_source.columns
-        )
-        block.record_creation_columns = true_false_dictionnaries
-        block.record_update_columns = true_false_dictionnaries
-        block.search_columns = true_false_dictionnaries
-        block.visible_columns = true_false_dictionnaries
-        block.save()
+        data_source = slide.slide_data_source
+        if data_source is not None:
+            true_false_dictionnaries = utils.flatten_dictionnaries(data_source.columns)
+            block.record_creation_columns = true_false_dictionnaries
+            block.record_update_columns = true_false_dictionnaries
+            block.search_columns = true_false_dictionnaries
+            block.visible_columns = true_false_dictionnaries
+            block.save()
 
         return block
 
@@ -238,22 +236,28 @@ class UpdateSlideForm(Serializer):
     )
 
     def update(self, instance, validated_data):
-        instance.name = validated_data['name']
+        name = validated_data.get('name', None)
+        if name is not None:
+            instance.name = name
 
-        data_source_id = validated_data['slide_data_source']
-        queryset = DataSource.objects.filter(data_source_id=data_source_id)
-        if not queryset.exists():
-            raise NotFound({
-                'sheet_data_source': 'Data source doest not exist'
-            })
-        try:
-            instance.slide_data_source = queryset.get()
-        except:
-            raise ValidationError({
-                'sheet_data_source': 'Could not get a valid data source'
-            })
-        else:
-            instance.save()
+        data_source_id = validated_data.get('slide_data_source', None)
+
+        if data_source_id is not None:
+            queryset = DataSource.objects.filter(data_source_id=data_source_id)
+
+            if not queryset.exists():
+                raise NotFound({
+                    'sheet_data_source': 'Data source doest not exist'
+                })
+
+            try:
+                instance.slide_data_source = queryset.get()
+            except:
+                raise ValidationError({
+                    'sheet_data_source': 'Could not get a valid data source'
+                })
+
+        instance.save()
         return instance
 
 
@@ -264,16 +268,19 @@ class NewSlideForm(Serializer):
         default=AccessChoices.PUBLIC
     )
 
-    def save(self, user, **kwargs):
-        validated_data = {**self.validated_data, **kwargs}
-        if self.instance is not None:
-            self.instance = self.update(self.instance, validated_data)
-        else:
-            self.instance = self.create(user, validated_data)
-        return self.instance
+    def create(self, validated_data):
+        # request = self._context['request']
+        # instance = Slide.objects.create(
+        #     user=request.user,
+        #     **validated_data
+        # )
+        # return instance
 
-    def create(self, user, validated_data):
-        instance = Slide.objects.create(user=user, **validated_data)
+        # TESTING
+        instance = Slide.objects.create(
+            user=get_user_model().objects.first(),
+            **validated_data
+        )
         return instance
 
 

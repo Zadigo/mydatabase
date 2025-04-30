@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "Winners",
-            "block_id": "bl_123",
+            "block_id": "bl_a123",
             "component": "Table block",
             "record_creation_columns": [],
             "record_update_columns": [],
@@ -26,7 +26,7 @@
         "pk": 2,
         "fields": {
             "name": "Loosers",
-            "block_id": "bl_124",
+            "block_id": "bl_b123",
             "component": "Table block",
             "record_creation_columns": [],
             "record_update_columns": [],

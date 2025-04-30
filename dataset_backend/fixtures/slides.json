@@ -5,7 +5,7 @@
         "fields": {
             "user": 1,
             "name": "Grammy Winners",
-            "slide_id": "sl_123",
+            "slide_id": "sl_a123",
             "blocks": [1, 2],
             "slide_data_source": null,
             "access": "Public",
