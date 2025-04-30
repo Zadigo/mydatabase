@@ -1,11 +1,15 @@
+export * from './operators'
+
 export const defaultComponentTypes = [
   'table-block', 
   'graph-block', 
   'grid-block', 
-  'chart-block'
+  'chart-block',
+  'calendar-block',
+  'grid-2-block'
 ] as const
 
-export type ComponentTypes = (typeof defaultComponentTypes)[number]
+export type DeafaultComponentTypes = (typeof defaultComponentTypes)[number]
 
 
 export const defaultColumnTypes = [
@@ -15,4 +19,4 @@ export const defaultColumnTypes = [
   'Number'
 ] as const
 
-export type ColumnTypes = (typeof defaultColumnTypes)[number]
+export type DefaultColumnTypes = (typeof defaultColumnTypes)[number]

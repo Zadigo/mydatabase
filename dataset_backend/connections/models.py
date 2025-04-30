@@ -6,14 +6,12 @@ from django.utils.timezone import now
 
 from connections import choices
 
-USER_MODEL = get_user_model()
-
 
 class Connnection(models.Model):
     """Stores user access connections to a Google sheet"""
 
     user = models.ForeignKey(
-        USER_MODEL,
+        get_user_model(),
         models.CASCADE
     )
     id_token = models.CharField(

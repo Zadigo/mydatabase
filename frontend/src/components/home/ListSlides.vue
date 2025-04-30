@@ -1,7 +1,7 @@
 <template>
   <q-list bordered separator>
     <q-item v-for="slide in searchedSlides" :key="slide.id" clickable v-ripple>
-      <router-link :to="{ name: 'slide', params: { id: slide.id } }">
+      <router-link :to="{ name: 'slide', params: { id: slide.slide_id } }">
         {{ slide.name }}
       </router-link>
 

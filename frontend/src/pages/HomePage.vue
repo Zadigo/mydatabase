@@ -44,7 +44,7 @@
             <div class="col-12">
               <h2 class="h4 mb-3">New Slide</h2>
               <q-input id="new-slide" v-model="newSlideRequestData.name" type="text" placeholder="Name" class="p-3" @keypress.enter="handleCreateNewSlide" />
-              <q-switch v-model="newSlideRequestData.private" class="my-2" label="Private slide" inset />
+              <q-toggle v-model="newSlideRequestData.private" class="my-2" label="Private slide" inset />
             </div>
           </div>
         </q-card-section>
