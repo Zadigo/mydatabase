@@ -9,9 +9,10 @@ from django.utils.crypto import get_random_string
 from rest_framework import fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer
-from my_database.choices import ColumnTypeChoices
+from dataset_backend.choices import ColumnTypeChoices
 from datasources import utils
-from datasources.models import USER_MODEL, DataSource
+from datasources.models import DataSource
+from django.contrib.auth import get_user_model
 
 
 class UserSerializer(Serializer):
@@ -71,7 +72,7 @@ class UploadDataSourceForm(Serializer):
 
     def create(self, validated_data):
         data = {}
-        user = get_object_or_404(USER_MODEL, pk=1)
+        user = get_object_or_404(get_user_model(), pk=1)
 
         endpoint_url = validated_data.get('endpoint_url')
         if endpoint_url is not None:

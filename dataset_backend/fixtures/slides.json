@@ -1,0 +1,17 @@
+[
+    {
+        "model": "slides.Slide",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "name": "Grammy Winners",
+            "slide_id": "sl_123",
+            "blocks": [1, 2],
+            "slide_data_source": null,
+            "access": "Public",
+            "share_url": null,
+            "modified_on": "2025-04-30 09:50:15.971881+00:00",
+            "created_on": "2025-04-30 09:50:15.971881+00:00"
+        }
+    }
+]

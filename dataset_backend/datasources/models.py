@@ -1,5 +1,7 @@
 import pathlib
 
+from datasources.utils import create_file_name
+from datasources.validators import validate_id
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_delete, post_save, pre_save
@@ -8,11 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
-from datasources.utils import create_file_name
-from datasources.validators import validate_id
-from my_database.utils import create_id
-
-USER_MODEL = get_user_model()
+from dataset_backend.utils import create_id
 
 
 class Webhook(models.Model):
@@ -57,7 +55,10 @@ class DataSource(models.Model):
     by creating a csv file via an API endpoint or
     by linking to a Google spreadsheet"""
 
-    user = models.ForeignKey(USER_MODEL, models.CASCADE)
+    user = models.ForeignKey(
+        get_user_model(),
+        models.CASCADE
+    )
     name = models.CharField(
         max_length=100,
         blank=True,

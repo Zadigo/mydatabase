@@ -43,7 +43,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'my_database.urls'
+ROOT_URLCONF = 'dataset_backend.urls'
 
 TEMPLATES = [
     {
@@ -61,7 +61,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'my_database.wsgi.application'
+WSGI_APPLICATION = 'dataset_backend.wsgi.application'
 
 
 # Database
@@ -158,3 +158,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+
+# Fixtures
+
+FIXTURES_DIRS = [
+    'fixtures/users.json',
+    'fixtures/blocks.json',
+    'fixtures/slides.json'
+]

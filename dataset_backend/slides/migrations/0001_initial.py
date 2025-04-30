@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import my_database.validators
+import dataset_backend.validators
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=100, null=True)),
-                ('block_id', models.CharField(blank=True, max_length=100, null=True, unique=True, validators=[my_database.validators.validate_id])),
+                ('block_id', models.CharField(blank=True, max_length=100, null=True,
+                 unique=True, validators=[dataset_backend.validators.validate_id])),
                 ('component', models.CharField(choices=[('table-block', 'Table Block'), ('graph-block', 'Graph Block'), ('grid-block', 'Grid Block'), ('chart-block', 'Chart Block')], default='table-block', max_length=100)),
                 ('record_creation_columns', models.JSONField(blank=True, help_text='Columns to consider when the user attemps to create a new record', null=True)),
                 ('record_update_columns', models.JSONField(blank=True, help_text='Columns to consider when the user attemps to update a new record', null=True)),
@@ -46,7 +47,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=100, null=True)),
-                ('slide_id', models.CharField(blank=True, max_length=100, null=True, unique=True, validators=[my_database.validators.validate_id])),
+                ('slide_id', models.CharField(blank=True, max_length=100, null=True, unique=True, validators=[dataset_backend.validators.validate_id])),
                 ('access', models.CharField(choices=[('Public', 'Public'), ('Private', 'Private')], default='Public', max_length=100)),
                 ('share_url', models.URLField(blank=True, null=True)),
                 ('modified_on', models.DateTimeField(auto_now=True)),

@@ -1,0 +1,11 @@
+[
+    {
+        "model": "auth.User",
+        "pk": 1,
+        "fields": {
+            "first_name": "Caro",
+            "last_name": "test",
+            "email": "lucie@gmail.com"
+        }
+    }
+]

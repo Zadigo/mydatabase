@@ -1,0 +1,46 @@
+[
+    {
+        "model": "slides.Block",
+        "pk": 1,
+        "fields": {
+            "name": "Winners",
+            "block_id": "bl_123",
+            "component": "Table block",
+            "record_creation_columns": [],
+            "record_update_columns": [],
+            "visible_columns": [],
+            "block_data_source": null,
+            "search_columns": [],
+            "user_filters": [],
+            "conditions": [],
+            "allow_record_creation": false,
+            "allow_record_update": false,
+            "allow_record_search": false,
+            "active": true,
+            "modified_on": "2025-04-30 09:50:15.971881+00:00",
+            "created_on": "2025-04-30 09:50:15.971881+00:00"
+        }
+    },
+    {
+        "model": "slides.Block",
+        "pk": 2,
+        "fields": {
+            "name": "Loosers",
+            "block_id": "bl_124",
+            "component": "Table block",
+            "record_creation_columns": [],
+            "record_update_columns": [],
+            "visible_columns": [],
+            "block_data_source": null,
+            "search_columns": [],
+            "user_filters": [],
+            "conditions": [],
+            "allow_record_creation": false,
+            "allow_record_update": false,
+            "allow_record_search": false,
+            "active": true,
+            "modified_on": "2025-04-30 09:50:15.971881+00:00",
+            "created_on": "2025-04-30 09:50:15.971881+00:00"
+        }
+    }
+]

@@ -3,12 +3,10 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-
-from my_database.utils import create_id
-from my_database.validators import validate_id
 from slides.choices import AccessChoices, ComponentTypes
 
-USER_MODEL = get_user_model()
+from dataset_backend.utils import create_id
+from dataset_backend.validators import validate_id
 
 
 class Slide(models.Model):
@@ -17,7 +15,10 @@ class Slide(models.Model):
     from the overall slide or specific data unique to
     the block"""
 
-    user = models.ForeignKey(USER_MODEL, models.CASCADE)
+    user = models.ForeignKey(
+        get_user_model(),
+        models.CASCADE
+    )
     name = models.CharField(
         max_length=100,
         blank=True,
@@ -30,7 +31,10 @@ class Slide(models.Model):
         null=True,
         validators=[validate_id]
     )
-    blocks = models.ManyToManyField('Block', blank=True)
+    blocks = models.ManyToManyField(
+        'Block',
+        blank=True
+    )
     slide_data_source = models.ForeignKey(
         'datasources.DataSource',
         models.SET_NULL,
@@ -43,9 +47,16 @@ class Slide(models.Model):
         choices=AccessChoices.choices
     )
     columns_visibility = None
-    share_url = models.URLField(blank=True, null=True)
-    modified_on = models.DateTimeField(auto_now=True)
-    created_on = models.DateTimeField(auto_now_add=True)
+    share_url = models.URLField(
+        blank=True,
+        null=True
+    )
+    modified_on = models.DateTimeField(
+        auto_now=True
+    )
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f'Slide: {self.slide_id}'
@@ -91,7 +102,10 @@ class Block(models.Model):
         null=True
     )
     visible_columns = models.JSONField(
-        help_text=_("Columns to be visible at the block level"),
+        help_text=_(
+            "Columns to be visible "
+            "at the block level"
+        ),
         blank=True,
         null=True
     )
@@ -131,9 +145,15 @@ class Block(models.Model):
         help_text=_("Whether the block should accept record search"),
         default=True
     )
-    active = models.BooleanField(default=True)
-    modified_on = models.DateTimeField(auto_now=True)
-    created_on = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(
+        default=True
+    )
+    modified_on = models.DateTimeField(
+        auto_now=True
+    )
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         ordering = ['-created_on']
