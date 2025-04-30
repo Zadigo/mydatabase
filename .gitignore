@@ -234,4 +234,4 @@ yarn-error.log*
 # local .env files
 .env.local*
 
-/media/sheets/
+/dataset_backend/media/sheets/
