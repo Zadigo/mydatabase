@@ -1,9 +1,9 @@
 <template>
   <section id="slide">
-    <div class="row">
+    <div class="row my-5">
       <div class="col-3">
-        <base-card class="shadow-sm">
-          <template #body>
+        <div class="card shadow-sm">
+          <div class="card-body">
             <!-- <v-breadcrumbs :items="[{ title: 'Slide', href: 'slide_view' }, { title: 'Block' }]">
               <template v-slot:divider>
                 <v-icon icon="mdi-chevron-right"></v-icon>
@@ -11,59 +11,65 @@
             </v-breadcrumbs> -->
 
             <component :is="activeSidebarComponent" />
-          </template>
-        </base-card>
+          </div>
+        </div>
       </div>
 
       <section class="col-9">
         <div class="row">
           <!-- Header -->
-          <section id="block-selection" class="col-12">
-            <base-card class="shadow-sm mb-5">
-              <template #body>
+          <header id="block-selection" class="col-12">
+            <div class="card shadow-sm mb-5">
+              <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex justify-content-start gap-2">
-                    <base-button v-for="blockType in blockTypes" :key="blockType.name" color="light" rounded @click="handleAddBlock(blockType)">
-                      <font-awesome-icon :icon="['fas', `${blockType.icon}`]" />
-                    </base-button>
+                  <div class="d-flex justify-content-end w-100 gap-2">
+                    <button v-for="blockType in blockTypes" :key="blockType.name" type="button" class="btn btn-info shadow-none btn-rounded" rounded @click="handleAddBlock(blockType)">
+                      <IconBase :icon="`${blockType.icon}`" />
+                    </button>
                   </div>
 
                   <div class="d-flex justify-content-end gap-2">
-                    <!-- <v-btn elevation="0" color="secondary" rounded>
-                      <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
+                    <button type="button" class="btn btn-rounded btn-dark d-flex inline-flex ms-3 shadow-none align-items-center" rounded>
+                      <IconBase icon="fa-solid:eye" class="me-2" />
                       Publish
-                    </v-btn> -->
+                    </button>
 
-                    <v-btn :to="{ name: 'page_preview_view', params: { id: currentSlide.slide_id } }" elevation="0" color="info" rounded>
-                      <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
-                      Preview
-                    </v-btn>
+                    <div v-if="currentSlide">
+                      <router-link :to="{ name: 'page_preview', params: { id: currentSlide.slide_id } }" elevation="0" color="info" rounded>
+                        <IconBase name="fa-solid:eye" class="me-2" />
+                        Preview
+                      </router-link>
+                    </div>
                   </div>
                 </div>
-              </template>
-            </base-card>
-          </section>
+              </div>
+            </div>
+          </header>
 
           <!-- Blocks -->
           <section id="blocks" class="col-12">
-            <div v-if="slidesStore.hasActiveBlocks">
+            <div v-if="currentSlide && slidesStore.hasActiveBlocks">
               <component :is="block.component" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" />
             </div>
 
             <div v-else class="text-center text-body-tertiary">
               <div class="row">
-                <div class="col-md-6 offset-md-3">
-                  <font-awesome-icon :icon="['fas', 'home']" class="fa-6x" />
-                  <p class="my-3">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Enim cupiditate aliquid vero fuga rem suscipit ducimus in
-                    exercitationem architecto, dolorem, sint libero quae hic quidem
-                    reiciendis rerum. Natus, voluptas aliquam!
-                  </p>
+                <div class="col-md-12">
+                  <div class="card shadow-sm">
+                    <div class="card-body">
+                      <IconBase icon="fa-solid:home" class="fa-6x" />
+                      <p class="my-3">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Enim cupiditate aliquid vero fuga rem suscipit ducimus in
+                        exercitationem architecto, dolorem, sint libero quae hic quidem
+                        reiciendis rerum. Natus, voluptas aliquam!
+                      </p>
 
-                  <v-btn color="primary" variant="tonal" size="x-large" rounded @click="showBlocksModal = true">
-                    Add your first block
-                  </v-btn>
+                      <button type="button" class="btn btn-info btn-lg btn-rounded shadow-none" @click="showBlocksModal=true">
+                        Add your first block
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -90,19 +96,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, type Component } from 'vue'
-import { storeToRefs } from 'pinia'
-import { mapActions } from 'pinia'
-import { useSlides } from 'src/stores/slides'
-import { useConnections } from 'src/stores/connections'
-import { useSheetsComposable } from 'src/composables/page'
-import { useRoute } from 'vue-router'
-import { type DeafaultComponentTypes } from 'src/data'
-
-import { onBeforeMount } from 'vue'
-import { api } from 'src/boot/axios'
-import { DataSource, DataSourceDataApiResponse } from 'src/types'
 import { useStorage } from '@vueuse/core'
+import { storeToRefs } from 'pinia'
+import { api } from 'src/plugins'
+import { useDatasource } from 'src/stores/datasources'
+import { useSlides } from 'src/stores/slides'
+import { computed, onMounted, ref, type Component } from 'vue'
+import { useRoute } from 'vue-router'
+
+import { type DeafaultComponentTypes } from 'src/data'
+import type { BlockItem, DataSource, DataSourceDataApiResponse, ExtendedRouteParamsGeneric } from 'src/types'
+import { useDatasourceComposable } from '@/composables/datasource'
 
 // import DefaultSlideSidebar from 'src/components/sidebar/DefaultSlideSidebar.vue'
 
@@ -116,13 +120,15 @@ type BlockType = {
   icon: string
 }
 
-const connections = useStorage('connections', [])
-const route = useRoute()
-const slidesStore = useSlides()
-const { slides, currentSlide, currentBlock, activeSidebarComponent } = storeToRefs(slidesStore)
+const { id: slideId } = useRoute().params as ExtendedRouteParamsGeneric
 
-const connectionsStore = useConnections()
-const { getConnections } = useSheetsComposable()
+const cachedDatasources = useStorage<DataSource[]>('dataSources', [])
+
+const slidesStore = useSlides()
+const { currentSlide, currentBlock } = storeToRefs(slidesStore)
+
+const datasourceStore = useDatasource()
+const { getConnections } = useDatasourceComposable()
 
 const showBlocksModal = ref<boolean>(false)
 const blockSelections = ref<BlockSelection>({})
@@ -130,34 +136,61 @@ const blockSelections = ref<BlockSelection>({})
 const blockTypes: BlockType[] = [
   {
     name: 'Table',
-    component: () => import('src/components/blocks/TableBlock.vue'),
+    component: () => import('@/components/slide/blocks/TableBlock.vue'),
     shortname: 'table-block',
-    icon: 'table'
+    icon: 'fa-solid:table'
   },
   {
     name: 'Calendar',
-    component: () => import('src/components/blocks/TableBlock.vue'),
+    component: () => import('@/components/slide/blocks/TableBlock.vue'),
     shortname: 'calendar-block',
-    icon: 'calendar'
+    icon: 'fa-solid:calendar'
   },
   {
     name: 'Chart',
-    component: () => import('src/components/blocks/ChartBlock.vue'),
+    component: () => import('@/components/slide/blocks/ChartBlock.vue'),
     shortname: 'chart-block',
-    icon: 'chart-simple'
+    icon: 'fa-solid:chart-line'
   },
   {
     name: 'Grid',
-    component: () => import('src/components/blocks/GridByTwoBlock.vue'),
+    component: () => import('@/components/slide/blocks/GridByTwoBlock.vue'),
     shortname: 'grid-2-block',
-    icon: 'table-cells-large'
+    icon: 'fa6-solid:table-cells-large'
   }
 ]
 
 /**
- * 
+ * The active sidebar component to use
+ * when navigating the SlideView
  */
-async function handleAddBlock (blockType: DeafaultComponentTypes) {
+const activeSidebarComponent = computed(() => {
+  let component: Component | (() => Promise<{ default: Component }>) = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+
+  if (currentBlock.value) {
+    switch (currentBlock.value.component) {
+      case 'table-block':
+        component = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+        break
+
+      case 'chart-block':
+        component = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+        break
+
+      default:
+        break
+    }
+  }
+
+  return component
+})
+
+console.log('activeSidebarComponent', activeSidebarComponent.value)
+
+/**
+ * TODO:
+ */
+async function handleAddBlock(blockType: BlockType) {
   // Creates a new block for the slide
   try {
     const path = `/api/v1/sheets/pages/${pageStore.currentPage.page_id}/blocks/create`
@@ -176,39 +209,38 @@ async function handleAddBlock (blockType: DeafaultComponentTypes) {
 }
 
 /**
- * 
+ * TODO:
  */
-async function handleUpdateSlide () {
-  // Changes the source for the given page
-  // try {
-  //   const path = `slides/${this.currentSlide.slide_id}/blocks/${this.currentBlock.block_id}/update`
-  //   // this.blockRequestData.block_data_source = blockId
-  //   const response = await this.$http.post(path, this.pageRequestData)
-  //   this.currentSlide = response.data
-  //   await this.getBlockData((data) => {
-  //     data
-  //   })
-  // } catch (e) {
-  //   console.log(e)
-  // }
-}
+// async function handleUpdateSlide() {
+//   Changes the source for the given page
+//   try {
+//     const path = `slides/${this.currentSlide.slide_id}/blocks/${this.currentBlock.block_id}/update`
+//     // this.blockRequestData.block_data_source = blockId
+//     const response = await this.$http.post(path, this.pageRequestData)
+//     this.currentSlide = response.data
+//     await this.getBlockData((data) => {
+//       data
+//     })
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
 
 /**
- * 
+ * TODO:
  */
-async function handleUpdateBlock () {
-
-}
+// async function handleUpdateBlock() {}
 
 /**
- * 
+ * Gets the data for the current slide
  */
-async function getSlideData () {
-  // Gets the data for the current slide
+async function getSlideData() {
   try {
-    if (currentSlide.value) {
-      const response = await api.get<DataSourceDataApiResponse>(`/api/v1/sheets/${currentSlide.value.slide_data_source}`)
+    if (currentSlide.value && currentSlide.value.slide_data_source) {
+      const response = await api.get<DataSourceDataApiResponse>(`/api/v1/datasources/${currentSlide.value.slide_data_source.data_source_id}`)
       slidesStore.setCurrentSlideData(currentSlide.value.slide_data_source.data_source_id, response.data)
+    } else {
+      console.log('Slide does not have a datasource - will be using block data source')
     }
   } catch (e) {
     console.log(e)
@@ -216,52 +248,47 @@ async function getSlideData () {
 }
 
 /**
- * 
+ * Handle the selection state for each block
  */
-function handleBlockSelection (blockDetails) {
-  // Handle the selection state for each block
-  Object.keys(this.blockSelections).forEach((key) => {
+function handleBlockSelection(blockDetails: BlockItem) {
+  Object.keys(blockSelections.value).forEach((key) => {
     if (key !== blockDetails.block_id) {
-      this.blockSelections[key] = false
+      blockSelections.value[key] = false
     }
   })
 
-  const state = this.blockSelections[blockDetails.block_id]
-  this.blockSelections[blockDetails.block_id] = !state
-  
+  const state = blockSelections.value[blockDetails.block_id]
+  blockSelections.value[blockDetails.block_id] = !state
+
   // Overall, if a block is selected, then set the currentBlock
   // to be the one that is being selected otherwise, it should
   // just be an empty object
-  const hasSelection = Object.values(this.blockSelections).some(x => x === true)
+  const hasSelection = Object.values(blockSelections.value).some(x => x)
   if (hasSelection) {
-    this.slidesStore.currentBlock = blockDetails
+    currentBlock.value = blockDetails
   } else {
-    this.slidesStore.currentBlock = {}
+    currentBlock.value = undefined
   }
-  this.slidesStore.setCurrentBlockRequestData()
+  slidesStore.setCurrentBlockRequestData()
 }
 
 /**
- * 
+ *
  */
-function checkIsSelected (blockDetails) {
+function checkIsSelected(blockDetails: BlockItem) {
   // Returns the selection state for the given block
-  return this.blockSelections[blockDetails.block_id]
+  return blockSelections.value[blockDetails.block_id]
 }
 
-onBeforeMount(async () => {
-  console.log('SlideView before route enter (1)')
-  slidesStore.setCurrentSlide(route.params.id)
-  
-  await getSlideData()
-
-  connectionsStore.setCurrentConnection(slidesStore.currentSlide?.slide_data_source)
-})
+slidesStore.setCurrentSlide(slideId)
 
 onMounted(async () => {
-  if (!connections.value) {
+  await getSlideData()
+  datasourceStore.setCurrentDatasource(currentSlide.value)
+
+  if (cachedDatasources.value.length === 0) {
     await getConnections((data) => {
-      connections.value = data
+      cachedDatasources.value = data
     })
   }
 

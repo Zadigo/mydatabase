@@ -129,7 +129,7 @@ import { onBeforeMount, PropType, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getCurrentInstance } from 'vue'
 import { useSlides } from 'src/stores/slides'
-import { useConnections } from 'src/stores/connections'
+import { useConnections } from '@/stores/datasources'
 import { useBlocksComposable } from 'src/composables/blocks'
 import { useUtilities } from 'src/composables/utils'
 

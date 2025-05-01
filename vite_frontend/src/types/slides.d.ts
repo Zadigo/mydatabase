@@ -1,6 +1,6 @@
 import type { BlockItem } from './block'
 import type { DataSource } from './data_source'
-import type { User } from "./user"
+import type { User } from './user'
 
 export type AccessTypes = 'Public' | 'Private'
 

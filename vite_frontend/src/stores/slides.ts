@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, type Component } from 'vue'
 
-import type { BlockItem, BlockItemData, DataSourceDataApiResponse, RowData, Sheet, Slide } from './types'
-import type { BlockRequestData } from './utils'
+import type { BlockItem, BlockItemData, DataSourceDataApiResponse, RowData, Sheet, Slide } from '../types'
+import type { BlockRequestData } from '../utils'
 
 export const useSlides = defineStore('slides', () => {
   const slides = ref<Slide[]>([])
   const currentSlide = ref<Slide>()
 
+  const cachedSlidesData = ref<Record<string, RowData[]>>({})
   const currentSlideData = ref<RowData[]>([])
   const currentSheet = ref<Sheet>()
 
@@ -15,6 +16,7 @@ export const useSlides = defineStore('slides', () => {
   const currentBlock = ref<BlockItem>()
   const currentBlockData = ref<BlockItemData>()
 
+  // TODO: Rename to slideRequestData
   const blockRequestData = ref<BlockRequestData>({
     name: '',
     record_creation_columns: [],
@@ -69,11 +71,7 @@ export const useSlides = defineStore('slides', () => {
    * on the slide level
    */
   const slideHasData = computed(() => {
-    if (currentSlideData.value) {
-      return Object.keys(currentSlideData.value).length > 0
-    } else {
-      return false
-    }
+    return currentSlideData.value.length > 0
   })
 
   /**
@@ -104,31 +102,6 @@ export const useSlides = defineStore('slides', () => {
     return null
   })
 
-  /**
-   * The active sidebar component to use
-   * when navigating the SlideView
-   */
-  const activeSidebarComponent = computed(() => {
-    let component = 'default-slide-sidebar'
-
-    if (currentBlock.value) {
-      switch (currentBlock.value.component) {
-        case 'table-block':
-          component = 'table-sidebar'
-          break
-
-        case 'chart-block':
-          component = 'chart-sidebar'
-          break
-
-        default:
-          break
-      }
-    }
-
-    return component
-  })
-
   // function loadFromCache() {
   //   // TODO: When the user lands directly on /slide/2 for example
   //   // the session does not have "slides" or "connections" in the
@@ -157,14 +130,12 @@ export const useSlides = defineStore('slides', () => {
    * Sets currentSlide to the slide
    * matching the ID in slides
    *
-   * @param id
+   * @param slideId The ID of the slide to get
    */
-  function setCurrentSlide(id: string | number | null) {
-    // loadFromCache()
-
-    if (currentSlide.value && id) {
-      const cleanId = typeof id === 'string' ? parseInt(id) : id 
-      currentSlide.value = slides.value.find(x => x.id === cleanId)
+  function setCurrentSlide(slideId: string | null) {
+    if (slideId) {
+      currentSlide.value = slides.value.find(x => x.slide_id === slideId)
+      console.log('setCurrentSlide', currentSlide.value)
     }
   }
 
@@ -176,7 +147,10 @@ export const useSlides = defineStore('slides', () => {
    */
   function setCurrentSlideData(slideId: string | number | null, data: DataSourceDataApiResponse) {
     currentSlideData.value = data.results
-    // $session.create(slideId, data.results)
+
+    if (slideId) {
+      cachedSlidesData.value[slideId] = data.results
+    }
   }
 
   /**
@@ -219,8 +193,8 @@ export const useSlides = defineStore('slides', () => {
     slideHasData,
     blockHasData,
     dataToUse,
-    activeSidebarComponent,
-    // loadFromCache,
+    cachedSlidesData,
+
     setCurrentBlockRequestData,
     setCurrentSlide,
     setCurrentSlideData,

@@ -1,7 +1,13 @@
-import type { User } from "./user"
+import type { DefaultColumnTypes } from '../data'
+import type { User } from './user'
+
+export interface ColumnTypes {
+  name: string
+  column_type: DefaultColumnTypes
+}
 
 /**
- * Information on the data source 
+ * Information on the data source
  */
 export interface DataSource {
   id: number
@@ -11,13 +17,13 @@ export interface DataSource {
   google_sheet_url: string | null
   csv_based: boolean
   csv_file: string | null
-  columns: string[]
+  columns: ColumnTypes[]
   column_names: string[]
   created_on: string
 }
 
 /**
- * The actual data from the source e.g. rows 
+ * The actual data from the source e.g. rows
  */
 export type RowData = {
   [key: string]: string | number | boolean | null
@@ -25,12 +31,10 @@ export type RowData = {
 
 /**
  * The result that is received when the data from the
- * source is read and returned by the endpoint 
+ * source is read and returned by the endpoint
  */
 export interface DataSourceDataApiResponse {
   columns: string[]
   count: number
   results: RowData[]
 }
-
-

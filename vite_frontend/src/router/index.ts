@@ -15,7 +15,7 @@ const router = createRouter({
           component: async () => import('../pages/HomePage.vue')
         },
         {
-          path: 'slide/:id(\\d+)',
+          path: 'slide/:id',
           name: 'slide',
           component: async () => import('../pages/SlidePage.vue')
         }

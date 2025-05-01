@@ -1,11 +1,9 @@
 <template>
   <div class="list-group">
     <a v-for="slide in searchedSlides" :key="slide.id" href="#" class="list-group-item p-3 d-flex justify-content-between align-items-center" @click.prevent>
-      <router-link :to="{ name: 'slide', params: { id: slide.id } }">
-        {{ slide.name }}
+      <router-link :to="{ name: 'slide', params: { id: slide.slide_id } }">
+        {{ slide.name }} <span class="badge text-bg-primary">{{ slide.blocks.length }} blocks</span>
       </router-link>
-
-      {{ searchedSlides }}
 
       <!-- <v-menu>
         <template #activator="{ props }">
@@ -27,9 +25,9 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { useSlides } from 'src/stores/slides'
+import { useSlides } from '@/stores/slides'
 import { computed } from 'vue'
-import { api } from 'src/plugins'
+import { api } from '@/plugins'
 
 import type { Slide } from 'src/types'
 
