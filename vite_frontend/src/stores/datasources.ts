@@ -12,6 +12,8 @@ export const useDatasource = defineStore('datasources', () => {
    * Connections <-> Blocks
    */
   const connections = ref<DataSource[]>([])
+  // FIXME: If there are multiple sources then this
+  // could be a prolemn
   const currentConnection = ref<DataSource>()
 
   /**

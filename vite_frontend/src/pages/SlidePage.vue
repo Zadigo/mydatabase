@@ -18,61 +18,15 @@
       <section class="col-9">
         <div class="row">
           <!-- Header -->
-          <header id="block-selection" class="col-12">
-            <div class="card shadow-sm mb-5">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex justify-content-end w-100 gap-2">
-                    <button v-for="blockType in blockTypes" :key="blockType.name" type="button" class="btn btn-info shadow-none btn-rounded" rounded @click="handleAddBlock(blockType)">
-                      <IconBase :icon="`${blockType.icon}`" />
-                    </button>
-                  </div>
-
-                  <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-rounded btn-dark d-flex inline-flex ms-3 shadow-none align-items-center" rounded>
-                      <IconBase icon="fa-solid:eye" class="me-2" />
-                      Publish
-                    </button>
-
-                    <div v-if="currentSlide">
-                      <router-link :to="{ name: 'page_preview', params: { id: currentSlide.slide_id } }" elevation="0" color="info" rounded>
-                        <IconBase name="fa-solid:eye" class="me-2" />
-                        Preview
-                      </router-link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </header>
+          <PageHeader :block-types="blockTypes" />
 
           <!-- Blocks -->
           <section id="blocks" class="col-12">
             <div v-if="currentSlide && slidesStore.hasActiveBlocks">
-              <component :is="block.component" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" />
+              <component :is="getComponentPromise(block)" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" />
             </div>
 
-            <div v-else class="text-center text-body-tertiary">
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="card shadow-sm">
-                    <div class="card-body">
-                      <IconBase icon="fa-solid:home" class="fa-6x" />
-                      <p class="my-3">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Enim cupiditate aliquid vero fuga rem suscipit ducimus in
-                        exercitationem architecto, dolorem, sint libero quae hic quidem
-                        reiciendis rerum. Natus, voluptas aliquam!
-                      </p>
-
-                      <button type="button" class="btn btn-info btn-lg btn-rounded shadow-none" @click="showBlocksModal=true">
-                        Add your first block
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <NoBlock v-else @block-modal="showBlocksModal=true" />
           </section>
         </div>
       </section>
@@ -98,27 +52,25 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { useDatasourceComposable } from 'src/composables/datasource'
 import { api } from 'src/plugins'
 import { useDatasource } from 'src/stores/datasources'
 import { useSlides } from 'src/stores/slides'
-import { computed, onMounted, ref, type Component } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, type Component } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { type DeafaultComponentTypes } from 'src/data'
-import type { BlockItem, DataSource, DataSourceDataApiResponse, ExtendedRouteParamsGeneric } from 'src/types'
-import { useDatasourceComposable } from '@/composables/datasource'
+import type { BlockItem, BlockType, DataSource, DataSourceDataApiResponse, ExtendedRouteParamsGeneric } from 'src/types'
+
+import PageHeader from 'src/components/slide/PageHeader.vue'
+import NoBlock from 'src/components/slide/blocks/NoBlock.vue'
+
+const AsyncTableBlock = defineAsyncComponent({
+  loader: () => import('@/components/slide/blocks/TableBlock.vue')
+})
 
 // import DefaultSlideSidebar from 'src/components/sidebar/DefaultSlideSidebar.vue'
 
 type BlockSelection = Record<string, boolean>
-
-type BlockType = {
-  name: string
-  component: Component | (() => Promise<{ default: Component }>)
-  // sidebar: Component | (() => Promise<{ default: Component }>)
-  shortname: DeafaultComponentTypes
-  icon: string
-}
 
 const { id: slideId } = useRoute().params as ExtendedRouteParamsGeneric
 
@@ -136,7 +88,7 @@ const blockSelections = ref<BlockSelection>({})
 const blockTypes: BlockType[] = [
   {
     name: 'Table',
-    component: () => import('@/components/slide/blocks/TableBlock.vue'),
+    component: AsyncTableBlock,
     shortname: 'table-block',
     icon: 'fa-solid:table'
   },
@@ -190,27 +142,6 @@ console.log('activeSidebarComponent', activeSidebarComponent.value)
 /**
  * TODO:
  */
-async function handleAddBlock(blockType: BlockType) {
-  // Creates a new block for the slide
-  try {
-    const path = `/api/v1/sheets/pages/${pageStore.currentPage.page_id}/blocks/create`
-    const response = await api.post(path, {
-      name: null,
-      component: blockType.component,
-      conditions: { filters: [] }
-    })
-
-    currentPage.blocks.push(response.data)
-    this.$session.create('pages', this.pageStore.pages)
-    this.showBlocksModal = false
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-/**
- * TODO:
- */
 // async function handleUpdateSlide() {
 //   Changes the source for the given page
 //   try {
@@ -225,6 +156,16 @@ async function handleAddBlock(blockType: BlockType) {
 //     console.log(e)
 //   }
 // }
+
+function getComponentPromise(block: BlockItem) {
+  const result = blockTypes.find(x => x.shortname === block.component)
+
+  if (result) {
+    return result.component
+  } else {
+    return result
+  }
+}
 
 /**
  * TODO:

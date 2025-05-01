@@ -2,27 +2,30 @@
   <div :id="`table-block-${blockDetails.block_id}`" :class="{ 'border border-info': isSelected }" class="card shadow-sm" @click="handleBlockSelection">
     <div class="card-header">
       <div class="d-flex justify-content-between align-items-center">
-        <button v-if="blockDetails.allow_record_search" elevation="0" class="btn btn-primary" @click="showSearchRecordsModal=true">
-          <IconBase name="'fas-solid:search" class="me-2" />
+        <button v-if="blockDetails.allow_record_search" class="btn btn-primary btn-sm shadow-none btn-rounded" @click="showSearchRecordsModal=true">
+          <IconBase icon="fa-solid:search" class="me-2" />
           Columns for search
         </button>
 
         <div class="right-actions">
-          <button id="cta-user-filters" class="me-2 btn btn-primary btn-sm" rounded @click.prevent>
-            <IconBase name="'fas-solid:filter" class="me-2" />
+          <button id="cta-user-filters" class="me-2 btn btn-primary btn-sm shadow-none btn-rounded" rounded @click.prevent>
+            <IconBase icon="fa-solid:filter" class="me-2" />
             User filters
           </button>
 
-          <button v-if="blockDetails.allow_record_creation" id="cta-create-record" class="btn btn-primary btn-sm" rounded @click="showCreateRecordModal=true">
-            <IconBase name="'fas-solid:plus" class="me-2" />
+          <button v-if="blockDetails.allow_record_creation" id="cta-create-record" class="btn btn-primary btn-sm shadow-none btn-rounded" rounded @click="showCreateRecordModal=true">
+            <IconBase icon="fa-solid:plus" class="me-2" />
             Columns for creation
           </button>
         </div>
       </div>
     </div>
 
-    <div v-if="slidesStore.blockHasData || slidesStore.slideHasData" class="card-body">
-      <v-table fixed-header>
+    <div v-if="hasData" class="card-body">
+      {{ cachedData }}
+      {{ results }}
+
+      <!-- <v-table fixed-header>
         <thead>
           <tr>
             <th v-for="column in blockDetails.visible_columns" :key="column.name" class="text-left">
@@ -42,7 +45,7 @@
             </tr>
           </template>
         </tbody>
-      </v-table>
+      </v-table> -->
     </div>
 
     <div v-else class="card-body">
@@ -50,7 +53,7 @@
     </div>
 
     <!-- Modals -->
-    <teleport to="body">
+    <!-- <teleport to="body">
       <v-dialog id="search-records-modal" v-model="showSearchRecordsModal" width="400">
         <v-card title="Select columns">
           <v-card-text v-if="currentConnection">
@@ -68,16 +71,16 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </teleport>
+    </teleport> -->
 
-    <teleport to="body">
+    <!-- <teleport to="body">
       <v-dialog v-model="showCreateRecordModal" width="400">
         <v-card title="Select columns">
           <v-card-text>
             <p>Allow the creation for a new record for the specified columns</p>
 
             <div class="row">
-              <!-- <div v-for="column in blockDetails.record_creation_columns" :key="column" class="col-12">
+              <div v-for="column in blockDetails.record_creation_columns" :key="column" class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                   <span>{{ column }}</span>
                   <button-toggle color="warning" multiple>
@@ -85,10 +88,10 @@
                     <button value="update">Update</button>
                   </button-toggle>
                 </div>
-              </div> -->
+              </div>
             </div>
 
-            <!-- <v-switch v-for="column in blockDetails.record_creation_columns" :key="column" :label="column" inset hide-details /> -->
+            <v-switch v-for="column in blockDetails.record_creation_columns" :key="column" :label="column" inset hide-details />
           </v-card-text>
 
           <v-card-actions>
@@ -97,9 +100,9 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </teleport>
+    </teleport> -->
 
-    <teleport to="body">
+    <!-- <teleport to="body">
       <v-dialog id="column-update-modal" v-model="showColumnActionsModal" width="500">
         <v-card>
           <v-card-text>
@@ -122,20 +125,20 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </teleport>
+    </teleport> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBlocksComposable } from 'src/composables/blocks'
+import { useDatasourceComposable } from 'src/composables/datasource'
 import { DefaultColumnTypes, DefaultSortingChoices } from 'src/data'
 import { api } from 'src/plugins'
-import { useDatasource } from 'src/stores/datasources'
 import { useSlides } from 'src/stores/slides'
-import { onBeforeMount, PropType, ref } from 'vue'
+import { onBeforeMount, onMounted, PropType, ref } from 'vue'
 
-import type { BlockItem, ColumnTypes, DataSource, VisibleColumns } from 'src/types'
+import type { BlockItem, DataSource, VisibleColumns } from 'src/types'
 
 import NoSheetAlert from '../NoSheetAlert.vue'
 
@@ -166,16 +169,13 @@ const emit = defineEmits({
   }
 })
 
-const { columnTypeChoices, columnSortingChoices } = useBlocksComposable()
-const slidesStore = useSlides()
+const { getDatasourceData } = useDatasourceComposable()
+const { cachedData, hasData, results } = useBlocksComposable()
 
+const slidesStore = useSlides()
 const { currentSlide, blockRequestData, currentBlock } = storeToRefs(slidesStore)
 
-const datasourceStore = useDatasource()
-const { currentConnection } = storeToRefs(datasourceStore)
-
 const columnsRequestData = ref<Record<string, ColumRequestData>>({})
-
 const blockDatasource = ref<DataSource>()
 const showCreateRecordModal = ref<boolean>(false)
 const showSearchRecordsModal = ref<boolean>(false)
@@ -235,5 +235,12 @@ function handleBlockSelection() {
 
 onBeforeMount(() => {
   blockDatasource.value = props.blockDetails.block_data_source || currentSlide.value?.slide_data_source
+})
+
+onMounted(async () => {
+  blockDatasource.value = props.blockDetails.block_data_source || currentSlide.value?.slide_data_source
+  await getDatasourceData(blockDatasource.value.data_source_id, (data) => {
+    cachedData.value = data
+  })
 })
 </script>

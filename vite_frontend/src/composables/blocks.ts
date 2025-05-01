@@ -1,8 +1,17 @@
-import { type DefaultColumnTypes, defaultColumnTypes, type DefaultSortingChoices, defaultSortingChoices } from 'src/data'
 import { computed, ref } from 'vue'
+import { type DefaultColumnTypes, defaultColumnTypes, type DefaultSortingChoices, defaultSortingChoices } from '../data'
+import type { DataSourceDataApiResponse } from '../types'
 
-export function useBlocksComposable () {
-  const selected = ref<boolean>(false)
+export function useBlocksComposable() {
+  const cachedData = ref<DataSourceDataApiResponse>()
+
+  const results = computed(() => {
+    if (cachedData.value) {
+      return cachedData.value.results
+    } else {
+      return []
+    }
+  })
 
   const columnSortingChoices = computed((): DefaultSortingChoices[] => {
     return [...defaultSortingChoices]
@@ -12,21 +21,15 @@ export function useBlocksComposable () {
     return [...defaultColumnTypes]
   })
 
-  /**
-   * Highlights the block when the user 
-   * has clicked on the card
-   */
-  function handleBlockSelection(details) {
-    selected.value = !selected.value
-    // if (instance) {
-    //   instance.emit('block-selected', details)
-    // }
-  }
+  const hasData = computed(() => {
+    return results.value.length > 0
+  })
 
   return {
-    selected,
+    hasData,
+    results,
+    cachedData,
     columnTypeChoices,
     columnSortingChoices,
-    handleBlockSelection
   }
 }

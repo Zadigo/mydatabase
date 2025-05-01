@@ -1,7 +1,7 @@
 import { api } from '../plugins'
 
 import type { AxiosResponse } from 'axios'
-import type { DataSource } from '../types'
+import type { DataSource, DataSourceDataApiResponse } from '../types'
 
 function runCallback<T extends AxiosResponse<DataSource | DataSource[]>, U extends DataSource | DataSource[]>(func: (data: U) => void, response: T) {
   if (typeof func === 'function') {
@@ -32,32 +32,25 @@ export function useDatasourceComposable() {
   }
 
   /**
-   * Returns the data for a specific given
-   * sheet using the 'sheet_id'
-   * FIXME: Response is rouw data ????
+   * Returns the underlying data for a specific given
+   * datasource ID
+   *
    * @param id The ID of the datasource
    * @param callback Callback function with the actual data
    */
-  async function getSheetData(id: string, callback: (data: DataSource) => void) {
+  async function getDatasourceData(datasourceId: string, callback: (data: DataSourceDataApiResponse) => void) {
     try {
-      const response = await api.get<DataSource>(`/api/v1/datasources/${id}`)
-      runCallback(callback, response)
+      if (datasourceId) {
+        const response = await api.get<DataSourceDataApiResponse>(`/api/v1/datasources/${datasourceId}`)
+        callback(response.data)
+      }
     } catch (e) {
       console.log(e)
     }
   }
 
-  /**
-   * @param id
-   */
-  async function getBlockData(id: string) {
-    // pass
-    return id
-  }
-
   return {
-    getBlockData,
     getConnections,
-    getSheetData
+    getDatasourceData
   }
 }
