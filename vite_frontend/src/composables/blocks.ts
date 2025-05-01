@@ -3,6 +3,10 @@ import { type DefaultColumnTypes, defaultColumnTypes, type DefaultSortingChoices
 import type { DataSourceDataApiResponse } from '../types'
 
 export function useBlocksComposable() {
+  /**
+   * The current cached data for the
+   * the given block
+   */
   const cachedData = ref<DataSourceDataApiResponse>()
 
   const results = computed(() => {
@@ -30,6 +34,6 @@ export function useBlocksComposable() {
     results,
     cachedData,
     columnTypeChoices,
-    columnSortingChoices,
+    columnSortingChoices
   }
 }

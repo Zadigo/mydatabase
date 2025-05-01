@@ -27,9 +27,13 @@ export const defaultUnions = [
 ] as const 
 
 export const defaultSortingChoices = [
-  'No sort', 
-  'Ascending', 
+  'No sort',
+  'Ascending',
   'Descending'
+] as const
+
+export const defaultInputTypes = [
+  'Input'
 ] as const
 
 export type DefaultOperators = (typeof defaultOperators)[number]
@@ -39,3 +43,5 @@ export type DefaultColumnInputs = (typeof defaultColumnInputs)[number]
 export type DefaultUnions = (typeof defaultUnions)[number]
 
 export type DefaultSortingChoices = (typeof defaultSortingChoices)[number]
+
+export type DefaultInputTypes = (typeof defaultInputTypes)[number]

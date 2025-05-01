@@ -52,9 +52,9 @@
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { useDatasourceComposable } from 'src/composables/datasource'
 import { api } from 'src/plugins'
 import { useDatasource } from 'src/stores/datasources'
+import { useEditing } from 'src/stores/editing'
 import { useSlides } from 'src/stores/slides'
 import { computed, defineAsyncComponent, onMounted, ref, type Component } from 'vue'
 import { useRoute } from 'vue-router'
@@ -63,24 +63,27 @@ import type { BlockItem, BlockType, DataSource, DataSourceDataApiResponse, Exten
 
 import PageHeader from 'src/components/slide/PageHeader.vue'
 import NoBlock from 'src/components/slide/blocks/NoBlock.vue'
-
-const AsyncTableBlock = defineAsyncComponent({
-  loader: () => import('@/components/slide/blocks/TableBlock.vue')
-})
+import DefaultSlideSidebar from 'src/components/slide/sidebars/DefaultSlideSidebar.vue'
+import TableSidebar from 'src/components/slide/sidebars/TableSidebar.vue'
 
 // import DefaultSlideSidebar from 'src/components/sidebar/DefaultSlideSidebar.vue'
 
 type BlockSelection = Record<string, boolean>
 
-const { id: slideId } = useRoute().params as ExtendedRouteParamsGeneric
+const AsyncTableBlock = defineAsyncComponent({
+  loader: () => import('@/components/slide/blocks/TableBlock.vue')
+})
 
+const { id: slideId } = useRoute().params as ExtendedRouteParamsGeneric
 const cachedDatasources = useStorage<DataSource[]>('dataSources', [])
 
-const slidesStore = useSlides()
-const { currentSlide, currentBlock } = storeToRefs(slidesStore)
-
 const datasourceStore = useDatasource()
-const { getConnections } = useDatasourceComposable()
+
+const editingStore = useEditing()
+const { currentBlockToEdit } = storeToRefs(editingStore)
+
+const slidesStore = useSlides()
+const { currentSlide } = storeToRefs(slidesStore)
 
 const showBlocksModal = ref<boolean>(false)
 const blockSelections = ref<BlockSelection>({})
@@ -117,16 +120,16 @@ const blockTypes: BlockType[] = [
  * when navigating the SlideView
  */
 const activeSidebarComponent = computed(() => {
-  let component: Component | (() => Promise<{ default: Component }>) = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+  let component: Component = DefaultSlideSidebar
 
-  if (currentBlock.value) {
-    switch (currentBlock.value.component) {
+  if (currentBlockToEdit.value) {
+    switch (currentBlockToEdit.value.component) {
       case 'table-block':
-        component = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+        component = TableSidebar
         break
 
       case 'chart-block':
-        component = () => import('src/components/slide/sidebars/DefaultSlideSidebar.vue')
+        component = DefaultSlideSidebar
         break
 
       default:
@@ -145,7 +148,7 @@ console.log('activeSidebarComponent', activeSidebarComponent.value)
 // async function handleUpdateSlide() {
 //   Changes the source for the given page
 //   try {
-//     const path = `slides/${this.currentSlide.slide_id}/blocks/${this.currentBlock.block_id}/update`
+//     const path = `slides/${this.currentSlide.slide_id}/blocks/${this.currentBlockToEdit.block_id}/update`
 //     // this.blockRequestData.block_data_source = blockId
 //     const response = await this.$http.post(path, this.pageRequestData)
 //     this.currentSlide = response.data
@@ -174,6 +177,7 @@ function getComponentPromise(block: BlockItem) {
 
 /**
  * Gets the data for the current slide
+ * TODELETE:
  */
 async function getSlideData() {
   try {
@@ -201,37 +205,37 @@ function handleBlockSelection(blockDetails: BlockItem) {
   const state = blockSelections.value[blockDetails.block_id]
   blockSelections.value[blockDetails.block_id] = !state
 
-  // Overall, if a block is selected, then set the currentBlock
-  // to be the one that is being selected otherwise, it should
+  // Overall, if a block is selected, then set the currentBlockToEdit
+  // to be JUST the one that is being selected otherwise, it should
   // just be an empty object
   const hasSelection = Object.values(blockSelections.value).some(x => x)
   if (hasSelection) {
-    currentBlock.value = blockDetails
+    currentBlockToEdit.value = blockDetails
   } else {
-    currentBlock.value = undefined
+    currentBlockToEdit.value = undefined
   }
-  slidesStore.setCurrentBlockRequestData()
+  editingStore.setCurrentBlockRequestData()
 }
 
 /**
- *
+ * Returns the selection state for the given block
  */
 function checkIsSelected(blockDetails: BlockItem) {
-  // Returns the selection state for the given block
   return blockSelections.value[blockDetails.block_id]
 }
 
 slidesStore.setCurrentSlide(slideId)
 
 onMounted(async () => {
-  await getSlideData()
-  datasourceStore.setCurrentDatasource(currentSlide.value)
-
   if (cachedDatasources.value.length === 0) {
-    await getConnections((data) => {
+    await datasourceStore.getConnections((data) => {
       cachedDatasources.value = data
     })
   }
+
+  await getSlideData()
+  editingStore.setActiveDatasource(null, currentSlide.value)
+  editingStore.slideDataSourceToEdit = currentSlide.value?.slide_data_source
 
   if (currentSlide.value) {
     // Container that manages the selection state

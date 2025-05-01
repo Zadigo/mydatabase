@@ -1,7 +1,8 @@
 <template>
   <div id="inner-sidebar" class="my-1">
-    <input v-model="blockRequestData.name" variant="outlined" elevation="0" placeholder="Slide name" />
-    <v-select id="sheet-selection" v-model="blockRequestData.slide_data_source" :items="connections" item-title="name" item-value="sheet_id" placeholder="Select sheet" variant="outlined" hide-details @update:model-value="handleChangePageSource" />
+    <input v-model="blockRequestData.name" class="form-control" placeholder="Slide name">
+    <!-- @update:model-value="handleChangePageSource" -->
+    <v-select id="sheet-selection" v-model="blockRequestData.slide_data_source" :items="connections" item-title="name" item-value="sheet_id" placeholder="Select sheet" variant="outlined" hide-details />
 
     <!-- Columns -->
     <div class="mt-5">
@@ -9,8 +10,8 @@
         Columns
       </h2>
 
-      <div v-if="currentConnection" class="list-group">
-        <div v-for="column in currentConnection.columns" :key="column.name" class="list-group-item list-group-item-action p-3 d-block">
+      <div v-if="slideDataSourceToEdit" class="list-group">
+        <div v-for="column in slideDataSourceToEdit.columns" :key="column.name" class="list-group-item list-group-item-action p-3 d-block">
           <span class="fw-bold">
             {{ column }}
           </span>
@@ -28,7 +29,7 @@
       </div>
     </div>
 
-    <button type="button" class="mt-3 btn btn-dark btn-rounded btn-block">
+    <button type="button" class="mt-3 btn btn-danger btn-rounded btn-block shadow-none">
       Delete
     </button>
 
@@ -46,21 +47,22 @@
 </template>
 
 <script setup lang="ts">
-import { defaultColumnTypes } from 'src/data'
 import { storeToRefs } from 'pinia'
+import { defaultColumnTypes } from 'src/data'
 import { useDatasource } from 'src/stores/datasources'
+import { useEditing } from 'src/stores/editing'
 import { useSlides } from 'src/stores/slides'
+import { ColumnTypes } from 'src/types'
 import { onBeforeMount, ref } from 'vue'
-import { ColumnTypes } from '@/types'
-// import { toRef } from '@vueuse/core'
 
-// import SheetSelection from '../SheetSelection.vue'
+const editingStore = useEditing()
+const { blockRequestData, slideDataSourceToEdit } = storeToRefs(editingStore)
 
 const slidesStore = useSlides()
-const { currentSlide, blockRequestData } = storeToRefs(slidesStore)
+const { currentSlide } = storeToRefs(slidesStore)
 
 const datasourceStore = useDatasource()
-const { connections, currentConnection } = storeToRefs(datasourceStore)
+const { connections } = storeToRefs(datasourceStore)
 
 const showColumnSettingsModal = ref<boolean>(false)
 
@@ -117,7 +119,7 @@ function handleChangeColumnSetting(column: ColumnTypes) {
 onBeforeMount(() => {
   console.log('DefaultSlideSidebar mounted (2)')
   // TODO: This sometimes has "undefined"
-  console.log('current slide', this.currentSlide)
+  console.log('DefaultSlideSidebar', currentSlide.value)
 
   // TODO: We are not able to load pre-exising connections
   // from the cache - maybe pass the connections via props ?

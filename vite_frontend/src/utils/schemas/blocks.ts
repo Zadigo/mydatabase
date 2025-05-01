@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { defaultInputTypes, defaultOperators } from '../../data'
 
 export const BlockRequestDataSchema = z.object({
   name: z.string().nonempty(),
@@ -27,10 +28,14 @@ export const BlockRequestDataSchema = z.object({
     state: z.boolean()
   }).array(),
   conditions: z.object({
-    filters: z.string().array(),
+    filters: z.object({
+      column: z.string(),
+      operator: z.enum(defaultOperators),
+      input_type: z.enum(defaultInputTypes)
+    }).array(),
     groups: z.string().array()
   }),
-  active: z.boolean().default(false),
+  active: z.boolean().default(false)
 })
 
 export type BlockRequestData = z.infer<typeof BlockRequestDataSchema>

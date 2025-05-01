@@ -129,9 +129,8 @@ import { onBeforeMount, PropType, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getCurrentInstance } from 'vue'
 import { useSlides } from 'src/stores/slides'
-import { useConnections } from '@/stores/datasources'
+import { useDatasource } from 'src/stores/datasources'
 import { useBlocksComposable } from 'src/composables/blocks'
-import { useUtilities } from 'src/composables/utils'
 
 import NoSheetAlert from '../NoSheetAlert.vue'
 import type { BlockItem } from 'src/types'
@@ -165,13 +164,11 @@ const emit = defineEmits({
   }
 })
 
-const app = getCurrentInstance()
-const { listManager } = useUtilities()
 const { columnTypeChoices, columnSortingChoices } = useBlocksComposable()
 const slidesStore = useSlides()
 const { currentSlide, blockRequestData, currentBlock } = storeToRefs(slidesStore)
-const connectionsStore = useConnections()
-const { currentConnection } = storeToRefs(connectionsStore)
+
+const datasourceStore = useDatasource()
 
 const columnsRequestData = ref<Record<string, ColumRequestData>>({})
 
@@ -233,7 +230,8 @@ function handleBlockSelection() {
 }
 
 onBeforeMount(() => {
-  connectionsStore.loadFromCache()
-  connectionsStore.setCurrentConnection(props.blockDetails.block_data_source || this.currentSlide.slide_data_source)
+  datasourceStore.requestDatasourceData()
+  // connectionsStore.loadFromCache()
+  // connectionsStore.setCurrentConnection(props.blockDetails.block_data_source || this.currentSlide.slide_data_source)
 })
 </script>

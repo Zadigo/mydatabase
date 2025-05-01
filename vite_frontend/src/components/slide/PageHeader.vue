@@ -17,7 +17,7 @@
 
             <div v-if="currentSlide">
               <router-link :to="{ name: 'page_preview', params: { id: currentSlide.slide_id } }" class="btn btn-rounded btn-success d-flex inline-flex shadow-none align-items-center">
-                <IconBase icon="fa-solid:eye" class="me-2" />
+                <IconBase icon="fa-solid:external-link-alt" class="me-2" />
                 Preview
               </router-link>
             </div>

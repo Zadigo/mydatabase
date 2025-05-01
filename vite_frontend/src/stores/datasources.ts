@@ -1,7 +1,15 @@
+import type { AxiosResponse } from 'axios'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { api } from '../plugins'
 
-import type { DataSource, Slide } from '../types'
+import type { DataSource, DataSourceDataApiResponse } from '../types'
+
+function runCallback<T extends AxiosResponse<DataSource | DataSource[]>, U extends DataSource | DataSource[]>(response: T, func?: (data: U) => void) {
+  if (typeof func === 'function') {
+    func(response.data)
+  }
+}
 
 export const useDatasource = defineStore('datasources', () => {
   /**
@@ -12,9 +20,6 @@ export const useDatasource = defineStore('datasources', () => {
    * Connections <-> Blocks
    */
   const connections = ref<DataSource[]>([])
-  // FIXME: If there are multiple sources then this
-  // could be a prolemn
-  const currentConnection = ref<DataSource>()
 
   /**
    * Checks the array has connections
@@ -31,23 +36,45 @@ export const useDatasource = defineStore('datasources', () => {
   })
 
   /**
-   * Sets the current datasource for the
-   * current sheet ID
-   *
-   * @param sheetId
+  * Returns all the data sources that were
+  * linked to the app by the user. This does not
+  * return the underlying data but a description
+  * of the data that is linked to a component
+  *
+  * @param callback
+  */
+  async function getConnections(callback?: (data: DataSource[]) => void) {
+    try {
+      const response = await api.get<DataSource[]>('/api/v1/datasources')
+      connections.value = response.data
+      runCallback(response, callback)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  /**
+   * Function used to get the datasource for a slide
+   * or for a block
    */
-  function setCurrentDatasource(slide: Slide | undefined) {
-    if (slide) {
-      currentConnection.value = connections.value.find(x => x.data_source_id === slide.slide_data_source.data_source_id)
+  async function requestDatasourceData(dataSource: DataSource, callback?: (data: DataSourceDataApiResponse) => void) {
+    try {
+      const response = await api.get<DataSourceDataApiResponse>(`/api/v1/datasources/${dataSource.data_source_id}`)
+
+      if (callback) {
+        callback(response.data)
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
   return {
     connections,
-    currentConnection,
     connectionNames,
     hasActiveConnections,
 
-    setCurrentDatasource
+    getConnections,
+    requestDatasourceData
   }
 })

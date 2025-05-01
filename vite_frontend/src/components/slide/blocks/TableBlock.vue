@@ -132,9 +132,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBlocksComposable } from 'src/composables/blocks'
-import { useDatasourceComposable } from 'src/composables/datasource'
 import { DefaultColumnTypes, DefaultSortingChoices } from 'src/data'
 import { api } from 'src/plugins'
+import { useEditing } from 'src/stores/editing'
 import { useSlides } from 'src/stores/slides'
 import { onBeforeMount, onMounted, PropType, ref } from 'vue'
 
@@ -169,17 +169,20 @@ const emit = defineEmits({
   }
 })
 
-const { getDatasourceData } = useDatasourceComposable()
 const { cachedData, hasData, results } = useBlocksComposable()
 
-const slidesStore = useSlides()
-const { currentSlide, blockRequestData, currentBlock } = storeToRefs(slidesStore)
+const editingStore = useEditing()
+const { currentBlockToEdit, blockRequestData } = storeToRefs(editingStore)
 
-const columnsRequestData = ref<Record<string, ColumRequestData>>({})
-const blockDatasource = ref<DataSource>()
+const slidesStore = useSlides()
+const { currentSlide } = storeToRefs(slidesStore)
+
 const showCreateRecordModal = ref<boolean>(false)
 const showSearchRecordsModal = ref<boolean>(false)
 const showColumnActionsModal = ref<boolean>(false)
+
+const columnsRequestData = ref<Record<string, ColumRequestData>>({})
+const blockDatasource = ref<DataSource>()
 const currentUpdatedColumn = ref<ColumRequestData | null>(null)
 
 /**
@@ -188,14 +191,15 @@ const currentUpdatedColumn = ref<ColumRequestData | null>(null)
  */
 async function handleUpdateColumn() {
   try {
-    if (currentSlide.value) {
-      const path = `/api/v1/slides/${currentSlide.value.slide_id}/blocks/${currentBlock.block_id}/column/update`
+    if (currentSlide.value && currentBlockToEdit.value) {
+      const path = `/api/v1/slides/${currentSlide.value.slide_id}/blocks/${currentBlockToEdit.value.block_id}/column/update`
       const response = await api.post(path, columnsRequestData.value[currentUpdatedColumn.value.name])
 
-      currentBlock.visible_columns = response.data.visible_columns
-      currentBlock.search_columns = response.data.search_columns
-      currentBlock.record_update_columns = response.data.record_update_columns
-      currentBlock.record_creation_columns = response.data.record_creation_columns
+      currentBlockToEdit.visible_columns = response.data.visible_columns
+      currentBlockToEdit.search_columns = response.data.search_columns
+      currentBlockToEdit.record_update_columns = response.data.record_update_columns
+      currentBlockToEdit.record_creation_columns = response.data.record_creation_columns
+
       showColumnActionsModal.value = false
     }
   } catch (e) {
@@ -229,7 +233,7 @@ function handleShowColumnActionModal(column: VisibleColumns) {
  * has clicked on the card
  */
 function handleBlockSelection() {
-  slidesStore.setCurrentBlockRequestData()
+  editingStore.setCurrentBlockRequestData()
   emit('block-selected', props.blockDetails)
 }
 
@@ -239,7 +243,7 @@ onBeforeMount(() => {
 
 onMounted(async () => {
   blockDatasource.value = props.blockDetails.block_data_source || currentSlide.value?.slide_data_source
-  await getDatasourceData(blockDatasource.value.data_source_id, (data) => {
+  await editingStore.getDatasourceData(blockDatasource.value.data_source_id, (data) => {
     cachedData.value = data
   })
 })

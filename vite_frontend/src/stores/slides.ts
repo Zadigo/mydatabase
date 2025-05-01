@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed, type Component } from 'vue'
+import { ref, computed } from 'vue'
 
-import type { BlockItem, BlockItemData, DataSourceDataApiResponse, RowData, Sheet, Slide } from '../types'
-import type { BlockRequestData } from '../utils'
+import type { BlockItemData, DataSourceDataApiResponse, RowData, Slide } from '../types'
 
 export const useSlides = defineStore('slides', () => {
   const slides = ref<Slide[]>([])
@@ -10,30 +9,9 @@ export const useSlides = defineStore('slides', () => {
 
   const cachedSlidesData = ref<Record<string, RowData[]>>({})
   const currentSlideData = ref<RowData[]>([])
-  const currentSheet = ref<Sheet>()
 
   // Block level
-  const currentBlock = ref<BlockItem>()
   const currentBlockData = ref<BlockItemData>()
-
-  // TODO: Rename to slideRequestData
-  const blockRequestData = ref<BlockRequestData>({
-    name: '',
-    record_creation_columns: [],
-    record_update_columns: [],
-    allow_record_creation: true,
-    allow_record_search: true,
-    allow_record_update: true,
-    block_data_source: null,
-    search_columns: [],
-    user_filters: [],
-    visible_columns: [],
-    conditions: {
-      filters: [],
-      groups: []
-    },
-    active: true
-  })
 
   /**
    * Checks if user needs to click save either at the slide
@@ -41,18 +19,6 @@ export const useSlides = defineStore('slides', () => {
    */
   const requiresSave = computed(() => {
     return false
-  })
-
-  /**
-   * Checks if a block was selected in a slide
-   */
-  const blockSelected = computed(() => {
-    // Checks if a block was selected in a slide
-    if (currentBlock.value) {
-      return true
-    } else {
-      return false
-    }
   })
 
   /**
@@ -114,19 +80,6 @@ export const useSlides = defineStore('slides', () => {
   // }
 
   /**
-   * Set the current values for the
-   * in the requestData for the current
-   * selected block
-   */
-  function setCurrentBlockRequestData() {
-    if (blockSelected.value && currentBlock.value) {
-      Object.keys(blockRequestData.value).forEach((key) => {
-        blockRequestData.value[key] = currentBlock.value[key]
-      })
-    }
-  }
-
-  /**
    * Sets currentSlide to the slide
    * matching the ID in slides
    *
@@ -153,51 +106,19 @@ export const useSlides = defineStore('slides', () => {
     }
   }
 
-  /**
-   * Reset the modifications made
-   * to the blockRequestData
-   */
-  function resetBlockRequestData() {
-    // slideRequiresSave = false
-    // blockRequiresSave = false
-    blockRequestData.value = {
-      name: '',
-      record_creation_columns: [],
-      record_update_columns: [],
-      allow_record_creation: true,
-      allow_record_search: true,
-      allow_record_update: true,
-      block_data_source: null,
-      search_columns: [],
-      user_filters: [],
-      visible_columns: [],
-      conditions: {
-        filters: [],
-        groups: []
-      },
-      active: true
-    }
-  }
-
   return {
     slides,
     currentSlide,
     currentSlideData,
-    currentSheet,
-    currentBlock,
     currentBlockData,
-    blockRequestData,
     requiresSave,
-    blockSelected,
     hasActiveBlocks,
     slideHasData,
     blockHasData,
     dataToUse,
     cachedSlidesData,
 
-    setCurrentBlockRequestData,
     setCurrentSlide,
-    setCurrentSlideData,
-    resetBlockRequestData
+    setCurrentSlideData
   }
 })
