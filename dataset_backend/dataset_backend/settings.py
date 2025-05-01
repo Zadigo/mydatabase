@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+
 import dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,7 +22,7 @@ SECRET_KEY = 'django-insecure-(9xppl(j7)jb#nb108n^@phbqv5g*x4dp7ki)_py=5i11(=x^4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_spectacular',
     'django_extensions',
     'corsheaders',
     'slides',
@@ -143,18 +145,19 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 # CORS_ALLOWED_ORIGIN_REGEXES = [
-#     r'^https?\:\/\/localhost\:8080$',
-#     r'^https?\:\/\/localhost\:9000$'
+#     'http://localhost:5173',
 # ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',
-    'http://localhost:9000'
+    # 'http://localhost:8080',
+    # 'http://localhost:9000',
+    'http://localhost:5173',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8080',
-    'http://localhost:9000'
+    # 'http://localhost:8080',
+    # 'http://localhost:9000',
+    'http://localhost:5173',
 ]
 
 
@@ -246,4 +249,14 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': BASE_DIR / 'cache'
     }
+}
+
+
+# DRF
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }

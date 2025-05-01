@@ -3,18 +3,17 @@ import pathlib
 from typing import Generic, TypeVar
 
 import pandas
+from datasources import models as sheets_models
+from django.contrib.auth import get_user_model
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
-from rest_framework import generics
-from datasources import models as sheets_models
 from slides import models
+from datasources.models import DataSource
 from slides.api import serializers
-from django.contrib.auth import get_user_model
-from rest_framework import status
-
-S = TypeVar('S', bound='models.Slide')
 
 
 class ListSlides(generics.ListAPIView):
@@ -72,13 +71,13 @@ class CreateBlock(generics.CreateAPIView):
         return context
 
 
-class DeleteBlock(Generic[S], generics.DestroyAPIView):
+class DeleteBlock(generics.DestroyAPIView):
     queryset = models.Slide.objects.all()
     serializer_class = serializers.BlockSerializer
     lookup_field = 'slide_id'
     lookup_url_kwarg = 'slide_id'
 
-    def get_queryset(self) -> S:
+    def get_queryset(self) -> QuerySet[models.Slide]:
         qs = super().get_queryset()
         user = get_user_model().objects.first()
         return qs.filter(user=user)
@@ -137,7 +136,7 @@ def update_block_column(request, slide_id, block_id, **kwargs):
         slide__slide_id=slide_id,
         block_id=block_id
     )
-    sheet = models.DataSource.objects.get(data_source_id=block.data_source)
+    sheet = DataSource.objects.get(data_source_id=block.data_source)
 
     serializer = serializers.UpdateBlockColumnForm(
         data=request.data,
