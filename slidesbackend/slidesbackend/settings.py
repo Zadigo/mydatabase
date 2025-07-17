@@ -43,7 +43,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'my_database.urls'
+ROOT_URLCONF = 'slidesbackend.urls'
 
 TEMPLATES = [
     {
@@ -61,7 +61,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'my_database.wsgi.application'
+WSGI_APPLICATION = 'slidesbackend.wsgi.application'
 
 
 # Database

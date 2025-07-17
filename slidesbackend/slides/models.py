@@ -4,7 +4,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from my_database.validators import validate_id
+from slidesbackend.validators import validate_id
 from sheets.models import Sheet
 from sheets.utils import create_id
 from slides.choices import AccessChoices, ComponentTypes
