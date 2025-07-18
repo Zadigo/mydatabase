@@ -5,19 +5,19 @@
         <template #body>
           <div class="flex justify-between items-center">
             <div class="flex justify-start gap-2">
-              <NuxtButton v-for="blockType in blockTypes" :key="blockType.name" @click="handleAddBlock(blockType)">
+              <NuxtButton v-for="blockType in blockTypes" :key="blockType.name" @click="create(blockType)">
                 <Icon :name="blockType.icon" />
               </NuxtButton>
             </div>
             
             <div class="flex justify-end gap-2">
               <NuxtButton>
-                <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
+                <Icon name="i-fa-solid:eye" />
                 Publish
               </NuxtButton>
 
-              <NuxtButton :to="{ name: 'page_preview_view', params: { id: currentSlide.slide_id } }">
-                <font-awesome-icon :icon="['fas', 'eye']" class="me-2" />
+              <NuxtButton v-if="activeSlide" :to="`/preview/${activeSlide.slide_id}`">
+                <Icon name="i-fa-solid:eye" />
                 Preview
               </NuxtButton>
             </div>
@@ -27,19 +27,35 @@
     </header>
 
     <section id="blocks" class="mt-5">
+      {{ activeSlide }} {{ hasBlocks }} {{ blocks }}
       <div v-if="hasBlocks">
-        Blocks here
-        <!-- <component :is="block.component" v-for="(block, i) in currentSlide.blocks" :key="block.block_id" :class="{ 'mb-2': i >= 0 }" :block-details="block" :is-selected="checkIsSelected(block)" @block-selected="handleBlockSelection" /> -->
+        <component :is="dynamicComponents[block.component]" v-for="block in blocks" :key="block.block_id" :block-details="block" :is-selected="() => {}" @block-selected="() => {}" />
       </div>
 
-      <BlocksEmpty v-else />
+      <BlocksEmpty v-else @show:add-blocks-modal="showCreateModal=true" />
     </section>
+
+    <!-- Modals -->
+    <ModalsBlocksCreate v-model="showCreateModal" />
   </section>
 </template>
 
 <script setup lang="ts">
-import { useBlock } from '~/composables/blocks'
+import { useBlocks } from '~/composables/blocks'
+import { useGetSlideData } from '~/composables/slides'
 import { blockTypes } from '~/data/constants'
 
-const { blocks, getBlocks, hasBlocks } = useBlock()
+definePageMeta({
+  layout: 'dashboard',
+  title: 'Slide Editor',
+})
+
+const sheetsStore = useSheetsStore()
+const { activeSlideSheets, hasSheets, searched, activeSlide } = storeToRefs(sheetsStore)
+
+
+
+const { blocks, hasBlocks, showCreateModal, create, dynamicComponents } = useBlocks()
+
+const { activeData } = useGetSlideData()
 </script>

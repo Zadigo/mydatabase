@@ -1,23 +1,29 @@
-export const blockTypes = [
+export interface BlockType {
+  name: string
+  component: string
+  icon: string
+}
+
+export const blockTypes: BlockType[] = [
   {
     name: 'Table',
     component: 'table-block',
-    icon: 'table'
+    icon: 'i-fa-solid:table'
   },
   {
     name: 'Calendar',
     component: 'calendar-block',
-    icon: 'calendar'
+    icon: 'i-fa-solid:calendar'
   },
   {
     name: 'Chart',
     component: 'chart-block',
-    icon: 'chart-simple'
+    icon: 'i-fa-solid:chart-area'
   },
   {
     name: 'Grid',
     component: 'grid-by-two-block',
-    icon: 'table-cells-large'
+    icon: 'i-fa6-solid:table-cells-large'
   }
 ] as const
 

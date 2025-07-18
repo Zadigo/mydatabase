@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
 from rest_framework import fields
 from rest_framework.serializers import Serializer
-
-from sheets.models import USER_MODEL, Sheet
+from django.contrib.auth import get_user_model
+from sheets.models import  Sheet
 
 
 class UploadSheetForm(Serializer):
@@ -27,7 +27,7 @@ class UploadSheetForm(Serializer):
 
     def create(self, validated_data):
         data = {}
-        user = get_object_or_404(USER_MODEL, pk=1)
+        user = get_object_or_404(get_user_model(), pk=1)
 
         endpoint_url = validated_data.get('endpoint_url')
         if endpoint_url:

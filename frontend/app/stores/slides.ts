@@ -1,10 +1,12 @@
+import { slidesFixture } from '~/data/fixtures'
+
 import type { Slide } from '~/types'
 
 export const useSlideStore = defineStore('slides', () => {
   /**
    * Slides
    */
-  
+
   const slides = ref<Slide[]>([])
   const search = ref<string>('')
   
@@ -20,13 +22,7 @@ export const useSlideStore = defineStore('slides', () => {
 
   async function getSlides() {
     // Simulate fetching slides from an API or database
-    slides.value = [
-      { id: 1, name: 'Introduction to Vue.js' },
-      { id: 2, name: 'Advanced Vue.js Techniques' },
-      { id: 3, name: 'State Management with Vuex' },
-      { id: 4, name: 'Building Reusable Components' },
-      { id: 5, name: 'Vue Router Basics' }
-    ]
+    slides.value = slidesFixture
   }
 
   /**
@@ -34,9 +30,12 @@ export const useSlideStore = defineStore('slides', () => {
    */
 
   const { id } = useRoute().params as { id: string }
+
+  console.log(id)
+  
   const activeSlide = computed(() => {
     if (id) {
-      return slides.value.find(slide => slide.id.toString() === id) || null
+      return slides.value.find(slide => slide.slide_id.toString() === id) || null
     } else {
       return null
     }

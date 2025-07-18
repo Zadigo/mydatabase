@@ -6,11 +6,8 @@ from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-
 from sheets.utils import create_file_name, create_id
 from sheets.validators import validate_id
-
-USER_MODEL = get_user_model()
 
 
 class Webhook(models.Model):
@@ -55,7 +52,10 @@ class Sheet(models.Model):
     by creating a csv file via an API endpoint or
     by linking to a Google spreadsheet"""
 
-    user = models.ForeignKey(USER_MODEL, models.CASCADE)
+    user = models.ForeignKey(
+        get_user_model(),
+        models.CASCADE
+    )
     name = models.CharField(
         max_length=100,
         blank=True,
@@ -104,7 +104,9 @@ class Sheet(models.Model):
         blank=True,
         null=True
     )
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f'Sheet: {self.sheet_id}'
