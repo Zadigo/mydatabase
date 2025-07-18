@@ -1,8 +1,10 @@
+import type { BlockTypeNames } from '~/data/constants'
+
 export interface Block {
   id: number
   name: string | null
   block_id: string
-  component: string
+  component: BlockTypeNames
   record_creation_columns: string[] | null
   record_update_columns: string[] | null
   visible_columns: string[] | null

@@ -29,17 +29,18 @@ export const useSlideStore = defineStore('slides', () => {
    * Current slide
    */
 
-  const { id } = useRoute().params as { id: string }
+  // const { id } = useRoute().params as { id: string }
 
-  console.log(id)
+  // console.log(id)
   
-  const activeSlide = computed(() => {
-    if (id) {
-      return slides.value.find(slide => slide.slide_id.toString() === id) || null
-    } else {
-      return null
-    }
-  })
+  // const activeSlide = computed(() => {
+  //   if (id) {
+  //     return slides.value.find(slide => slide.slide_id.toString() === id) || null
+  //   } else {
+  //     return null
+  //   }
+  // })
+  const activeSlide = ref<Slide | null>(null)
 
   return {
     slides,

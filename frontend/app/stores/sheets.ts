@@ -14,7 +14,6 @@ export const useSheetsStore = defineStore('sheets', () => {
   })
 
   return {
-    activeSlide,
     /**
      * Returns the sheets or data sources that are
      * currently linked to the current slide

@@ -1,9 +1,3 @@
-export interface BlockType {
-  name: string
-  component: string
-  icon: string
-}
-
 export const blockTypes: BlockType[] = [
   {
     name: 'Table',
@@ -30,3 +24,9 @@ export const blockTypes: BlockType[] = [
 export type BlockTypeNames = (typeof blockTypes)[number]['name']
 
 export type BlockTypeComponents = (typeof blockTypes)[number]['component']
+
+export interface BlockType {
+  name: string
+  component: BlockTypeNames
+  icon: string
+}
