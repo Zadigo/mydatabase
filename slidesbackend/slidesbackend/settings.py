@@ -1,17 +1,28 @@
+import os
+import dotenv
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+if BASE_DIR.joinpath('.env').exists():
+    dotenv.load_dotenv(BASE_DIR / '.env')
+
+
+def get_debug():
+    debug = os.getenv('DEBUG', '1')
+    return True if debug == '1' else False
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(9xppl(j7)jb#nb108n^@phbqv5g*x4dp7ki)_py=5i11(=x^4'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_debug()
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -25,8 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'django_extensions',
+    'django_celery_beat',
+
     'corsheaders',
+    'rest_framework',
+    'import_export',
+    'storages',
+    'rest_framework.authtoken',
+    'drf_spectacular',
+
     'slides',
     'connections',
     'sheets'
@@ -69,8 +89,12 @@ WSGI_APPLICATION = 'slidesbackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
 
@@ -128,7 +152,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 INTERNAL_IPS = ['127.0.0.1']
 
 
-# Cors
+# CORS
+# https://github.com/adamchainz/django-cors-headers
 
 CORS_ALLOW_ALL_ORIGINS = False
 
@@ -151,7 +176,92 @@ CSRF_TRUSTED_ORIGINS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1440),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+    'UPDATE_LAST_LOGIN': True,
+    'AUTH_HEADER_TYPES': ['Token']
+}
+
+
+# Celery + Redis
+# https://docs.celeryq.dev/en/stable/
+
+# Redis default user requires a default
+# password to establish the connection:
+# https://github.com/redis/redis/issues/13437
+
+REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
+
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+
+REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379'
+
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
+
+RABBITMQ_USER = os.getenv('RABBITMQ_DEFAULT_USER', 'guest')
+
+RABBITMQ_PASSWORD = os.getenv('RABBITMQ_DEFAULT_PASS', 'guest')
+
+CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:5672'
+
+CELERY_RESULT_BACKEND = REDIS_URL
+
+CELERY_ACCEPT_CONTENT = ['json']
+
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TIMEZONE = 'Europe/Oslo'
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+
+# Caching
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
+        'KEY_PREFIX': 'ecommerce'
+    },
+    'file': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': BASE_DIR / 'cache'
+    }
+}
+
+
+# Emailing
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+EMAIL_USE_TLS = True
+
+EMAIL_PORT = 587
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+
+# Sites
+
+SITE_ID = 1
+
+
+# Fixtures
+
+FIXTURES_DIRS = []

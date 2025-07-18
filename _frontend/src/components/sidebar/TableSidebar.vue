@@ -69,7 +69,7 @@ import { useColumnFilters } from '@/composables/page'
 import { useSheetsComposable } from '@/composables/page'
 import { useConnections } from '@/store/connections'
 
-import ActiveFilter from '../../components/filters/ActiveFilter.vue'
+import ActiveFilter from '../filters/ActiveFilter.vue'
 import SimpleFilter from './filters/SimpleFilter.vue'
 import UnionFilter from './filters/UnionFilter.vue'
 
