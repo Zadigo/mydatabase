@@ -1,6 +1,6 @@
 <template>
-  <section id="settings">
-    Settings
+  <section id="integrations">
+    Integrations
   </section>
 </template>
 

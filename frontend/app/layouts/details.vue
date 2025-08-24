@@ -12,17 +12,25 @@
 <script setup lang="ts">
 const items = [
   {
-    name: 'Projects',
+    name: 'Overview',
     to: '/databases',
     icon: 'i-fa7-regular:home'
   },
   {
-    name: 'Integrations',
+    name: 'Table editor',
     to: '/integrations',
-    icon: 'i-fa7-solid:plug'
+    icon: 'i-fa7-solid:table'
   },
   {
-    name: 'Organization settings',
+    separator: true
+  },
+  {
+    name: 'Database',
+    to: '/integrations',
+    icon: 'i-fa7-solid:database'
+  },
+  {
+    name: 'Project settings',
     to: '/settings',
     icon: 'i-fa7-solid:cog'
   }

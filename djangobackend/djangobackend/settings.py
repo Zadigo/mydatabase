@@ -229,3 +229,12 @@ CHANNEL_LAYERS = {
         }
     }
 }
+
+
+# Fixtures
+
+FIXTURE_DIRS = [
+    'fixtures/databases',
+    'fixtures/tables',
+    'fixtures/users'
+]

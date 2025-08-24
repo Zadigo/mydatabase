@@ -1,5 +1,7 @@
 <template>
   <section id="home">
-    Home
+    Home Page
+    
+    <nuxt-link to="/databases">Go to Databases</nuxt-link>
   </section>
 </template>
