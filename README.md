@@ -20,9 +20,26 @@ An application that transforms any Google Sheet or Excel Sheet into a database.
 
 ## Technologies Used 🛠 
 
-- Nuxt
-- Python (Django)
-- Celery + Redis
+| Technology | version |
+| --- | --- |
+| Nuxt 4 | ✅ 4.0.0 |
+| Python (Django) | ✅ 4.0.0 |
+| Celery + Redis | ✅ 5.2.0 |
+| Tailwindcss | ✅ 3.0.0 |
+| Volt (PrimeVue) | ✅ 3.0.0 |
+
+### How it is built? 🛖
+
+The application uses websocket to communicate and exchange data between the frontend and backend in real-time for
+building the databases. This allows for quick data manipulation during construction.
+
+## How it works? 🔍
+
+1. User uploads a Google Sheets or Excel file.
+2. The application reads the file and extracts the data.
+3. The user maps the spreadsheet columns to database fields.
+4. The application creates the database schema and imports the data.
+5. The user can then query and manage the data through the application interface.
 
 ## License 📄
 
