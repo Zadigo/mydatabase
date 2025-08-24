@@ -7,7 +7,8 @@
     },
     "tailwindCSS.classAttributes": [
         "class",
-        "ui"
+        "ui",
+        "nuxt"
     ],
     "tailwindCSS.experimental.classRegex": [
         [
