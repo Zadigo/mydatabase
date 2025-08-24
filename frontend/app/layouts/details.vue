@@ -26,12 +26,14 @@ const items = [
   {
     name: 'Overview',
     to: `/databases/${currentDatabase.value?.id}`,
-    icon: 'i-lucide-home'
+    icon: 'i-lucide-home',
+    isAlpha: false
   },
   {
     name: 'Table editor',
     to: `/databases/${currentDatabase.value?.id}/editor`,
-    icon: 'i-lucide-table'
+    icon: 'i-lucide-table',
+    isAlpha: false
   },
   {
     separator: true
@@ -39,17 +41,20 @@ const items = [
   {
     name:'Integrations',
     to: `/databases/${currentDatabase.value?.id}/integrations`,
-    icon: 'i-lucide-plug'
+    icon: 'i-lucide-plug',
+    isAlpha: true
   },
   {
     name: 'Database',
     to: `/databases/${currentDatabase.value?.id}/database`,
-    icon: 'i-lucide-database'
+    icon: 'i-lucide-database',
+    isAlpha: true
   },
   {
     name: 'Project settings',
     to: `/databases/${currentDatabase.value?.id}/settings`,
-    icon: 'i-lucide-cog'
+    icon: 'i-lucide-cog',
+    isAlpha: false
   }
 ]
 

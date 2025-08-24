@@ -14,17 +14,20 @@ const items = [
   {
     name: 'Projects',
     to: '/databases',
-    icon: 'i-lucide-home'
+    icon: 'i-lucide-home',
+    isAlpha: false
   },
   {
     name: 'Integrations',
     to: '/integrations',
-    icon: 'i-lucide-plug'
+    icon: 'i-lucide-plug',
+    isAlpha: true
   },
   {
     name: 'Organization settings',
     to: '/settings',
-    icon: 'i-lucide-cog'
+    icon: 'i-lucide-cog',
+    isAlpha: true
   }
 ]
 </script>
