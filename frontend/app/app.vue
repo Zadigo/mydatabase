@@ -1,7 +1,7 @@
 <template>
-  <ui-app>
+  <nuxt-app>
     <nuxt-layout>
       <nuxt-page />
     </nuxt-layout>
-  </ui-app>
+  </nuxt-app>
 </template>

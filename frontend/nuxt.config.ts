@@ -20,7 +20,7 @@ export default defineNuxtConfig({
   },
 
   ui: {
-    prefix: 'ui'
+    prefix: 'Nuxt'
   },
 
   css: [
