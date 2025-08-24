@@ -7,10 +7,13 @@
 
       <nuxt-separator class=" mt-2 mb-5" />
 
-      <editor-aside-links />
+      <editor-aside-links v-if="currentAside==='editor-aside'" />
+      <database-aside-links v-else-if="currentAside==='database-aside'" />
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
+const dbStore = useDatabasesStore()
+const { currentAside } = storeToRefs(dbStore)
 </script>

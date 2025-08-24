@@ -5,7 +5,7 @@
 
     <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
       <!-- Aside -->
-      <base-aside v-if="hasAside && currentAside === 'editor-aside'" />
+      <base-aside v-if="hasAside" />
 
       <!-- Content -->
       <slot />
@@ -26,25 +26,30 @@ const items = [
   {
     name: 'Overview',
     to: `/databases/${currentDatabase.value?.id}`,
-    icon: 'i-fa7-regular:home'
+    icon: 'i-lucide-home'
   },
   {
     name: 'Table editor',
     to: `/databases/${currentDatabase.value?.id}/editor`,
-    icon: 'i-fa7-solid:table'
+    icon: 'i-lucide-table'
   },
   {
     separator: true
   },
   {
+    name:'Integrations',
+    to: `/databases/${currentDatabase.value?.id}/integrations`,
+    icon: 'i-lucide-plug'
+  },
+  {
     name: 'Database',
     to: `/databases/${currentDatabase.value?.id}/database`,
-    icon: 'i-fa7-solid:database'
+    icon: 'i-lucide-database'
   },
   {
     name: 'Project settings',
     to: `/databases/${currentDatabase.value?.id}/settings`,
-    icon: 'i-fa7-solid:cog'
+    icon: 'i-lucide-cog'
   }
 ]
 

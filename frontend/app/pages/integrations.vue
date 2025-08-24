@@ -1,6 +1,10 @@
 <template>
   <section id="integrations">
-    Integrations
+    <div class="w-full border-b border-gray-200 pb-8 font-bold text-2xl">
+      Integrations
+    </div>
+
+    Organization level integrations
   </section>
 </template>
 
