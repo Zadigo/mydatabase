@@ -5,8 +5,7 @@
 
     <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
       <!-- Aside -->
-      <!-- v-if="hasAside && currentAside === 'editor-aside'" -->
-      <base-aside />
+      <base-aside v-if="hasAside && currentAside === 'editor-aside'" />
 
       <!-- Content -->
       <slot />

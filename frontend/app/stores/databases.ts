@@ -15,9 +15,21 @@ export const useDatabasesStore = defineStore('databases', () => {
   const currentAside = ref<'editor-aside' | 'database-aside' | null>(null)
 
   return {
+    /**
+     * The route ID of the currently selected database
+     */
     routeId,
+    /**
+     * The search term used to filter databases
+     */
     search,
+    /**
+     * The filtered list of databases based on the search term
+     */
     searched,
+    /**
+     * The currently selected database
+     */
     currentDatabase,
     /**
      * The names of the tables in the current database
@@ -27,5 +39,10 @@ export const useDatabasesStore = defineStore('databases', () => {
      * The current aside sidebar to display
      */
     currentAside
+  }
+}, {
+  persist: {
+    pick: ['routeId'],
+    storage: sessionStorage
   }
 })

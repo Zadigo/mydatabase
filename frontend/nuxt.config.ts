@@ -14,7 +14,8 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@pinia/nuxt',
     '@vueuse/nuxt',
-    '@nuxt/test-utils/module'
+    '@nuxt/test-utils/module',
+    'pinia-plugin-persistedstate/nuxt'
   ],
 
   routeRules: {

@@ -1,20 +1,18 @@
-export type DocumentData = Record<string, unknown>
+import type { SimpleTable } from './tables'
 
-export interface Document {
-  id: number
-  data: DocumentData[]
-}
+export type * from './tables'
 
-export interface Table {
-  id: number
-  name: string
-  documents: Document[]
-}
-
-type SimpleTable = Pick<Table, 'id' | 'name' | 'documents'>
-
+/**
+ * A database is a collection of tables
+ */
 export interface Database {
   id: number
+  /**
+   * The name of the database
+   */
   name: string
+  /**
+   * The list of tables in the database
+   */
   tables: SimpleTable[]
 }
