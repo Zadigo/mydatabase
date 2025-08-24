@@ -10,10 +10,12 @@ export const databaseFixture: Database = {
       documents: [
         {
           id: 1,
-          data: {
-            title: 'Test Document',
-            content: 'This is a test document.'
-          }
+          data: [
+            {
+              title: 'Test Document',
+              content: 'This is a test document.'
+            }
+          ]
         }
       ]
     }

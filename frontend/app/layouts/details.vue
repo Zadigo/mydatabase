@@ -3,7 +3,12 @@
     <base-navbar />
     <base-sidebar :items="items" />
 
-    <main class="ps-[calc(240px+1rem)] pe-5 mt-[calc(42px+2rem)] mb-10">
+    <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
+      <!-- Aside -->
+      <!-- v-if="hasAside && currentAside === 'editor-aside'" -->
+      <base-aside />
+
+      <!-- Content -->
       <slot />
     </main>
   </section>
@@ -11,7 +16,9 @@
 
 <script setup lang="ts">
 const dbStore = useDatabasesStore()
-const { currentDatabase } = storeToRefs(dbStore)
+const { currentDatabase, currentAside } = storeToRefs(dbStore)
+
+const hasAside = computed(() => currentAside.value !== null)
 
 const { id } = useRoute().params as { id: string }
 dbStore.routeId = Number(id)

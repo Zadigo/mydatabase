@@ -27,4 +27,8 @@
   --ui-info: var(--ui-color-info-500);
   --ui-warning: var(--ui-color-warning-500);
   --ui-error: var(--ui-color-error-500);
+
+  --sidebar-width: 240px;
+  --sidebar-secondary-width: 200px;
+  --navbar-min-height: 50px;
 }

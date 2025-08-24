@@ -10,11 +10,22 @@ export const useDatabasesStore = defineStore('databases', () => {
 
   const routeId = ref<number | null>(null)
   const currentDatabase = computed(() => databases.find(database => database.id === routeId.value))
+  const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
+
+  const currentAside = ref<'editor-aside' | 'database-aside' | null>(null)
 
   return {
     routeId,
     search,
     searched,
-    currentDatabase
+    currentDatabase,
+    /**
+     * The names of the tables in the current database
+     */
+    availableTableNames,
+    /**
+     * The current aside sidebar to display
+     */
+    currentAside
   }
 })

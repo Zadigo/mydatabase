@@ -3,7 +3,7 @@
     <base-navbar />
     <base-sidebar :items="items" />
 
-    <main class="ps-[calc(240px+1rem)] pe-5 mt-[calc(42px+2rem)] mb-10">
+    <main class="ps-[calc(var(--sidebar-width)+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10">
       <slot />
     </main>
   </section>

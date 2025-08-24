@@ -1,6 +1,8 @@
+export type DocumentData = Record<string, unknown>
+
 export interface Document {
   id: number
-  data: Record<string, unknown>
+  data: DocumentData[]
 }
 
 export interface Table {
