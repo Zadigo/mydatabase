@@ -6,16 +6,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Database tables',
+  title: 'Database: Tables',
   layout: 'details'
-})
-
-const dbStore = useDatabasesStore()
-const { currentAside } = storeToRefs(dbStore)
-
-currentAside.value = 'database-aside'
-
-onUnmounted(() => {
-  currentAside.value = null
 })
 </script>

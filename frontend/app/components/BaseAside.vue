@@ -6,14 +6,16 @@
       </h2>
 
       <nuxt-separator class=" mt-2 mb-5" />
+      {{ route.meta }}
+      <editor-aside-links v-if="route.meta.title && route.meta.title.startsWith('Editor:')" />
+      <database-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Database:')" />
 
-      <editor-aside-links v-if="currentAside==='editor-aside'" />
-      <database-aside-links v-else-if="currentAside==='database-aside'" />
+      <!-- <editor-aside-links v-if="currentAside==='editor-aside'" />
+      <database-aside-links v-else-if="currentAside==='database-aside'" /> -->
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-const dbStore = useDatabasesStore()
-const { currentAside } = storeToRefs(dbStore)
+const route = useRoute()
 </script>

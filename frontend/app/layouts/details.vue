@@ -15,9 +15,10 @@
 
 <script setup lang="ts">
 const dbStore = useDatabasesStore()
-const { currentDatabase, currentAside } = storeToRefs(dbStore)
+const { currentDatabase } = storeToRefs(dbStore)
 
-const hasAside = computed(() => currentAside.value !== null)
+const route = useRoute()
+const hasAside = computed(() => route.meta.title && (route.meta.title.startsWith('Database:') || route.meta.title.startsWith('Editor:')))
 
 const { id } = useRoute().params as { id: string }
 dbStore.routeId = Number(id)
@@ -48,7 +49,7 @@ const items = [
     name: 'Database',
     to: `/databases/${currentDatabase.value?.id}/database`,
     icon: 'i-lucide-database',
-    isAlpha: true
+    isAlpha: false
   },
   {
     name: 'Project settings',

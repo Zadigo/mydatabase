@@ -79,14 +79,11 @@ export interface ColumnTypeOptions {
 
 /**
  * Composables used for working with table columns
+ * e.g. search, modifying column types etc.
  * @param data The table's data
  */
 export function useTableColumns(data: DocumentData[] | undefined) {
-  console.log('witnessElement', data)
-
-  const witnessElement = toRef(data?.[0] || {})
-
-  console.log('witnessElement', witnessElement.value)
+  const witnessElement = toRef(data?.[0] || {}) // TODO: Create a unique Ref that is not linked to the underlying data
 
   const columnNames = computed(() => Object.keys(witnessElement.value || {}))
   const columnOptions = ref<ColumnOptions[]>(columnNames.value.map(column => ({
@@ -114,11 +111,12 @@ export function useTableColumns(data: DocumentData[] | undefined) {
      */
     columnNames,
     /**
-     * The visibility of the columns in the table
+     * Options for modifying how the end user interacts
+     * with the columns e.g visibility, editability, sortability
      */
     columnOptions,
     /**
-     * The data type of the columns in the table
+     * Options for modifiying the data types of each column
      */
     columnTypeOptions,
     /**
@@ -144,7 +142,7 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
   })
 
   const [showEditTableDrawer, toggleEditTableDrawer] = useToggle()
-  const editableTableRef = toRef(table)
+  const editableTableRef = toRef(table) // TODO: Create a unique Ref that is not linked to the original data because when we change the values here it changes the orginal Ref too
 
   return {
     /**

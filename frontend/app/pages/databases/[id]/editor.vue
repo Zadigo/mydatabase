@@ -27,17 +27,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Project overview',
+  title: 'Editor: Table',
   layout: 'details'
-})
-
-const dbStore = useDatabasesStore()
-const { currentAside } = storeToRefs(dbStore)
-
-currentAside.value = 'editor-aside'
-
-onUnmounted(() => {
-  currentAside.value = null
 })
 
 const tableEditorStore = useTableEditionStore()

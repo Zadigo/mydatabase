@@ -12,8 +12,6 @@ export const useDatabasesStore = defineStore('databases', () => {
   const currentDatabase = computed(() => databases.find(database => database.id === routeId.value))
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
 
-  const currentAside = ref<'editor-aside' | 'database-aside' | null>(null)
-
   return {
     /**
      * The route ID of the currently selected database
@@ -35,10 +33,6 @@ export const useDatabasesStore = defineStore('databases', () => {
      * The names of the tables in the current database
      */
     availableTableNames,
-    /**
-     * The current aside sidebar to display
-     */
-    currentAside
   }
 }, {
   persist: {

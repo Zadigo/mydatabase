@@ -1,6 +1,8 @@
 /**
  * Store used to manage the state of table edition
- * accross multiple components
+ * accross multiple components aka which table is
+ * being edited, what data in the table is being
+ * manipulated etc.
  */
 export const useTableEditionStore = defineStore('tableEdition', () => {
   const dbStore = useDatabasesStore()
@@ -12,8 +14,6 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const tableDocuments = computed(() => selectedTable.value?.documents || [])
   const hasData = computed(() => tableDocuments.value.length > 0)
   
-  /** Only fetch the first item for now. In the future we need to deal with multiple data from different documents*/
-  // const tableData = computed(() => hasData.value && tableDocuments.value.map(doc => doc.data).flat() || [])
   const selectedTableDataName = ref<string>()
   const selectedTableDataNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
   const tableData = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDataName.value)?.data || [])
