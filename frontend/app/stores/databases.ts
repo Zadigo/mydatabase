@@ -8,8 +8,13 @@ export const useDatabasesStore = defineStore('databases', () => {
     return databases.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
   })
 
+  const routeId = ref<number | null>(null)
+  const currentDatabase = computed(() => databases.find(database => database.id === routeId.value))
+
   return {
+    routeId,
     search,
-    searched
+    searched,
+    currentDatabase
   }
 })

@@ -1,5 +1,12 @@
 <template>
   <section id="settings-home">
-    Settings home
+    Project settings
   </section>
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+  title: 'Project overview',
+  layout: 'details'
+})
+</script>

@@ -1,12 +1,12 @@
 <template>
-  <section id="tables">
-    Project overview
+  <section id="database">
+    Database
   </section>
 </template>
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Project overview',
+  title: 'Database',
   layout: 'details'
 })
 </script>

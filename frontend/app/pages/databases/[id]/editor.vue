@@ -1,6 +1,6 @@
 <template>
-  <section id="tables">
-    Project overview
+  <section id="editor">
+    Editor
   </section>
 </template>
 

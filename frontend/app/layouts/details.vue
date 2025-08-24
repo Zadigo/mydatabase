@@ -10,15 +10,21 @@
 </template>
 
 <script setup lang="ts">
+const dbStore = useDatabasesStore()
+const { currentDatabase } = storeToRefs(dbStore)
+
+const { id } = useRoute().params as { id: string }
+dbStore.routeId = Number(id)
+
 const items = [
   {
     name: 'Overview',
-    to: '/databases',
+    to: `/databases/${currentDatabase.value?.id}`,
     icon: 'i-fa7-regular:home'
   },
   {
     name: 'Table editor',
-    to: '/integrations',
+    to: `/databases/${currentDatabase.value?.id}/editor`,
     icon: 'i-fa7-solid:table'
   },
   {
@@ -26,13 +32,17 @@ const items = [
   },
   {
     name: 'Database',
-    to: '/integrations',
+    to: `/databases/${currentDatabase.value?.id}/database`,
     icon: 'i-fa7-solid:database'
   },
   {
     name: 'Project settings',
-    to: '/settings',
+    to: `/databases/${currentDatabase.value?.id}/settings`,
     icon: 'i-fa7-solid:cog'
   }
 ]
+
+onUnmounted(() => {
+  dbStore.routeId = null
+})
 </script>
