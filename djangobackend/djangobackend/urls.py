@@ -1,9 +1,9 @@
-from django.urls import re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular import views as drf_views
+from rest_framework_simplejwt import views as auth_views
 
 urlpatterns = [
     path(
@@ -22,7 +22,21 @@ urlpatterns = [
         name='redoc'
     ),
     path(
-        'admin/', 
+        'v1/auth/token/',
+        auth_views.TokenObtainPairView.as_view(),
+        name='token_obtain_pair'
+    ),
+    path(
+        'v1/auth/token/refresh/',
+        auth_views.TokenRefreshView.as_view(),
+        name='token_refresh'
+    ),
+    path(
+        'v1/databases',
+        include('dbschemas.urls')
+    ),
+    path(
+        'admin/',
         admin.site.urls
     )
 ]

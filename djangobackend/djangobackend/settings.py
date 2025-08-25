@@ -6,6 +6,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENV_FILE = BASE_DIR / '.env'
+
+if ENV_FILE.exists():
+    dotenv.load_dotenv(ENV_FILE)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -13,12 +18,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-
 
 def is_debug():
     return os.getenv('DEBUG', 'True') == 'True'
 
+
+# SECURITY WARNING: don't run with debug turned on in production!
 
 DEBUG = is_debug()
 
@@ -44,7 +49,12 @@ INSTALLED_APPS = [
     'django_extensions',
 
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+
+    'tabledocuments',
+    'dbschemas',
+    'dbtables'
+
 ]
 
 MIDDLEWARE = [
@@ -235,6 +245,6 @@ CHANNEL_LAYERS = {
 
 FIXTURE_DIRS = [
     'fixtures/databases',
-    'fixtures/tables',
-    'fixtures/users'
+    # 'fixtures/tables',
+    # 'fixtures/users'
 ]

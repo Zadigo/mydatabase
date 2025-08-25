@@ -6,12 +6,9 @@
       </h2>
 
       <nuxt-separator class=" mt-2 mb-5" />
-      {{ route.meta }}
+
       <editor-aside-links v-if="route.meta.title && route.meta.title.startsWith('Editor:')" />
       <database-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Database:')" />
-
-      <!-- <editor-aside-links v-if="currentAside==='editor-aside'" />
-      <database-aside-links v-else-if="currentAside==='database-aside'" /> -->
     </div>
   </aside>
 </template>
