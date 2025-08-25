@@ -3,9 +3,17 @@ import type { SimpleTable } from './tables'
 export type * from './tables'
 
 /**
+ * @private
+ */
+export interface _BaseDatetimes {
+  updated_at: string
+  created_at: string
+}
+
+/**
  * A database is a collection of tables
  */
-export interface Database {
+export interface Database extends _BaseDatetimes {
   id: number
   /**
    * The name of the database

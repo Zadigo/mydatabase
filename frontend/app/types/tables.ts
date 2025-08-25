@@ -1,3 +1,5 @@
+import type { _BaseDatetimes } from '.'
+
 export type DocumentData = Record<string, unknown>
 
 /**
@@ -5,7 +7,7 @@ export type DocumentData = Record<string, unknown>
  * an Excel/Google sheet with the data that
  * is contained within that sheet
  */
-export interface TableDocument {
+export interface TableDocument extends _BaseDatetimes {
   id: number
   /**
    * The name of the document
@@ -17,7 +19,7 @@ export interface TableDocument {
   data: DocumentData[]
 }
 
-export interface Table {
+export interface Table extends _BaseDatetimes {
   id: number
   /**
    * The name of the table
@@ -44,6 +46,6 @@ export interface Table {
 }
 
 // TODO: When listing databases, I do not want to load the "data" field in documents
-export type SimpleTable = Pick<Table, 'id' | 'name' | 'description' | 'documents' | 'component' | 'active'>
+export type SimpleTable = Pick<Table, 'id' | 'name' | 'description' | 'component' | 'active' | 'documents'> & _BaseDatetimes
 
 export type TableComponent = 'data-table' | 'graph-table'

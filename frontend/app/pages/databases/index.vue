@@ -29,4 +29,6 @@ definePageMeta({
 
 const databasesStore = useDatabasesStore()
 const { search, searched } = storeToRefs(databasesStore)
+
+databasesStore.fetch()
 </script>

@@ -4,8 +4,7 @@ from tabledocuments.api.serializer import SimpleDocumentSerializer
 
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
-    documents = SimpleDocumentSerializer(
-        many=True, read_only=True, source='tabledocument_set')
+    documents = SimpleDocumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = DatabaseTable

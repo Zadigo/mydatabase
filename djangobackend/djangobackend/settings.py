@@ -27,7 +27,7 @@ def is_debug():
 
 DEBUG = is_debug()
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -185,11 +185,13 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGIN_REGEXES = []
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173'
+    'http://localhost:3000',
+    'http://localhost:3001'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173'
+    'http://localhost:3000',
+    'http://localhost:3001'
 ]
 
 
