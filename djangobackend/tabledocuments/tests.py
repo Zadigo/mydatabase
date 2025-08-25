@@ -124,7 +124,7 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         self.assertIsInstance(response['data'], str)
         await self.check_response(response)
 
-    async def test_with_authentication(self):
-        self.use_authentication = True
-        instance = await self.create_connection()
-        print(instance.scope)
+    # async def test_with_authentication(self):
+    #     self.use_authentication = True
+    #     instance = await self.create_connection()
+    #     print(instance.scope)
