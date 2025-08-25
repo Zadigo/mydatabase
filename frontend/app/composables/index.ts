@@ -1,6 +1,7 @@
 export {
   useTable,
-  useTableColumns
+  useTableColumns,
+  useDatabaseCreation
 } from './use'
 
 /**

@@ -1,35 +1,42 @@
-import { databasesFixture } from '~/data/__fixtures__'
+// import { databasesFixture } from '~/data/__fixtures__'
 import type { Database } from '~/types'
 
 export const useDatabasesStore = defineStore('databases', () => {
-  const databases = reactive(databasesFixture)
+  // const databases = reactive<Database[]>(databasesFixture)
+  const databases = ref<Database[]>([])
 
   const search = ref<string>('')
   const searched = computed(() => {
-    return databases.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
+    return databases.value.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
   })
 
   const routeId = ref<number | null>(null)
-  const currentDatabase = computed(() => databases.find(database => database.id === routeId.value))
+  const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
 
   async function fetch() {
     const config = useRuntimeConfig()
     
-    const { data, error } = await useFetch('/v1/databases', {
+    const { data, error } = await useFetch<Database[]>('/v1/databases', {
       method: 'GET',
       baseURL: config.public.prodDomain,
-      immediate: true,
+      immediate: true
     })
 
     if (error.value) {
       console.error('Error fetching databases:', error.value)
     }
 
-    return data
+    if (data.value) {
+      databases.value = data.value
+    }
   }
 
   return {
+    /**
+     * List of none-filtered databases
+     */
+    databases,
     /**
      * The route ID of the currently selected database
      */
@@ -39,7 +46,7 @@ export const useDatabasesStore = defineStore('databases', () => {
      */
     search,
     /**
-     * The filtered list of databases based on the search term
+     * Filtered list of databases based on the search term
      */
     searched,
     /**

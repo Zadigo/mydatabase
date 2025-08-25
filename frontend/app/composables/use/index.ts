@@ -5,6 +5,10 @@ export {
   useTableColumns
 } from './tables'
 
+export {
+  useDatabaseCreation
+} from './databases'
+
 
 /**
  * Transforms an array of strings into an array of menu items
