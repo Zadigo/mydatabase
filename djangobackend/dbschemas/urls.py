@@ -5,7 +5,7 @@ app_name = 'dbschemas'
 
 urlpatterns = [
     re_path(
-        r'^databases/$',
+        r'^$',
         views.ListDatabases.as_view(),
         name='list_databases'
     )
