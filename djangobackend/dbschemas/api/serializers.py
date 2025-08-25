@@ -1,15 +1,11 @@
-from dbschemas.models import DatabaseSchema, DatabaseTable
+from dbschemas.models import DatabaseSchema
+from dbtables.api.serializers import DatabaseTableSerializer
 from rest_framework import serializers
 
 
-class DatabaseTableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DatabaseTable
-        fields = '__all__'
-        exclude = ['database_schema', 'documents']
-
-
 class DatabaseSchemaSerializer(serializers.ModelSerializer):
+    tables = DatabaseTableSerializer(many=True, read_only=True)
+
     class Meta:
         model = DatabaseSchema
         fields = '__all__'

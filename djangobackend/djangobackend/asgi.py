@@ -15,11 +15,13 @@ django_asgi_application = get_asgi_application()
 # https://github.com/django/daphne/issues/347
 # https://channels.readthedocs.io/en/stable/deploying.html#configuring-the-asgi-application
 
+from tabledocuments.routing import urlpatterns as tabledocuments_urlpatterns  # noqa
+
 application = ProtocolTypeRouter({
     'http': django_asgi_application,
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
-            URLRouter([])
+            URLRouter([tabledocuments_urlpatterns])
         )
     )
 })

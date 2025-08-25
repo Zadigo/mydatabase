@@ -43,6 +43,7 @@ export interface Table {
   documents: TableDocument[]
 }
 
+// TODO: When listing databases, I do not want to load the "data" field in documents
 export type SimpleTable = Pick<Table, 'id' | 'name' | 'description' | 'documents' | 'component' | 'active'>
 
 export type TableComponent = 'data-table' | 'graph-table'
