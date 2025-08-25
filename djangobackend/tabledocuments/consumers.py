@@ -4,7 +4,7 @@ from django.core.files import File
 from djangobackend.consumer_mixins import BaseConsumerMixin
 
 
-class DatabaseConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
+class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     """WebSocket consumer used on the editor side in order
     to manage quick data manipulation and transactions on
     the Google/Excel/CSV sheets"""
@@ -17,11 +17,14 @@ class DatabaseConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
         await self.accept()
 
-        user = self.scope['user']
+        print(self.scope)
+        
+        # user = self.scope['user']
+        # print(user)
 
-        if not user.is_authenticated:
-            await self.close(code=1000)
-            return
+        # if not user.is_authenticated:
+        #     await self.close(code=1000)
+        #     return
 
     async def disconnect(self, close_code):
         await self.close(code=close_code)
@@ -30,9 +33,9 @@ class DatabaseConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         action = content['action']
 
         if action == 'idle_connect':
-            pass
-        elif action  == 'load_url':
-            document = await self.document_edition.load_document_by_url(content['url'], partial=True)
+            await self.send_json({'action': 'connected'})
+        elif action == 'load_url':
+            document = await self.document_edition.load_json_document_by_url(content['url'])
             if document is not None:
                 await self.send_json({
                     'action': 'url_loaded',
@@ -41,7 +44,8 @@ class DatabaseConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                 })
 
                 # Create the document in the database
-                file_instance = File(document.content.to_csv(index=False), document.document_id)
+                # file_instance = File(document.content.to_csv(
+                #     index=False), document.document_id)
             else:
                 await self.send_error(f'Failed to load document from URL: {content["url"]}')
         elif action == 'load_data':

@@ -1,11 +1,14 @@
 import dataclasses
+import datetime
 import re
-from typing import Callable, TypeAlias
+from typing import Any, Callable, TypeAlias
 
 import pandas
+import pytz
 import requests
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
+from requests.models import Response
 
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
 
@@ -42,6 +45,7 @@ class DocumentEdition:
         self.column_triggers: PostReadTrigger = options.get('post_read_triggers', {})
 
     async def finalize(self, document_id: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
+        metadata['date'] = str(datetime.datetime.now(tz=pytz.UTC))
         return Document(document_id=document_id, content=df, metadata=metadata)
 
     async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
@@ -69,28 +73,31 @@ class DocumentEdition:
         if self.partial:
             df = df.head(n=self.partial_limit)
 
-        return await self.finalize(document_id=document_id, df=df)
+        return await self.finalize(document_id=document_id, df=df, metadata=metadata)
 
     async def load_document_by_id(self, id: str) -> pandas.DataFrame:
         pass
 
-    async def load_document_by_url(self, url: str, **params):
-        """Loads a new document using an API endpoint"""
+    async def load_document_by_url(self, url: str, **request_params: Any) -> Response | None:
         try:
-            response = requests.get(url, headers={}, **params)
+            response = requests.get(url, headers={}, **request_params)
         except requests.RequestException as e:
             self.errors.append(str(e))
             return None
         else:
-            if response.ok:
-                try:
-                    data = response.json()
-                except ValueError:
-                    self.errors.append("Failed to parse JSON response")
-                    return None
-                else:
-                    return await self.clean(pandas.DataFrame(data))
-            return None
+            return response
+        
+    async def load_json_document_by_url(self, url: str, **request_params: Any) -> Document | None:
+        response = await self.load_document_by_url(url, **request_params)
+        if response is not None and response.ok:
+            try:
+                data = response.json()
+            except ValueError:
+                self.errors.append("Failed to parse JSON response")
+                return None
+            else:
+                return await self.clean(pandas.DataFrame(data), {'url': url})
+        return None  
 
 
 class DocumentTransform:
