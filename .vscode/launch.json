@@ -8,7 +8,8 @@
             "name": "Python: My Database",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\manage.py",
+            "envFile": "${workspaceFolder}/djangobackend/.env",
+            "program": "${workspaceFolder}/djangobackend/manage.py",
             "args": [
                 "runserver"
             ],

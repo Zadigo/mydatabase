@@ -23,7 +23,7 @@ application = ProtocolTypeRouter({
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             JWTTokenAuthMiddleware(
-                URLRouter([tabledocuments_urlpatterns])
+                URLRouter(tabledocuments_urlpatterns)
             )
         )
     )

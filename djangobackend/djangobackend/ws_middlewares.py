@@ -1,11 +1,9 @@
 from typing import TYPE_CHECKING, Any
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from rest_framework.authtoken.models import Token
 from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
 
-if TYPE_CHECKING:
-    from django.contrib.auth.models import User
 
 
 @database_sync_to_async

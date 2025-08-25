@@ -11,7 +11,9 @@ class DatabaseTable(models.Model):
         null=False
     )
     description = models.TextField(
-        max_length=1000
+        max_length=1000,
+        blank=True,
+        null=True
     )
     database_schema = models.ForeignKey(
         'dbschemas.DatabaseSchema',
@@ -37,6 +39,7 @@ class DatabaseTable(models.Model):
     )
 
     class Meta:
+        verbose_name = 'database table'
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'database_schema'],

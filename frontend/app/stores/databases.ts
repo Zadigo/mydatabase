@@ -1,4 +1,5 @@
 import { databasesFixture } from '~/data/__fixtures__'
+import type { Database } from '~/types'
 
 export const useDatabasesStore = defineStore('databases', () => {
   const databases = reactive(databasesFixture)
@@ -11,6 +12,22 @@ export const useDatabasesStore = defineStore('databases', () => {
   const routeId = ref<number | null>(null)
   const currentDatabase = computed(() => databases.find(database => database.id === routeId.value))
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
+
+  async function fetch() {
+    const config = useRuntimeConfig()
+    
+    const { data, error } = await useFetch('/v1/databases', {
+      method: 'GET',
+      baseURL: config.public.prodDomain,
+      immediate: true,
+    })
+
+    if (error.value) {
+      console.error('Error fetching databases:', error.value)
+    }
+
+    return data
+  }
 
   return {
     /**
@@ -33,6 +50,10 @@ export const useDatabasesStore = defineStore('databases', () => {
      * The names of the tables in the current database
      */
     availableTableNames,
+    /**
+     * Fetch the list of databases
+     */
+    fetch
   }
 }, {
   persist: {

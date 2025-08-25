@@ -18,5 +18,8 @@ class DatabaseSchema(models.Model):
         auto_now_add=True,
     )
 
+    class Meta:
+        verbose_name = 'database schema'
+
     def __str__(self):
         return self.name
