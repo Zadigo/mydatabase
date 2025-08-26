@@ -27,10 +27,10 @@
         <div v-if="selectedTable" class="w-full text-center">
           <p>Your table has no data. Select a datasource or create a new one</p>
 
-          <nuxt-button class="mt-5">
+          <!-- <nuxt-button class="mt-5" @click="() => { toggleShowAddDocumentModal() }">
             <icon name="i-lucide-file-plus-2" />
             Create New Document
-          </nuxt-button>
+          </nuxt-button> -->
         </div>
 
         <div v-else class="w-full text-center">
@@ -62,6 +62,9 @@ const tableEditonStore = useTableEditionStore()
 const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditonStore)
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
+
+const params = useUrlSearchParams() as { table: string }
+params.table = useToString(selectedTable.value?.id || '').value
 
 provide('hasData', hasData)
 provide('tableData', tableData)

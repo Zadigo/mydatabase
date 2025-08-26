@@ -6,6 +6,12 @@
     <!-- Select Table Data -->
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
+    <!-- Add Data -->
+    <nuxt-button @click="() => { toggleShowAddDocumentModal() }">
+      <icon name="i-lucide-file-plus-2" />
+      Add document
+    </nuxt-button>
+
     <!-- Columns -->
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
       <template #default="{ column }">
@@ -33,10 +39,14 @@
       </div>
     </div>
     <nuxt-skeleton v-else class="h-3 w-5" />
+
+    <!-- Modals -->
+    <editor-modals-add-document v-model="showAddDocumentModal" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { useCreateDocument } from '~/composables/use/documents'
 import { useWebsocketMessage } from '~/composables/use'
 
 const dbStore = useDatabasesStore()
@@ -49,4 +59,6 @@ const { truncate } = useTruncateString()
 
 const tableColumnsStore = useTableColumnsStore()
 const { columnOptions } = storeToRefs(tableColumnsStore)
+
+const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
 </script>
