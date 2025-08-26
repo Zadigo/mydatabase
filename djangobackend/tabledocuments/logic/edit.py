@@ -193,6 +193,11 @@ class DocumentTransform:
         self.current_document: Document | None = None
         self.initial_dataframe: pandas.DataFrame | None = None
 
+        self.column_names: list[str] = []
+        self.column_type_options: list[dict[str, str | bool ]] = []
+        self.column_options: list[dict[str, str | bool]] = []
+        # self.column_types: list[dict[str, str]] = []
+
     @property
     def can_transform(self):
         return self.current_document is not None
@@ -212,6 +217,48 @@ class DocumentTransform:
         # dataset from memory
         cache_key = self.current_document.document_cache_key + '-raw'
         self.initial_dataframe = cache.get(cache_key, None)
+
+        self.column_names = document.content.columns.tolist()
+
+        # Column type options allows the user to modify the column
+        # type and so as uniqueness and nullity
+        self.column_type_options = list(
+            map(
+                lambda column: {
+                    'name': column,
+                    'columnType': 'String',
+                    'unique': False,
+                    'nullable': True
+                },
+                self.column_names
+            )
+        )
+
+        # Column options allws the user to spcify which columns 
+        # are editable, visible etc to the end user
+        self.column_options = list(
+            map(
+                lambda column: {
+                    'name': column,
+                    'visible': True,
+                    'editable': True,
+                    'sortable': True,
+                    'searchable': True
+                },
+                self.column_names
+            )
+        )
+
+        # This builds the column types that will be
+        # modified by the user. By default, every
+        # column is considered as a string [String]
+        # self.column_types = list(
+        #     map(
+        #         lambda column: {
+        #             ''
+        #         }
+        #     )
+        # )
 
     async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] = [], select: list[str] = []):
         """Artificially create a foreign key between two documents. The end

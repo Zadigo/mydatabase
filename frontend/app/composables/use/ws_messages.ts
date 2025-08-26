@@ -17,9 +17,22 @@ export interface BaseWsSendMessage {
 export interface BaseWsReceiveMessage {
   action: ReceiveWsAction,
   message: string
-  data: Record<string, unknown>
+  
   document_id: number
+  /**
+   * The actual document's data
+   */
   document_data: string
+
+  /**
+   * Metadata on the columns returned
+   * from the underlying data
+   */
+  columns: {
+    names: string[]
+    options: ColumnOptions[]
+    type_options: ColumnTypeOptions[]
+  }
 }
 
 /**

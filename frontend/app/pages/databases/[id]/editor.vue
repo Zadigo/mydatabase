@@ -69,5 +69,5 @@ provide('editableTableRef', editableTableRef)
 
 console.log('editableTableRef', editableTableRef.value)
 
-const { wsobject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
+useTableWebocketManager(editableTableRef, selectedTableDocument)
 </script>

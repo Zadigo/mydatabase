@@ -12,7 +12,7 @@
         <span :title="column.name" class="text-sm">{{ truncate(column.name, 15) }}</span>
 
         <div id="actions">
-          <nuxt-button size="sm" variant="subtle" @click="() => toggleOption(column, 'visible')">
+          <nuxt-button size="sm" variant="subtle" @click="() => tableColumnsStore.toggleOption(column, 'visible')">
             <icon v-if="column.visible" name="i-fa7-solid:eye" />
             <icon v-else name="i-fa7-solid:eye-slash" />
           </nuxt-button>
@@ -42,7 +42,9 @@ const { availableTables } = storeToRefs(dbStore)
 
 const { selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 console.log('Editor.AsideLinks', tableData.value)
-const { columnOptions, toggleOption } = useTableColumns(tableData.value)
 
 const { truncate } = useTruncateString()
+
+const tableColumnsStore = useTableColumnsStore()
+const { columnOptions } = storeToRefs(tableColumnsStore)
 </script>

@@ -19,6 +19,9 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
   const tableEditionStore = useTableEditionStore()
   const { tableData } = storeToRefs(tableEditionStore)
 
+  const tableColumnsStore = useTableColumnsStore()
+  const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
+
   const wsobject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
     onConnected(ws) {
@@ -34,6 +37,12 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
             if (data.document_data) {
               console.log('Parsed data', JSON.parse(data.document_data))
               tableData.value = JSON.parse(data.document_data)
+            }
+
+            if (data.columns) {
+              columnNames.value = data.columns.names
+              columnOptions.value = data.columns.options
+              columnTypeOptions.value = data.columns.type_options
             }
             break
 

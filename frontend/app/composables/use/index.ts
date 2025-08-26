@@ -1,8 +1,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 
 export {
-  useTable,
-  useTableColumns
+  useTable
 } from './tables'
 
 export {

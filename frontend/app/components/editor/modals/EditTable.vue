@@ -1,7 +1,9 @@
 <template>
   <nuxt-drawer v-model:open="show" direction="right" :handle="false" class="w-90">
     <template #header>
-      <h2 class="font-bold">Update table</h2>
+      <h2 class="font-bold">
+        Update table
+      </h2>
     </template>
 
     <template #content>
@@ -44,15 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
-import { columnTypesMenuItem, useTableColumns } from '~/composables/use/tables'
-import type { DocumentData, Table } from '~/types'
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from '@nuxt/ui';
+import type { Table } from '~/types';
 
-const tableData = inject<Ref<DocumentData>>('tableData')
 const editableTableRef = inject<Ref<Table>>('editableTableRef')
-
-const { columnTypeOptions } = useTableColumns(tableData.value)
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
@@ -74,4 +71,7 @@ const constrainMenuItem: DropdownMenuItem[] = [
     }
   }
 ]
+
+const tableColumnsStore = useTableColumnsStore()
+const { columnTypeOptions } = storeToRefs(tableColumnsStore)
 </script>

@@ -69,11 +69,19 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                 await self.document_transform.load_document(document)
                 await self.send_json({
                     'action': 'loaded_via_id',
-                    'document_data': self.document_transform.stringify
+                    'document_data': self.document_transform.stringify,
+                    'columns': {
+                        'names': self.document_transform.column_names,
+                        'options': self.document_transform.column_options,
+                        'type_options': self.document_transform.column_type_options
+                    }
                 })
             else:
                 await self.send_error(
                     f"Could not load document: {','.join(self.document_edition.errors)}"
                 )
+        elif action == 'edit_data':
+            subaction = content['subaction']
+            accepted_subactions = ['visible_columns', 'sortable_columns', 'editable_columns']
         else:
             await self.send_error(f'Unknown action: {action}')
