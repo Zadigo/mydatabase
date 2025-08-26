@@ -19,7 +19,7 @@ class JWTTokenAuthMiddleware(BaseMiddleware):
     def __init__(self, inner):
         self.inner = inner
 
-    def __call__(self, scope: dict[str, str | dict[str, str] | list[Any] | AnonymousUser | Any]):
+    async def __call__(self, scope, receive, send):
         # headers = dict(scope['headers'])
         # print('headers', headers)
         # if b'authorization' in headers:
@@ -41,4 +41,4 @@ class JWTTokenAuthMiddleware(BaseMiddleware):
             except Token.DoesNotExist:
                 scope['user'] = AnonymousUser()
 
-        return self.inner(scope)
+        return await self.inner(scope, receive, send)

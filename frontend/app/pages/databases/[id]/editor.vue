@@ -13,11 +13,35 @@
           </nuxt-button>
         </div>
 
-        <nuxt-skeleton v-else class="h-10 w-10" />
+        <template v-else>
+          <div class="flex gap-2">
+            <nuxt-skeleton class="h-5 w-40" />
+            <nuxt-skeleton class="h-5 w-20" />
+          </div>
+        </template>
       </template>
 
-      <!-- Component -->
-      <component :is="displayComponent" />
+      <!-- Component -->  
+      <component :is="displayComponent" v-if="hasData" />
+      <template v-else>
+        <div v-if="selectedTable" class="w-full text-center">
+          <p>Your table has no data. Select a datasource or create a new one</p>
+
+          <nuxt-button class="mt-5">
+            <icon name="i-lucide-file-plus-2" />
+            Create New Document
+          </nuxt-button>
+        </div>
+
+        <div v-else class="w-full text-center">
+          <p>Select a table</p>
+          
+          <nuxt-button class="mt-5">
+            <icon name="i-lucide-table" />
+            Select a table
+          </nuxt-button>
+        </div>
+      </template>
     </nuxt-card>
 
     <!-- Modals -->
@@ -26,17 +50,24 @@
 </template>
 
 <script setup lang="ts">
+import { useTableWebocketManager } from '~/composables/use/tables'
+
 definePageMeta({
   title: 'Editor: Table',
   layout: 'details'
 })
 
 const tableEditorStore = useTableEditionStore()
-const { selectedTable, tableData, hasData } = storeToRefs(tableEditorStore)
+const { selectedTable, tableData, hasDocuments, hasData } = storeToRefs(tableEditorStore)
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
 
-provide('tableData', tableData)
 provide('hasData', hasData)
+provide('tableData', tableData)
+provide('hasDocuments', hasDocuments)
 provide('editableTableRef', editableTableRef)
+
+console.log('editableTableRef', editableTableRef.value)
+
+const { wsobject } = useTableWebocketManager(editableTableRef)
 </script>

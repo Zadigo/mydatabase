@@ -1,3 +1,5 @@
+import type { DocumentData } from '~/types'
+
 /**
  * Store used to manage the state of table edition
  * accross multiple components aka which table is
@@ -12,11 +14,13 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const selectedTable = computed(() => currentDatabase.value?.tables.find(table => table.name === selectedTableName.value))
 
   const tableDocuments = computed(() => selectedTable.value?.documents || [])
-  const hasData = computed(() => tableDocuments.value.length > 0)
+  const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
   const selectedTableDataName = ref<string>()
   const selectedTableDataNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
-  const tableData = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDataName.value)?.data || [])
+
+  const tableData = reactive<DocumentData[]>([])
+  const hasData = computed(() => tableData.length > 0)
 
   return {
     /**
@@ -41,13 +45,18 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
      */
     tableDocuments,
     /**
-     * The data to use for the current table
+     * The actual data to use for the current table
      */
     tableData,
     /**
-     * Whether the current table has data
+     * Whether the current table has any data
      */
-    hasData
+    hasData,
+    /**
+     * Whether the current table has at least
+     * one document linked to it
+     */
+    hasDocuments
   }
 }, {
   persist: {

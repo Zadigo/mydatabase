@@ -22,3 +22,31 @@ export function useToMenuItems<T = DropdownMenuItem[]>(data: string[]) {
     items
   }
 }
+
+/**
+ * WebSocket message utilities
+ */
+export function useWebsocketMessage() {
+  function stringify<T = Record<string, unknown>>(message: T): string {
+    return JSON.stringify(message)
+  }
+
+  function parse<M>(message: string): M | undefined {
+    try {
+      return JSON.parse(message) as M
+    } catch {
+      return undefined
+    }
+  }
+
+  return {
+    /**
+     * Stringify a WebSocket message
+     */
+    stringify,
+    /**
+     * Parse a WebSocket message
+     */
+    parse
+  }
+}

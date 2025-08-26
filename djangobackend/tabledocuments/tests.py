@@ -3,13 +3,17 @@ from unittest import IsolatedAsyncioTestCase
 
 import pandas
 from asgiref.sync import async_to_sync
+from channels.db import database_sync_to_async
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
+from django.core.files.base import ContentFile
 from django.test import TransactionTestCase
 from django.urls import re_path
-from djangobackend.utils import UnittestAuthenticationMixin
 from tabledocuments import consumers
 from tabledocuments.logic.edit import DocumentEdition
+from tabledocuments.models import TableDocument
+
+from djangobackend.utils import UnittestAuthenticationMixin
 
 
 class TestDocumentEdition(IsolatedAsyncioTestCase):
@@ -30,10 +34,15 @@ class TestDocumentEdition(IsolatedAsyncioTestCase):
 
     def setUp(self):
         self.instance = DocumentEdition()
-        self.test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20'
+        self.test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=2'
 
-    async def test_json_load_document_by_url(self):
-        document = await self.instance.load_json_document_by_url(self.test_url)
+    async def test_json_load_document_by_url_with_entry_key(self):
+        document = await self.instance.load_json_document_by_url(self.test_url, entry_key='results')
+
+        self.assertListEqual(
+            self.instance.errors, [], 
+            f"There were errors loading the document: {', '.join(self.instance.errors)}"
+        )
 
         # Assertions
         self.assertIsNotNone(document)
@@ -41,7 +50,7 @@ class TestDocumentEdition(IsolatedAsyncioTestCase):
         self.assertIsInstance(document.content, pandas.DataFrame)
 
         final_df = document.content
-        self.assertEqual(final_df.shape[0], 20)
+        self.assertEqual(final_df.shape[0], 2)
 
     async def test_clean(self):
         df = pandas.DataFrame(self.fake_data)
@@ -70,7 +79,7 @@ class TestDocumentEdition(IsolatedAsyncioTestCase):
 
 
 class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMixin):
-    fixtures = ['fixtures/users']
+    fixtures = ['fixtures/users', 'fixtures/databases']
 
     def setUp(self):
         self.consumer = consumers.DocumentEditionConsumer()
@@ -116,13 +125,52 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         instance = await self.create_connection()
 
         test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20'
-        await instance.send_json_to({'action': 'load_url', 'url': test_url})
+        await instance.send_json_to({'action': 'load_via_url', 'url': test_url})
         response = await instance.receive_json_from()
         await self.check_response(response)
 
         self.assertIn('data', response)
         self.assertIsInstance(response['data'], str)
         await self.check_response(response)
+
+    async def test_load_via_id(self):
+        instance = await self.create_connection()
+
+        @database_sync_to_async
+        def get_document():
+            document = TableDocument.objects.first()
+            if document is not None:
+                # Create a fake csv file and save it on the
+                # document, we will remove it later below
+                document.file.save(
+                    'test.csv', ContentFile('col1,col2\nval1,val2'))
+                return document.pk, document.name
+            return None, None
+
+        @database_sync_to_async
+        def remove_document_file(document_id: int):
+            document = TableDocument.objects.get(id=document_id)
+            document.file.delete()
+
+        pk, name = await get_document()
+
+        if pk is not None and name is not None:
+            await instance.send_json_to({
+                'action': 'load_via_id',
+                'document': {
+                    'id': pk,
+                    'name': name
+                }
+            })
+
+            response = await instance.receive_json_from()
+            await self.check_response(response)
+
+            self.assertIn('data', response)
+            self.assertIsInstance(response['data'], str)
+            await self.check_response(response)
+
+            await remove_document_file(pk)
 
     # async def test_with_authentication(self):
     #     self.use_authentication = True

@@ -6,13 +6,16 @@ from typing import Any, Callable, TypeAlias
 import pandas
 import pytz
 import requests
+from channels.db import database_sync_to_async
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
 from requests.models import Response
+from tabledocuments.models import TableDocument
 
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
 
-PostReadTrigger: TypeAlias = dict[str, Callable[[str, pandas.DataFrame], pandas.DataFrame]]
+PostReadTrigger: TypeAlias = dict[str, Callable[[
+    str, pandas.DataFrame], pandas.DataFrame]]
 
 
 @dataclasses.dataclass
@@ -42,7 +45,8 @@ class DocumentEdition:
 
         # Triggers to run on the columns of the dataframe when the
         # read is complete (e.g. transform data operations etc.)
-        self.column_triggers: PostReadTrigger = options.get('post_read_triggers', {})
+        self.column_triggers: PostReadTrigger = options.get(
+            'post_read_triggers', {})
 
     async def finalize(self, document_id: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
         metadata['date'] = str(datetime.datetime.now(tz=pytz.UTC))
@@ -68,15 +72,36 @@ class DocumentEdition:
         if self.column_triggers:
             for column, trigger in self.column_triggers.items():
                 df = trigger(column, df)
-            cache.set(document_id + '-transformed', df, timeout=(60 * 60))  # 1 hour
+            cache.set(
+                document_id + '-transformed',
+                df, timeout=(60 * 60)
+            )  # 1 hour
 
         if self.partial:
             df = df.head(n=self.partial_limit)
 
         return await self.finalize(document_id=document_id, df=df, metadata=metadata)
 
-    async def load_document_by_id(self, id: str) -> pandas.DataFrame:
-        pass
+    async def load_document_by_id(self, id: int | str) -> Document | bool:
+        """Loads the data in a document using the database"""
+
+        @database_sync_to_async
+        def get_document() -> tuple[bool, pandas.DataFrame | None]:
+            document = TableDocument.objects.get(id=id)
+
+            if document.file is None:
+                self.errors.append(
+                    'The document does not have a file associated with it')
+                return False, None
+
+            return True, pandas.read_csv(document.file.path)
+
+        is_valid, df = await get_document()
+
+        if not is_valid:
+            return False
+
+        return await self.clean(df)
 
     async def load_document_by_url(self, url: str, **request_params: Any) -> Response | None:
         try:
@@ -86,8 +111,15 @@ class DocumentEdition:
             return None
         else:
             return response
-        
-    async def load_json_document_by_url(self, url: str, **request_params: Any) -> Document | None:
+
+    async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
+        """Function used to load the content of document returned via an API endpoint
+        as a json format. The content will be loaded and transformed back to a csv database file.
+
+        Since the the actual data in a JSON file is not always at the root, the entry key can be used 
+        to specify the path to the data. For example: items in `{'items': []}` or root.items
+        in `{'root': {'items': []}}`
+        """
         response = await self.load_document_by_url(url, **request_params)
         if response is not None and response.ok:
             try:
@@ -96,9 +128,85 @@ class DocumentEdition:
                 self.errors.append("Failed to parse JSON response")
                 return None
             else:
-                return await self.clean(pandas.DataFrame(data), {'url': url})
-        return None  
+                # Get the document type via the headers e.g application/csv
+                content_type = response.headers.get('Content-Type', '')
+
+                if 'application/json' not in content_type:
+                    self.errors.append(
+                        "Unhandled document type. Valid types are: json")
+                    return None
+
+                if entry_key is not None:
+                    # Override the data with the entry key
+                    # since we do not really care about the
+                    # root structure
+                    keys = entry_key.split('.')
+                    for key in keys:
+                        data = data.get(key, {})
+
+                if isinstance(data, dict):
+                    self.errors.append(
+                        'Trying to build data from a dict? If this is not '
+                        'intended, please provide an entry key'
+                    )
+                    return None
+
+                try:
+                    # By any means, if the data is not valid, pandas
+                    # will also automatically raise an error
+                    df = pandas.DataFrame(data)
+                    print(df)
+                except:
+                    self.errors.append(
+                        "Failed to create DataFrame from JSON data")
+                else:
+                    return await self.clean(df, {'url': url})
+        return None
 
 
 class DocumentTransform:
-    pass
+    """This is the main class that handles live document
+    aka data transformation"""
+
+    def __init__(self):
+        self.document_id: str | None = None
+        self.current_document: Document | None = None
+        self.initial_dataframe: pandas.DataFrame | None = None
+
+    @property
+    def to_dict(self) -> str | None:
+        if self.current_document is not None:
+            return self.current_document.content.to_dict(orient='records', force_ascii=False)
+        return None
+
+    async def load_document(self, document: Document):
+        self.current_document = document
+        # Since the Document dataclass only contains the partial data
+        # contained in the whole dataset, we need to load the original
+        # dataset from memory
+        self.initial_dataframe = cache.get(
+            self.current_document.document_id + '-raw', None)
+
+    async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] = [], select: list[str] = []):
+        """Artificially create a foreign key between two documents. The end
+        user will then be able to view documents who are not merged as one
+
+        * `lh_document`: The left-hand document
+        * `rh_document`: The right-hand document
+        * `relationship_fields`: The fields to use for the relationship
+        * `select`: The fields to select from the documents
+        """
+        return NotImplemented
+
+    async def merge_documents(self, *documents):
+        """Merge multiple documents into one using the
+        initial document as a base"""
+        return NotImplemented
+
+    async def transform_data_types(self, datatypes: dict[str, str]):
+        """Enables the document owner to indicate what type of
+        data types are present in the document"""
+        accepted_data_types = [
+            'String', 'Number', 'Boolean', 'Date',
+            'Datetime', 'Array', 'Dict'
+        ]

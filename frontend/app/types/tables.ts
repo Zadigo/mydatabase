@@ -16,7 +16,7 @@ export interface TableDocument extends _BaseDatetimes {
   /**
    * The data contained within that sheet
    */
-  data: DocumentData[]
+  // data: DocumentData[]
 }
 
 export interface Table extends _BaseDatetimes {

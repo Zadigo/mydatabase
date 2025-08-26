@@ -2,6 +2,10 @@ import type { DocumentData, Table, TableComponent } from '~/types'
 import { EditorTablesDataTable } from '#components'
 import type { Component } from 'vue'
 
+export {
+  useTableWebocketManager
+} from './ws_manager'
+
 export type DefaultColumnOption = 'visible' | 'editable' | 'sortable'
 
 export interface ColumnOptions {
@@ -136,8 +140,9 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
     'graph-table': EditorTablesDataTable
   }
 
+  const tableValue = unref(table)
+  
   const displayComponent = computed(() => {
-    const tableValue = unref(table)
     return tableValue ? componentMapping[tableValue.component] : undefined
   })
 

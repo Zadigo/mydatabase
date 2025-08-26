@@ -22,9 +22,10 @@ application = ProtocolTypeRouter({
     'http': django_asgi_application,
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
-            JWTTokenAuthMiddleware(
-                URLRouter(tabledocuments_urlpatterns)
-            )
+            URLRouter(tabledocuments_urlpatterns)
+            # JWTTokenAuthMiddleware(
+            #     URLRouter(tabledocuments_urlpatterns)
+            # )
         )
     )
 })
