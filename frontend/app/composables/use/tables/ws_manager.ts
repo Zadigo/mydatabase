@@ -22,7 +22,7 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
   const tableColumnsStore = useTableColumnsStore()
   const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
 
-  const wsobject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
+  const wsObject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
     onConnected(ws) {
       ws.send(stringify({ action: 'idle_connect' }))
@@ -56,7 +56,7 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
 
   function loadDataViaId() {
     if (editableTableRef.value && selectedDocument.value) {
-      wsobject.send(stringify({
+      wsObject.send(stringify({
         action: 'load_via_id',
         table_id: editableTableRef.value?.id,
         document: {
@@ -68,12 +68,12 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
   }
 
   onMounted(() => {
-    wsobject.open()
+    wsObject.open()
     loadDataViaId()
   })
 
   onUnmounted(() => {
-    wsobject.close()
+    wsObject.close()
   })
 
   /**
@@ -88,6 +88,6 @@ export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>
   })
 
   return {
-    wsobject
+    wsObject
   }
 }

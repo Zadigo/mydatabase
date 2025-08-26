@@ -80,8 +80,9 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                 await self.send_error(
                     f"Could not load document: {','.join(self.document_edition.errors)}"
                 )
-        elif action == 'edit_data':
+        elif action == 'edit':
             subaction = content['subaction']
             accepted_subactions = ['visible_columns', 'sortable_columns', 'editable_columns']
+            print('acceptable')
         else:
             await self.send_error(f'Unknown action: {action}')

@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { useWebsocketMessage } from '~/composables/use'
+
 const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
 

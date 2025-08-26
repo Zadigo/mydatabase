@@ -71,7 +71,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   }
 })
 
-export type DefaultColumnOption = 'visible' | 'editable' | 'sortable'
+export type DefaultColumnOption = 'visible' | 'editable' | 'sortable' | 'searchable'
 
 export interface ColumnOptions {
   name: string
@@ -164,6 +164,10 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     column.columnType = columnType
   }
 
+  function toggleConstraint(column: ColumnTypeOptions, constraint: 'unique' | 'nullable') {
+    column[constraint] = !column[constraint]
+  }
+
   return {
     /**
      * The names of the columns in the table
@@ -185,6 +189,15 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     /**
      * Change the type for the given column
      */
-    changeTypeOption
+    changeTypeOption,
+    /**
+     * Change the constraint type of the column
+     */
+    toggleConstraint
+  }
+}, {
+  persist: {
+    pick: ['columnNames', 'columnOptions', 'columnTypeOptions'],
+    storage: sessionStorage
   }
 })

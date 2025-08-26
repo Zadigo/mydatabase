@@ -96,8 +96,6 @@ in your queries. Here is the list of built-in functions that are found on any da
     - `MD5`: Returns the MD5 hash of a string.
     - `SHA256`: Returns the SHA256 hash of a string.
     - `SHA512`: Returns the SHA512 hash of a string.
-    - `BLAKE2B`: Returns the BLAKE2B hash of a string.
-    - `BLAKE3`: Returns the BLAKE3 hash of a string.
 
 The functions to apply on a column are saved in the Django database as `column_name.function_name`. For example, on a column
 called `firstname` on which we want to apply an `UPPER` function, we would save it as `firstname.upper`.

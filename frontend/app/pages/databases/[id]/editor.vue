@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import { useWebsocketMessage } from '~/composables/use'
 import { useTableWebocketManager } from '~/composables/use/tables'
 
 definePageMeta({
@@ -57,8 +58,8 @@ definePageMeta({
   layout: 'details'
 })
 
-const tableEditorStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditorStore)
+const tableEditonStore = useTableEditionStore()
+const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditonStore)
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
 
@@ -69,5 +70,14 @@ provide('editableTableRef', editableTableRef)
 
 console.log('editableTableRef', editableTableRef.value)
 
-useTableWebocketManager(editableTableRef, selectedTableDocument)
+const { wsObject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
+
+const tableColumnsStore = useTableColumnsStore()
+const { columnOptions } = storeToRefs(tableColumnsStore)
+
+const { stringify } = useWebsocketMessage()
+
+watch(columnOptions, () => {
+  console.log(('edit'))
+})
 </script>
