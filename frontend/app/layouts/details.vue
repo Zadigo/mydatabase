@@ -18,7 +18,11 @@ const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
 
 const route = useRoute()
-const hasAside = computed(() => route.meta.title && (route.meta.title.startsWith('Database:') || route.meta.title.startsWith('Editor:')))
+const hasAside = computed(() => {
+  return route.meta.title && (
+    route.meta.title.startsWith('Database:') || route.meta.title.startsWith('Editor:') || route.meta.title.startsWith('Settings:')
+  )
+})
 
 const { id } = useRoute().params as { id: string }
 dbStore.routeId = Number(id)

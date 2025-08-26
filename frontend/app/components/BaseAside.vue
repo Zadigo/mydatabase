@@ -9,6 +9,7 @@
 
       <editor-aside-links v-if="route.meta.title && route.meta.title.startsWith('Editor:')" />
       <database-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Database:')" />
+      <settings-project-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Settings:')" />
     </div>
   </aside>
 </template>
