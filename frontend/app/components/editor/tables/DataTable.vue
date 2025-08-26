@@ -1,7 +1,6 @@
 <template>
   <section id="data-table">
-    {{ items }}
-    <nuxt-table v-if="items" :items="items" />
+    <nuxt-table v-if="items" :data="items" />
     <div v-else>
       <nuxt-skeleton class="h-10 w-full" />
       <nuxt-skeleton class="h-10 w-6/12" />

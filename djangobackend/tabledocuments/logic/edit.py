@@ -78,7 +78,7 @@ class DocumentEdition:
         # Return only a partial view of the dataframe
         # to the frontend
         partial: bool = options.get('partial', True)
-        partial_limit: int = options.get('partial_limit', 50)
+        partial_limit: int = options.get('partial_limit', 20)
 
         if partial:
             df = df.head(n=partial_limit)

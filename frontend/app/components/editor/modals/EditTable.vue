@@ -5,7 +5,7 @@
     </template>
 
     <template #content>
-      <div v-if="editableTableRef" class="space-y-4 p-4">
+      <div v-if="editableTableRef" class="space-y-4 p-4 overflow-y-scroll">
         <!-- Name -->
         <nuxt-input v-model="editableTableRef.name" class="w-full" placeholder="Table name" />
         <!-- Description -->

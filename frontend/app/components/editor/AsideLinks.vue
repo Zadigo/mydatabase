@@ -9,7 +9,7 @@
     <!-- Columns -->
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
       <template #default="{ column }">
-        <span class="text-sm">{{ column.name }}</span>
+        <span :title="column.name" class="text-sm">{{ truncate(column.name, 15) }}</span>
 
         <div id="actions">
           <nuxt-button size="sm" variant="subtle" @click="() => toggleOption(column, 'visible')">
@@ -41,5 +41,8 @@ const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
 
 const { selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
+console.log('Editor.AsideLinks', tableData.value)
 const { columnOptions, toggleOption } = useTableColumns(tableData.value)
+
+const { truncate } = useTruncateString()
 </script>
