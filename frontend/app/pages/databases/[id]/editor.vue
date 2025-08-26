@@ -58,7 +58,7 @@ definePageMeta({
 })
 
 const tableEditorStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData } = storeToRefs(tableEditorStore)
+const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditorStore)
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
 
@@ -69,5 +69,5 @@ provide('editableTableRef', editableTableRef)
 
 console.log('editableTableRef', editableTableRef.value)
 
-const { wsobject } = useTableWebocketManager(editableTableRef)
+const { wsobject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
 </script>

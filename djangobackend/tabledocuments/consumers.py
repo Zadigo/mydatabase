@@ -1,10 +1,10 @@
 import json
 from typing import Any
-
+import dataclasses
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.files import File
-from tabledocuments.logic.edit import DocumentEdition
+from tabledocuments.logic.edit import DocumentEdition, DocumentTransform
 from tabledocuments.models import TableDocument
 
 from djangobackend.consumer_mixins import BaseConsumerMixin
@@ -19,6 +19,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
         self.document_edition = DocumentEdition()
+        self.document_transform = DocumentTransform()
 
     async def connect(self):
         await self.accept()
@@ -42,7 +43,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
             document = await self.document_edition.load_json_document_by_url(content['url'])
             if document is not None:
                 await self.send_json({
-                    'action': 'url_loaded',
+                    'action': 'loaded_via_url',
                     'data': document.content.to_json(orient='records', force_ascii=False),
                     'document_id': document.document_id
                 })
@@ -63,9 +64,16 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         elif action == 'load_via_id':
             document = content['document']
             document = await self.document_edition.load_document_by_id(document['id'])
-            await self.send_json({
-                'action': 'data_loaded',
-                'data': document
-            })
+
+            if document and dataclasses.is_dataclass(document):
+                await self.document_transform.load_document(document)
+                await self.send_json({
+                    'action': 'loaded_via_id',
+                    'document_data': self.document_transform.stringify
+                })
+            else:
+                await self.send_error(
+                    f"Could not load document: {','.join(self.document_edition.errors)}"
+                )
         else:
             await self.send_error(f'Unknown action: {action}')

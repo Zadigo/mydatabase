@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-2">
     <!-- Select Table -->
-    <nuxt-select-menu v-model="selectedTableName" :items="availableTableNames" class="w-full" placeholder="Select a table" />
-    
+    <nuxt-select-menu v-model="selectedTableName" :items="availableTables" value-key="name" label-key="name" class="w-full" placeholder="Select a table" />
+
     <!-- Select Table Data -->
-    <nuxt-select-menu v-model="selectedTableDataName" :items="selectedTableDataNames" class="w-full" placeholder="Select a datasource" />
+    <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
     <!-- Columns -->
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
@@ -38,8 +38,8 @@
 
 <script setup lang="ts">
 const dbStore = useDatabasesStore()
-const { availableTableNames } = storeToRefs(dbStore)
+const { availableTables } = storeToRefs(dbStore)
 
-const { selectedTableName, selectedTable, selectedTableDataName, selectedTableDataNames, tableData } = storeToRefs(useTableEditionStore())
+const { selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 const { columnOptions, toggleOption } = useTableColumns(tableData.value)
 </script>

@@ -14,9 +14,9 @@ export interface TableDocument extends _BaseDatetimes {
    */
   name: string
   /**
-   * The data contained within that sheet
+   * The unique identifier for the document
    */
-  // data: DocumentData[]
+  document_uuid: string
 }
 
 export interface Table extends _BaseDatetimes {

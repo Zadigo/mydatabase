@@ -14,48 +14,45 @@ from tabledocuments.models import TableDocument
 
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
 
-PostReadTrigger: TypeAlias = dict[str, Callable[[
-    str, pandas.DataFrame], pandas.DataFrame]]
+PostReadTrigger: TypeAlias = dict[
+    str, 
+    Callable[[
+        str, pandas.DataFrame
+    ], 
+    pandas.DataFrame
+]]
 
 
 @dataclasses.dataclass
 class Document:
-    document_id: str
+    document_cache_key: str
     content: pandas.DataFrame
     metadata: dict[str, str | bool] = dataclasses.field(default_factory=dict)
 
     def __hash__(self):
-        return hash((self.document_id))
+        return hash((self.document_cache_key))
 
 
 class DocumentEdition:
     """A classs that preloads and reads a document
     for edition in the frontend"""
 
-    def __init__(self, **options: str | bool | list[str]):
+    def __init__(self):
         self.errors: list[str] = []
         self.columns: list[str] = []
 
-        if isinstance(options.get('columns'), list):
-            self.columns = options['columns']
-
-        # Return only a partial view of the dataframe
-        self.partial: bool = options.get('partial', False)
-        self.partial_limit: int = options.get('partial_limit', 50)
-
         # Triggers to run on the columns of the dataframe when the
         # read is complete (e.g. transform data operations etc.)
-        self.column_triggers: PostReadTrigger = options.get(
-            'post_read_triggers', {})
+        self.column_triggers: PostReadTrigger = {}
 
-    async def finalize(self, document_id: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
+    async def finalize(self, document_cache_key: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
         metadata['date'] = str(datetime.datetime.now(tz=pytz.UTC))
-        return Document(document_id=document_id, content=df, metadata=metadata)
+        return Document(document_cache_key=document_cache_key, content=df, metadata=metadata)
 
-    async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
+    async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}, **options: dict):
         # Before running document operations,
         # save it to the cache with a unique key
-        document_id = f"document_{get_random_string(length=10)}"
+        document_cache_key = f"document_{get_random_string(length=10)}"
 
         # Some documents might have invalid characters in their
         # column title. Deal with this here.
@@ -64,7 +61,8 @@ class DocumentEdition:
 
         # Cache the whole document to prevent reading
         # the whole file all the time
-        cache.set(document_id + '-raw', df, timeout=(24 * 60 * 60))  # 24 hour
+        cache.set(document_cache_key + '-raw', df,
+                  timeout=(24 * 60 * 60))  # 24 hour
 
         if self.columns:
             df = df[self.columns]
@@ -73,14 +71,19 @@ class DocumentEdition:
             for column, trigger in self.column_triggers.items():
                 df = trigger(column, df)
             cache.set(
-                document_id + '-transformed',
+                document_cache_key + '-transformed',
                 df, timeout=(60 * 60)
             )  # 1 hour
 
-        if self.partial:
-            df = df.head(n=self.partial_limit)
+        # Return only a partial view of the dataframe
+        # to the frontend
+        partial: bool = options.get('partial', True)
+        partial_limit: int = options.get('partial_limit', 50)
 
-        return await self.finalize(document_id=document_id, df=df, metadata=metadata)
+        if partial:
+            df = df.head(n=partial_limit)
+
+        return await self.finalize(document_cache_key=document_cache_key, df=df, metadata=metadata)
 
     async def load_document_by_id(self, id: int | str) -> Document | bool:
         """Loads the data in a document using the database"""
@@ -94,8 +97,26 @@ class DocumentEdition:
                     'The document does not have a file associated with it')
                 return False, None
 
-            return True, pandas.read_csv(document.file.path)
-
+            try:
+                # Some csv files contain ";" and Pandas will throw an
+                # error if this separator is not explicity indicated since it
+                # logically expects commas.
+                # So try to load the document using the classic ","
+                # separator if not got to ";"
+                return True, pandas.read_csv(document.file.path)
+            except:
+                try:
+                    return True, pandas.read_csv(document.file.path, sep=';')
+                except:
+                    # Accept *ONLY* "," or ";". If pandas cannot read the separator
+                    # we are not going to waste time trying to guess or get it.
+                    # The onus is on the user to ensure that the file is either
+                    # comma or semicolon separated
+                    self.errors.append(
+                        "File does not contain a valid separator. "
+                        "Accepted separators are: ',' or ';'"
+                    )
+                    return False, None
         is_valid, df = await get_document()
 
         if not is_valid:
@@ -169,23 +190,28 @@ class DocumentTransform:
     aka data transformation"""
 
     def __init__(self):
-        self.document_id: str | None = None
         self.current_document: Document | None = None
         self.initial_dataframe: pandas.DataFrame | None = None
 
     @property
-    def to_dict(self) -> str | None:
+    def can_transform(self):
+        return self.current_document is not None
+
+    @property
+    def stringify(self) -> str:
+        """Returns a string version of the data which can
+        then be sent over websockets essentially"""
         if self.current_document is not None:
-            return self.current_document.content.to_dict(orient='records', force_ascii=False)
-        return None
+            return self.current_document.content.to_json(orient='records', force_ascii=False)
+        return ''
 
     async def load_document(self, document: Document):
         self.current_document = document
         # Since the Document dataclass only contains the partial data
         # contained in the whole dataset, we need to load the original
         # dataset from memory
-        self.initial_dataframe = cache.get(
-            self.current_document.document_id + '-raw', None)
+        cache_key = self.current_document.document_cache_key + '-raw'
+        self.initial_dataframe = cache.get(cache_key, None)
 
     async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] = [], select: list[str] = []):
         """Artificially create a foreign key between two documents. The end

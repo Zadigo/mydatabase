@@ -12,6 +12,7 @@ export const useDatabasesStore = defineStore('databases', () => {
 
   const routeId = ref<number | null>(null)
   const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
+  const availableTables = computed(() => currentDatabase.value?.tables || [])
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
 
   async function fetch() {
@@ -53,6 +54,11 @@ export const useDatabasesStore = defineStore('databases', () => {
      * The currently selected database
      */
     currentDatabase,
+    /**
+     * List of available tables in the current database
+     * as objects
+     */
+    availableTables,
     /**
      * The names of the tables in the current database
      */

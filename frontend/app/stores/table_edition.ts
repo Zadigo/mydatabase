@@ -16,11 +16,12 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const tableDocuments = computed(() => selectedTable.value?.documents || [])
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
-  const selectedTableDataName = ref<string>()
-  const selectedTableDataNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
+  const selectedTableDocumentName = ref<string>()
+  const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
+  const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
 
-  const tableData = reactive<DocumentData[]>([])
-  const hasData = computed(() => tableData.length > 0)
+  const tableData = ref<DocumentData[]>([])
+  const hasData = computed(() => tableData.value.length > 0)
 
   return {
     /**
@@ -35,11 +36,16 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
      * The name of the selected document
      * for the current table
      */
-    selectedTableDataName,
+    selectedTableDocumentName,
     /**
      * List of available documents by name
+     * @description This is useful essentially for autocompletion
      */
-    selectedTableDataNames,
+    selectedTableDocumentNames,
+    /**
+     * The currently selected document as an object
+     */
+    selectedTableDocument,
     /**
      * The documents contained within the selected table
      */
@@ -60,7 +66,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   }
 }, {
   persist: {
-    pick: ['selectedTableName', 'selectedTableDataName'],
+    pick: ['selectedTableName', 'selectedTableDocumentName'],
     storage: sessionStorage
   }
 })
