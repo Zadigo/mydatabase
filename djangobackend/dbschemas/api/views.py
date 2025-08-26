@@ -1,6 +1,7 @@
 from dbschemas.api.serializers import DatabaseSchemaSerializer
 from dbschemas.models import DatabaseSchema
-from rest_framework.generics import CreateAPIView, ListAPIView, DestroyAPIView
+from rest_framework.generics import (CreateAPIView, DestroyAPIView,
+                                     ListAPIView, RetrieveUpdateAPIView)
 
 
 class ListDatabases(ListAPIView):
@@ -16,6 +17,12 @@ class CreateDatabase(CreateAPIView):
 
 
 class DeleteDatabase(DestroyAPIView):
+    queryset = DatabaseSchema.objects.all()
+    serializer_class = DatabaseSchemaSerializer
+    permission_classes = []
+
+
+class UpdateDatabase(RetrieveUpdateAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
     permission_classes = []

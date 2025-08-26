@@ -10,6 +10,11 @@ urlpatterns = [
         name='delete_database'
     ),
     re_path(
+        r'^(?P<pk>\d+)$',
+        views.UpdateDatabase.as_view(),
+        name='retrieve_update_database'
+    ),
+    re_path(
         r'^create$',
         views.CreateDatabase.as_view(),
         name='create_database'

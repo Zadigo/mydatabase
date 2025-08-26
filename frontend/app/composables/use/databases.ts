@@ -28,9 +28,9 @@ export function useDatabaseCreation() {
     })
 
     if (data.value) {
+      toggleCreationModal()
       newDatabase.value = { name: '', description: '' }
       dbStore.databases.push(data.value)
-      toggleCreationModal(true)
     }
   }
 
@@ -48,5 +48,50 @@ export function useDatabaseCreation() {
      * Toggle the database creation modal
      */
     toggleCreationModal
+  }
+}
+
+
+/**
+ * Composable used to edit an existing database
+ * e.g name, description etc.
+ * @param database The database to edit
+ */
+export function useEditDatabase(database: Ref<Database | undefined>) {
+  const config = useRuntimeConfig()
+
+  const newDatabaseName = ref<string>(database.value?.name || '')
+
+  const { data, status, execute } = useFetch<Database>(`/v1/databases/${database.value?.id}`, {
+    immediate: false,
+    baseURL: config.public.prodDomain,
+    body: {
+      name: newDatabaseName.value
+    }
+  })
+
+  watchDebounced(newDatabaseName, async () => {
+    await execute()
+
+    if (data.value) {
+      database.value = data.value
+    }
+  }, {
+    debounce: 1000,
+    maxWait: 5000
+  })
+
+  const isUpdating = computed(() => status.value === 'pending')
+
+  return {
+    /**
+     * The updated database information
+     */
+    updatedDatabase: data,
+    /**
+     * Ref that holds the new database name
+     */
+    newDatabaseName,
+    isUpdating
   }
 }

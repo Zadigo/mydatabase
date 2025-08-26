@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 
 
-class TestListDatabases(APITestCase):
+class TestApiDatabases(APITestCase):
     fixtures = ['fixtures/databases']
 
     def test_list_databases(self):
@@ -36,6 +36,22 @@ class TestListDatabases(APITestCase):
 
         self.assertIn('name', data)
         self.assertEqual(data['name'], 'New Database')
+
+    def test_update_database(self):
+        instance = DatabaseSchema.objects.first()
+        path = reverse('dbschemas:retrieve_update_database',
+                       args=[instance.pk])
+        response = self.client.patch(path, {'name': 'Updated Database'})
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertIsInstance(data, dict)
+
+        self.assertIn('name', data)
+        self.assertEqual(data['name'], 'Updated Database')
+
+        self.assertEqual(response.status_code, 200)
 
     def test_delete_database(self):
         instance = DatabaseSchema.objects.first()

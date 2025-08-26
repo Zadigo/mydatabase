@@ -27,8 +27,14 @@ export interface Table extends _BaseDatetimes {
   name: string
   /**
    * A description for the table
+   * @default null
    */
   description: string
+  /**
+   * The data that the document is expected to return
+   * @default null
+   */
+  active_document_datasource: string | null
   /**
    * The component used to display the data for the given table
    * @default "data-table"

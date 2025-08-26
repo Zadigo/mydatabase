@@ -32,7 +32,11 @@ urlpatterns = [
         name='token_refresh'
     ),
     path(
-        'v1/databases',
+        'v1/tables/',
+        include('dbtables.urls')
+    ),
+    path(
+        'v1/databases/',
         include('dbschemas.urls')
     ),
     path(

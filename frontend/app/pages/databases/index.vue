@@ -78,9 +78,22 @@ definePageMeta({
 })
 
 const databasesStore = useDatabasesStore()
-const { search, searched } = storeToRefs(databasesStore)
+  const { search, searched } = storeToRefs(databasesStore)
 
 databasesStore.fetch()
 
 const { showModal, newDatabase, create, toggleCreationModal } = useDatabaseCreation()
+
+// Since the data are persisted, we should reset
+// them to undefined when the user makes it back
+// on this page. Other solution, persist some of
+// the metadata in firebase
+const tableEditionStore = useTableEditionStore()
+tableEditionStore.selectedTableName = undefined
+tableEditionStore.selectedTableDocumentName = undefined
+
+const tableColumnsStore = useTableColumnsStore()
+tableColumnsStore.columnNames = []
+tableColumnsStore.columnOptions = []
+tableColumnsStore.columnTypeOptions = []
 </script>

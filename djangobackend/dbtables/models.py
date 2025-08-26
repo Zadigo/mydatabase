@@ -17,11 +17,22 @@ class DatabaseTable(models.Model):
     )
     database_schema = models.ForeignKey(
         'dbschemas.DatabaseSchema',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        help_text='The database that owns this table'
+    )
+    active_document_datasource = models.UUIDField(
+        help_text='The data that this table is expected to return',
+        blank=True,
+        null=True
     )
     documents = models.ManyToManyField(
         'tabledocuments.TableDocument',
-        blank=True
+        blank=True,
+        help_text=(
+            'The documents associated with this table. A  table '
+            'can have multiple associations but will only have one '
+            'active document as a datasource.'
+        )
     )
     component = models.CharField(
         max_length=100,
