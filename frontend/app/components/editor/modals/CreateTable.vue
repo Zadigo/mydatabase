@@ -16,7 +16,8 @@
         <nuxt-button @click="() => { show = false }">
           Cancel
         </nuxt-button>
-        <nuxt-button :disabled="!dbStore.hasTables" @click="() => { create() }">
+
+        <nuxt-button @click="() => { create() }">
           Create
         </nuxt-button>
       </div>
@@ -30,8 +31,6 @@ import { useCreateTable } from '~/composables/use/tables';
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'udpate:modelValue': [] }>()
 const show = useVModel(props, 'modelValue', emit, { defaultValue: true })
-
-const dbStore = useDatabasesStore()
 
 /**
  * Create table

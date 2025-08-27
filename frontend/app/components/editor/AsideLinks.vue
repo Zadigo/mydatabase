@@ -3,7 +3,7 @@
     <!-- Select Table -->
     <nuxt-select-menu v-model="selectedTableName" :items="availableTables" value-key="name" label-key="name" class="w-full" placeholder="Select a table" />
 
-    <nuxt-button variant="soft" color="info" @click="() => { }">
+    <nuxt-button variant="soft" color="info" @click="() => { toggleCreateDocumentModal() }">
       <icon name="i-lucide-plus" />
       Create table
     </nuxt-button>
@@ -64,6 +64,14 @@ console.log('Editor.AsideLinks', tableData.value)
 const tableColumnsStore = useTableColumnsStore()
 const { columnOptions } = storeToRefs(tableColumnsStore)
 
+const queryParams = useUrlSearchParams() as { table: string }
+
+watch(selectedTableDocumentName, (value) => {
+  if (value) {
+    queryParams.table = useToString(selectedTable.value?.id || '').value
+  }
+})
+
 /**
  * Fix titles 
  */
@@ -80,5 +88,5 @@ const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
  * Create table
  */
 
-const { showModal: showCreateTableModal } = useCreateTable()
+const { showModal: showCreateTableModal, toggleCreateDocumentModal } = useCreateTable()
 </script>

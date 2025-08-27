@@ -5,6 +5,8 @@ export const useDatabasesStore = defineStore('databases', () => {
   // const databases = reactive<Database[]>(databasesFixture)
   const databases = ref<Database[]>([])
 
+  console.log('databases', databases.value)
+
   const search = ref<string>('')
   const searched = computed(() => {
     return databases.value.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))

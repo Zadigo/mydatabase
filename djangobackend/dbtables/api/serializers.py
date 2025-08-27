@@ -26,24 +26,26 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
         validated_data['database_schema'] = instance
         return validated_data
 
+
 class UploadFileSerializer(serializers.Serializer):
     """Serializer used to validate file uploads."""
 
-    name = serializers.CharField(max_length=255, required=False)
-    file = serializers.FileField(required=False)
-    url = serializers.URLField(required=False)
-    google_sheet_id = serializers.CharField(required=False)
+    name = serializers.CharField(allow_blank=True, max_length=255)
+    file = serializers.FileField(allow_null=True)
+    url = serializers.URLField(allow_blank=True)
+    entry_key = serializers.ChartField(allow_null=True, required=False)
+    # google_sheet_id = serializers.CharField(allow_blank=True)
 
     def validate(self, data):
         name = data.get('name')
         file = data.get('file')
         url = data.get('url')
-        google_sheet_id = data.get('google_sheet_id')
+        # google_sheet_id = data.get('google_sheet_id')
 
         fields_are_none = [
             file is None,
             url is None,
-            google_sheet_id is None
+            # google_sheet_id is None
         ]
 
         if all(fields_are_none):
@@ -71,18 +73,30 @@ class UploadFileSerializer(serializers.Serializer):
         request = self._context['request']
         table_id = request.parser_context['kwargs']['pk']
 
+        # NOTE: Remove this for now because we do not
+        # have the logic yet to upload Google Sheets
+        # as a CSV to our backend
+        # validated_data.pop('google_sheet_id')
+
+        entry_key = None
+        if 'entry_key' in validated_data:
+            entry_key = validated_data.pop('entry_key')
+
         table = DatabaseTable.objects.get(id=table_id)
         document = TableDocument.objects.create(**validated_data)
         table.documents.add(document)
 
-        print(document.url)
-
         request_document_by_url.apply_async(
             args=[document.url],
             countdown=10,
-            link=create_csv_file_from_data.s(document.pk)
+            link=create_csv_file_from_data.s(document.pk, entry_key)
         )
         if document.url and document.file is None:
             print('apply_async')
 
         return document
+
+
+class CustomCharField(fields.CharField):
+    def run_validation(self, data):
+        return super().run_validation(data)

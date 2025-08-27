@@ -50,44 +50,47 @@
 </template>
 
 <script setup lang="ts">
-import { useWebsocketMessage } from '~/composables/use'
-import { useTableWebocketManager } from '~/composables/use/tables'
+// import { useWebsocketMessage } from '~/composables/use'
+import { useEditorPageRefresh, useTableWebocketManager } from '~/composables/use/tables'
 
 definePageMeta({
   title: 'Editor: Table',
   layout: 'details'
 })
 
-const tableEditonStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditonStore)
+/**
+ * Edition
+ */
+
+const tableEditionStore = useTableEditionStore()
+const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditionStore)
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
 
-const queryParams = useUrlSearchParams() as { table: string }
-queryParams.table = useToString(selectedTable.value?.id || '').value
+/**
+ * Page refreshing
+ */
 
-const dbStore = useDatabasesStore()
-const { availableTables } = storeToRefs(dbStore)
+useEditorPageRefresh(selectedTable)
 
 /**
- * Automatically load the selected table when
- * the table query parameter is in the url
+ * Websocket
  */
-onMounted(() => {
-  console.log('params.table', queryParams.table)
-  if (queryParams.table) {
-    const tableToView = availableTables.value.find(table => table.id === useToNumber(queryParams.table).value)
-    console.log('tableToView.value', tableToView.value)
-  }
 
-  const params = useRoute().params as { id: string }
-  const id = useToNumber(params.id)
+const { wsObject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
 
-  if (!dbStore.currentDatabase) {
-    const databaseToView = dbStore.databases.find(database => database.id === id.value)
-    console.log('databaseToView.value', databaseToView.value)
-  }
-})
+const tableColumnsStore = useTableColumnsStore()
+const { columnOptions } = storeToRefs(tableColumnsStore)
+
+// const { stringify } = useWebsocketMessage()
+
+// watch(columnOptions, () => {
+//   console.log(('edit'))
+// })
+
+/**
+ * Provides
+ */
 
 provide('hasData', hasData)
 provide('tableData', tableData)
@@ -95,15 +98,4 @@ provide('hasDocuments', hasDocuments)
 provide('editableTableRef', editableTableRef)
 
 console.log('editableTableRef', editableTableRef.value)
-
-const { wsObject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
-
-const tableColumnsStore = useTableColumnsStore()
-const { columnOptions } = storeToRefs(tableColumnsStore)
-
-const { stringify } = useWebsocketMessage()
-
-watch(columnOptions, () => {
-  console.log(('edit'))
-})
 </script>

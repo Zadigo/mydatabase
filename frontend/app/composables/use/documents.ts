@@ -5,6 +5,7 @@ export interface NewDocument {
   url: string
   google_sheet_id: string
   file: null
+  entry_key: null
 }
 
 /**
@@ -17,7 +18,8 @@ export function useCreateDocument() {
     name: '',
     url: '',
     google_sheet_id: '',
-    file: null
+    file: null,
+    entry_key: null
   })
 
   const dbStore = useDatabasesStore()

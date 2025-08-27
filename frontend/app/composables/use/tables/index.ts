@@ -1,5 +1,5 @@
 import { EditorTablesDataTable } from '#components'
-import type { Component } from 'vue'
+import type { Component, MaybeRef } from 'vue'
 import type { Database, Table, TableComponent } from '~/types'
 
 export {
@@ -7,7 +7,8 @@ export {
 } from './ws_manager'
 
 /**
- * Composable used to working with a single table
+ * Composable used to working with a single table such as
+ * table edition the display component to show etc.
  * @param table The table to manipulate
  */
 export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Table | undefined> | undefined) {
@@ -22,7 +23,7 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
     return tableValue ? componentMapping[tableValue.component] : undefined
   })
 
-  const [showEditTableDrawer, toggleEditTableDrawer] = useToggle()
+  const [ showEditTableDrawer, toggleEditTableDrawer ] = useToggle()
   const editableTableRef = toRef(table) // TODO: Create a unique Ref that is not linked to the original data because when we change the values here it changes the orginal Ref too
 
   return {
@@ -48,10 +49,45 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
 }
 
 /**
+ * Composable that handles how the data is re-integrated
+ * in the stores when the page is refreshsed (refreshing the
+ * page usually makes the data null)
+ * @param currentTable The current table being viewed/edited
+ */
+export function useEditorPageRefresh(currentTable: MaybeRef<Table | undefined> | ComputedRef<Table | undefined> | undefined) {
+  const dbStore = useDatabasesStore()
+  const { availableTables } = storeToRefs(dbStore)
+
+  const queryParams = useUrlSearchParams() as { table: string }
+  queryParams.table = useToString(currentTable.value?.id || '').value
+
+  onMounted(() => {
+    console.log('params.table', queryParams.table)
+
+    // Load the table to view if specified in the
+    // the "table" query
+    if (queryParams.table) {
+      const tableToView = availableTables.value.find(table => table.id === useToNumber(queryParams.table).value)
+      console.log('tableToView.value', tableToView.value)
+    }
+
+    // Reload database data on page reload
+    const params = useRoute().params as { id: string }
+    const id = useToNumber(params.id)
+
+    if (!dbStore.currentDatabase) {
+      const databaseToView = dbStore.databases.find(database => database.id === id.value)
+      console.log('databaseToView.value', databaseToView.value)
+    }
+  })
+}
+
+/**
  * @todo Zod
  */
 export interface NewTable {
   name: string
+  database: number | undefined
 }
 
 /**
@@ -60,13 +96,18 @@ export interface NewTable {
 export function useCreateTable() {
   const dbStore = useDatabasesStore()
 
-  const showModal = ref<boolean>(false)
-  const newTable = ref<NewTable>()
+  const [showModal, toggleCreateDocumentModal] = useToggle()
+  const newTable = ref<NewTable>({
+    name: '',
+    database: undefined
+  })
 
-  function create() {
-    const { data } = useAsyncData('createDocument', async () => {
+  async function create() {
+    newTable.value.database = dbStore.currentDatabase?.id
+
+    const { data } = await useAsyncData('createTable', async () => {
       return Promise.all([
-        $fetch<{ name: string }>(`/v1/tables/create`, {
+        $fetch<Table>(`/v1/tables/create`, {
           method: 'POST',
           baseURL: useRuntimeConfig().public.prodDomain,
           body: newTable.value
@@ -79,16 +120,19 @@ export function useCreateTable() {
     })
 
     if (data.value) {
-      const [createData, databaseUpdateData] = data.value
-      console.log(createData)
-      console.log(databaseUpdateData)
-      // dbStore.databases = databaseUpdateData
+      const [newTableData, updatedDatabase] = data.value
+      showModal.value = false
+      newTable.value = { name: '', database: undefined }
+      // toggleCreateDocumentModal()
+      // dbStore.databases = updatedDatabase
+      console.log(updatedDatabase)
     }
   }
 
   return {
     showModal,
     newTable,
+    toggleCreateDocumentModal,
     create
   }
 }

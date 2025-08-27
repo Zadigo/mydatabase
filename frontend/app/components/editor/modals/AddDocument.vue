@@ -9,9 +9,13 @@
         <nuxt-alert v-if="!dbStore.hasTables" class="mb-5" title="Missing tables" description="Your database currently has no tables. You will nened to create one in order to upload a file" />
 
         <!-- Name -->
-        <nuxt-input v-model="newDocument.name" class="w-full" placeholder="Document Name" />
+        <nuxt-input v-model="newDocument.name" variant="subtle" class="w-full" placeholder="Document Name" />
 
-        <!-- CSV -->
+        <!-- Entry Key -->
+        <p class="mb-3 text-sm font-light mt-3">If applicable, for a JSON object specify the entry key to extract the relevant data from</p>
+        <nuxt-input v-model="newDocument.entry_key" variant="subtle" class="w-full" placeholder="Entry Key e.g. results, data" />
+
+        <!-- CSV/Json -->
         <nuxt-file-upload v-model="newDocument.file" class="w-full min-h-48" accept=".csv,.json,.xlsx" />
       </div>
 
@@ -19,8 +23,9 @@
 
       <!-- Other -->
       <div class="space-y-2">
-        <nuxt-input v-model="newDocument.url" class="w-full" placeholder="Via url" />
-        <nuxt-input v-model="newDocument.google_sheet_id" class="w-full" placeholder="Google Sheet ID" />
+        <p class="mb-3 text-sm font-light">You can also provide a URL or a Google Sheet ID to import data from external sources.</p>
+        <nuxt-input v-model="newDocument.url" class="w-full" placeholder="Url hosting the CSV or JSON file" />
+        <nuxt-input v-model="newDocument.google_sheet_id" :disabled="true" class="w-full" placeholder="Google Sheet ID" />
       </div>
     </template>
 
