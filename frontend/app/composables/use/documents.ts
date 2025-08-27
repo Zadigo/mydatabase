@@ -1,3 +1,5 @@
+import type { Database } from "~/types"
+
 export interface NewDocument {
   name: string
   url: string
@@ -18,9 +20,44 @@ export function useCreateDocument() {
     file: null
   })
 
+  const dbStore = useDatabasesStore()
+  const tableEditionStore = useTableEditionStore()
+  const { selectedTable } = storeToRefs(tableEditionStore)
+
+  // const { data, execute } = useFetch(`/v1/tables/${selectedTable.value?.id}/upload`, {
+  //   baseURL: useRuntimeConfig().public.prodDomain,
+  //   method: 'POST',
+  //   body: newDocument.value,
+  //   immediate: false
+  // })
+  
+  function create() {
+    const { data } = useAsyncData('createDocument', async () => {
+      return Promise.all([
+        $fetch<{ name: string }>(`/v1/tables/${selectedTable.value?.id}/upload`, {
+          method: 'POST',
+          baseURL: useRuntimeConfig().public.prodDomain,
+          body: newDocument.value
+        }),
+        $fetch<Database>(`/v1/databases/${dbStore.currentDatabase?.id}`, {
+          method: 'GET',
+          baseURL: useRuntimeConfig().public.prodDomain
+        })
+      ])
+    })
+
+    if (data.value) {
+      const [createData, databaseUpdateData] = data.value
+      console.log(createData)
+      console.log(databaseUpdateData)
+      // dbStore.databases = databaseUpdateData
+    }
+  }
+
   return {
     newDocument,
     showAddDocumentModal,
+    create,
     toggleShowAddDocumentModal
   }
 }

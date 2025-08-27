@@ -1,7 +1,8 @@
 from collections import namedtuple
 from dbtables.models import DatabaseTable
+from dbschemas.models import DatabaseSchema
 from django.utils.crypto import get_random_string
-from rest_framework import serializers
+from rest_framework import fields, serializers
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.models import TableDocument
 from dbtables.tasks import request_document_by_url, create_csv_file_from_data
@@ -9,11 +10,21 @@ from dbtables.tasks import request_document_by_url, create_csv_file_from_data
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
     documents = SimpleDocumentSerializer(many=True, read_only=True)
+    database = fields.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = DatabaseTable
         exclude = ['database_schema']
 
+    def validate(self, validated_data):
+        try:
+            database_id = validated_data.pop('database')
+            instance = DatabaseSchema.objects.get(id=database_id)
+        except:
+            raise serializers.ValidationError('Database not found')
+
+        validated_data['database_schema'] = instance
+        return validated_data
 
 class UploadFileSerializer(serializers.Serializer):
     """Serializer used to validate file uploads."""

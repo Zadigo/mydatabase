@@ -1,6 +1,6 @@
 import { EditorTablesDataTable } from '#components'
 import type { Component } from 'vue'
-import type { Table, TableComponent } from '~/types'
+import type { Database, Table, TableComponent } from '~/types'
 
 export {
   useTableWebocketManager
@@ -44,5 +44,51 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
      * Function to toggle the visibility of the edit table drawer
      */
     toggleEditTableDrawer
+  }
+}
+
+/**
+ * @todo Zod
+ */
+export interface NewTable {
+  name: string
+}
+
+/**
+ * Composable used to create a new table
+ */
+export function useCreateTable() {
+  const dbStore = useDatabasesStore()
+
+  const showModal = ref<boolean>(false)
+  const newTable = ref<NewTable>()
+
+  function create() {
+    const { data } = useAsyncData('createDocument', async () => {
+      return Promise.all([
+        $fetch<{ name: string }>(`/v1/tables/create`, {
+          method: 'POST',
+          baseURL: useRuntimeConfig().public.prodDomain,
+          body: newTable.value
+        }),
+        $fetch<Database>(`/v1/databases/${dbStore.currentDatabase?.id}`, {
+          method: 'GET',
+          baseURL: useRuntimeConfig().public.prodDomain
+        })
+      ])
+    })
+
+    if (data.value) {
+      const [createData, databaseUpdateData] = data.value
+      console.log(createData)
+      console.log(databaseUpdateData)
+      // dbStore.databases = databaseUpdateData
+    }
+  }
+
+  return {
+    showModal,
+    newTable,
+    create
   }
 }

@@ -1,4 +1,4 @@
-import type { DocumentData, Table } from '~/types'
+import type { DocumentData } from '~/types'
 
 /**
  * Store used to manage the state of table edition

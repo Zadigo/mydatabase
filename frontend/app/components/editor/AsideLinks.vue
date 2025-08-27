@@ -3,11 +3,16 @@
     <!-- Select Table -->
     <nuxt-select-menu v-model="selectedTableName" :items="availableTables" value-key="name" label-key="name" class="w-full" placeholder="Select a table" />
 
+    <nuxt-button variant="soft" color="info" @click="() => { }">
+      <icon name="i-lucide-plus" />
+      Create table
+    </nuxt-button>
+
     <!-- Select Table Data -->
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
     <!-- Add Data -->
-    <nuxt-button @click="() => { toggleShowAddDocumentModal() }">
+    <nuxt-button variant="soft" color="info" @click="() => { toggleShowAddDocumentModal() }">
       <icon name="i-lucide-file-plus-2" />
       Add document
     </nuxt-button>
@@ -42,12 +47,13 @@
 
     <!-- Modals -->
     <editor-modals-add-document v-model="showAddDocumentModal" />
+    <editor-modals-create-table v-model="showCreateTableModal" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useCreateDocument } from '~/composables/use/documents'
-import { useWebsocketMessage } from '~/composables/use'
+import { useCreateTable } from '~/composables/use/tables'
 
 const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
@@ -55,10 +61,24 @@ const { availableTables } = storeToRefs(dbStore)
 const { selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 console.log('Editor.AsideLinks', tableData.value)
 
-const { truncate } = useTruncateString()
-
 const tableColumnsStore = useTableColumnsStore()
 const { columnOptions } = storeToRefs(tableColumnsStore)
 
+/**
+ * Fix titles 
+ */
+
+const { truncate } = useTruncateString()
+
+/**
+ * Create document
+ */
+
 const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
+
+/**
+ * Create table
+ */
+
+const { showModal: showCreateTableModal } = useCreateTable()
 </script>

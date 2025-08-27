@@ -14,6 +14,7 @@ export const useDatabasesStore = defineStore('databases', () => {
   const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
   const availableTables = computed(() => currentDatabase.value?.tables || [])
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
+  const hasTables = computed(() => availableTables.value.length > 0)
 
   async function fetch() {
     const config = useRuntimeConfig()
@@ -63,6 +64,11 @@ export const useDatabasesStore = defineStore('databases', () => {
      * The names of the tables in the current database
      */
     availableTableNames,
+    /**
+     * Whether the database has tables
+     * @default false
+     */
+    hasTables,
     /**
      * Fetch the list of databases
      */
