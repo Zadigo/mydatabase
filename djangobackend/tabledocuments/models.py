@@ -1,8 +1,11 @@
+import pathlib
 import uuid
 
 from django.db import models
 from django.db.models import Q
 from django.db.models.constraints import CheckConstraint
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from tabledocuments.utils import upload_file_to, validate_file
 
 
@@ -12,8 +15,7 @@ class TableDocument(models.Model):
     upload and its content"""
 
     document_uuid = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False
+        default=uuid.uuid4
     )
     name = models.CharField(
         max_length=255
@@ -50,3 +52,12 @@ class TableDocument(models.Model):
 
     def __str__(self):
         return self.name or str(self.document_uuid)
+
+
+@receiver(post_delete, sender=TableDocument)
+def delete_document_file(sender, instance, **kwargs):
+    """Delete the file associated with the document when it is deleted."""
+    if instance.file:
+        path = pathlib.Path(instance.file.path)
+        if path.exists() and path.is_file():
+            path.unlink()

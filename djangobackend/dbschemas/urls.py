@@ -5,6 +5,11 @@ app_name = 'dbschemas'
 
 urlpatterns = [
     re_path(
+        r'^(?P<pk>\d+)/restart$',
+        views.RestartProject.as_view(),
+        name='restart_database'
+    ),
+    re_path(
         r'^(?P<pk>\d+)/delete$',
         views.DeleteDatabase.as_view(),
         name='delete_database'

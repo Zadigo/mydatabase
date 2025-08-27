@@ -1,14 +1,25 @@
+from typing import Generic, TypeVar
+
 from dbschemas.api.serializers import DatabaseSchemaSerializer
 from dbschemas.models import DatabaseSchema
+from rest_framework import status
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
-                                     ListAPIView, RetrieveUpdateAPIView)
+                                     GenericAPIView, ListAPIView,
+                                     RetrieveUpdateAPIView)
+from rest_framework.response import Response
+
+T = TypeVar('T', bound=GenericAPIView)
+
+class QuerysetMixin(Generic[T]):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(user=self.request.user)
 
 
 class ListDatabases(ListAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
     permission_classes = []
-
 
 
 class CreateDatabase(CreateAPIView):
@@ -26,3 +37,26 @@ class UpdateDatabase(RetrieveUpdateAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
     permission_classes = []
+
+
+class RestartProject(GenericAPIView):
+    """Endpoint that deletes all the data contained in the
+    documents provided by the tables and recursively deletes
+    the tables and documents associated with this database"""
+
+    queryset = DatabaseSchema.objects.all()
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        obj = super().get_object()
+        tables = obj.databasetable_set.all()
+
+        for table in tables:
+            documents = table.documents.all()
+
+            for document in documents:
+                document.delete()
+            
+            table.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

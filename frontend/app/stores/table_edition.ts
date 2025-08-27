@@ -1,4 +1,4 @@
-import type { DocumentData } from '~/types'
+import type { DocumentData, Table } from '~/types'
 
 /**
  * Store used to manage the state of table edition
@@ -31,9 +31,9 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   watch(selectedTable, (value) => {
     if (value) {
       if (value.active_document_datasource) {
-        const document = tableDocuments.value.find(doc => doc.document_uuid === value.active_document_datasource)
-        if (document) {
-          selectedTableDocumentName.value = document.name
+        const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === value.active_document_datasource)
+        if (tableDocument) {
+          selectedTableDocumentName.value = tableDocument.name
         }
       }
     }

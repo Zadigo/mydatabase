@@ -224,8 +224,7 @@ class DocumentTransform:
         if self.current_document is not None:
             return self.current_document.content.to_json(
                 orient='records',
-                force_ascii=False,
-                index=True
+                force_ascii=False
             )
         return ''
 

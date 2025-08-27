@@ -1,6 +1,10 @@
+import csv
 import json
+import pathlib
 
 from dbtables.models import DatabaseTable
+from django.conf import settings
+from django.core.files.base import ContentFile
 from django.test import TransactionTestCase
 from django.urls import reverse
 
@@ -36,3 +40,36 @@ class TestApiTables(TransactionTestCase):
         path = reverse('database_tables:update_table', args=[self.instance.pk])
         response = self.client.delete(path)
         self.assertEqual(response.status_code, 204)
+
+
+class TestUploadApiTables(TransactionTestCase):
+    fixtures = ['fixtures/databases']
+
+    def setUp(self):
+        self.table = DatabaseTable.objects.first()
+
+        self.filename = 'test.csv'
+        self.filepath = pathlib.Path(settings.MEDIA_ROOT) / self.filename
+        with open(self.filepath, mode='w', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['name', 'age'])
+            writer.writerow(['Alice', 30])
+            writer.writerow(['Bob', 25])
+
+    def tearDown(self):
+        self.filepath.unlink(missing_ok=True)
+
+    def test_upload_file_via_csv(self):
+        path = reverse('database_tables:upload_document', args=[self.table.pk])
+        with open(self.filepath, mode='rb') as f:
+            response = self.client.post(path, data={'file': f})
+        self.assertEqual(response.status_code, 201)
+
+    def test_upload_file_via_url(self):
+        path = reverse('database_tables:upload_document', args=[self.table.pk])
+        url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/panneaux4x3-feuille1@issy-les-moulineaux/records?limit=5'
+        response = self.client.post(path, data={'url': url})
+        self.assertEqual(response.status_code, 201)
+
+    def test_upload_file_via_google_sheet_id(self):
+        pass

@@ -62,3 +62,14 @@ class TestApiDatabases(APITestCase):
         response = self.client.delete(path)
 
         self.assertEqual(response.status_code, 204)
+
+    def test_restart_database(self):
+        instance = DatabaseSchema.objects.first()
+        self.assertIsNotNone(
+            instance, "No DatabaseSchema instance found in fixtures")
+
+        path = reverse('dbschemas:restart_database', args=[instance.pk])
+        response = self.client.post(path)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(instance.databasetable_set.all().exists())

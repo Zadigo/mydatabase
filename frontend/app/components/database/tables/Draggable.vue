@@ -3,16 +3,20 @@
     <div class="bg-slate-300 p-2 rounded-t-md font-bold">
       <icon name="i-lucide-table" />
       {{ table.name }}
+
+      <nuxt-button :to="`/databases/${dbStore.currentDatabase?.id}/editor?table=${table.id}`" variant="soft">
+        <icon name="i-lucide-link" />
+      </nuxt-button>
     </div>
 
-    <ul class="cursor-move">
-      <li v-for="i in 5" :key="i" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
+    <ul class="cursor-move overflow-y-scroll h-70">
+      <li v-for="typeOption in columnTypeOptions" :key="typeOption.name" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
         <div class="space-x-2">
-          <span>Column {{ i }}</span>
+          <span>{{ typeOption.name }}</span>
         </div>
 
         <div class="text-slate-500">
-          <icon name="i-lucide-a-large-small text-md" />
+          <icon :name="getTypeIcon(typeOption.columnType)" class="text-md" />
         </div>
       </li>
     </ul>
@@ -24,6 +28,10 @@ import type { Table } from '~/types'
 
 defineProps<{ table: Table }>()
 
+/**
+ * Dragging
+ */
+
 const containerEl = ref<HTMLElement | null>(null)
 const tableEl = useTemplateRef('tableEl')
 
@@ -33,8 +41,59 @@ const { style } = useDraggable(tableEl, {
   preventDefault: true
 })
 
-
 onMounted(() => {
   containerEl.value = document.querySelector('#tables-wrapper')
 })
+
+/**
+ * Link
+ */
+
+const dbStore = useDatabasesStore()
+
+/**
+ * Columns
+ */
+
+function getTypeIcon(columnType: ColumnType) {
+  let icon: string = 'i-lucide-a-large-small'
+
+  switch (columnType) {
+    case 'String':
+      icon = 'i-lucide-a-large-small'
+      break
+    
+    case 'Number':
+      icon = 'i-lucide-superscript'
+      break
+
+    case 'Array':
+      icon = 'i-lucide-brackets'
+      break
+
+    case 'Boolean':
+      icon = 'i-lucide-check'
+      break
+
+    case 'Date':
+      icon = 'i-lucide-calendar'
+      break
+    
+    case 'DateTime':
+      icon = 'i-lucide-calendar-clock'
+      break
+
+    case 'Dict':
+      icon = 'i-lucide-braces'
+      break
+
+    default:
+      break
+  }
+
+  return icon
+}
+
+const tableColumnsStore = useTableColumnsStore()
+const { columnTypeOptions } = storeToRefs(tableColumnsStore)
 </script>

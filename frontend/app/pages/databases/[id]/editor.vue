@@ -63,8 +63,31 @@ const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument }
 
 const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
 
-const params = useUrlSearchParams() as { table: string }
-params.table = useToString(selectedTable.value?.id || '').value
+const queryParams = useUrlSearchParams() as { table: string }
+queryParams.table = useToString(selectedTable.value?.id || '').value
+
+const dbStore = useDatabasesStore()
+const { availableTables } = storeToRefs(dbStore)
+
+/**
+ * Automatically load the selected table when
+ * the table query parameter is in the url
+ */
+onMounted(() => {
+  console.log('params.table', queryParams.table)
+  if (queryParams.table) {
+    const tableToView = availableTables.value.find(table => table.id === useToNumber(queryParams.table).value)
+    console.log('tableToView.value', tableToView.value)
+  }
+
+  const params = useRoute().params as { id: string }
+  const id = useToNumber(params.id)
+
+  if (!dbStore.currentDatabase) {
+    const databaseToView = dbStore.databases.find(database => database.id === id.value)
+    console.log('databaseToView.value', databaseToView.value)
+  }
+})
 
 provide('hasData', hasData)
 provide('tableData', tableData)

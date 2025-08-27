@@ -70,7 +70,7 @@ export const useDatabasesStore = defineStore('databases', () => {
   }
 }, {
   persist: {
-    pick: ['routeId'],
+    pick: ['routeId', 'databases'],
     storage: sessionStorage
   }
 })
