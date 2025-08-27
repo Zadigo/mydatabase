@@ -1,4 +1,4 @@
-import type { Table, TableDocument } from '~/types'
+import type { SimpleTable, TableDocument } from '~/types'
 import { useWebsocketMessage } from '..'
 
 /**
@@ -12,7 +12,7 @@ import { useWebsocketMessage } from '..'
  * 
  * @param table The table to edit
  */
-export function useTableWebocketManager(editableTableRef: Ref<Table | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
+export function useTableWebocketManager(editableTableRef: MaybeRef<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 

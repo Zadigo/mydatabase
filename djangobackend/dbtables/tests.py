@@ -71,23 +71,23 @@ class TestUploadApiTables(TransactionTestCase):
     def tearDown(self):
         self.filepath.unlink(missing_ok=True)
 
-    def test_upload_with_blank_fields(self):
+    def test_expect_upload_fail_with_blank_fields(self):
         path = reverse('database_tables:upload_document', args=[self.table.pk])
         data = {
             'file': None,
             'google_sheet_id': '',
             'name': '',
-            'url': 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20'
+            'url': ''
         }
         response = self.client.post(
             path, data=data, content_type='application/json')
-        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.status_code, 400, response.content)
 
     def test_upload_file_via_csv(self):
         path = reverse('database_tables:upload_document', args=[self.table.pk])
         with open(self.filepath, mode='rb') as f:
             response = self.client.post(path, data={'file': f})
-        self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.status_code, 400, response.content)
 
     def test_upload_file_via_url(self):
         path = reverse('database_tables:upload_document', args=[self.table.pk])

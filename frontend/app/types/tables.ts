@@ -52,7 +52,10 @@ export interface Table extends _BaseDatetimes {
   documents: TableDocument[]
 }
 
-// TODO: When listing databases, I do not want to load the "data" field in documents
+/**
+ * A simplified version of the table type which does not include the
+ * data stored by the documents for performance reasons
+ */
 export type SimpleTable = Pick<Table, 'id' | 'name' | 'description' | 'active_document_datasource' | 'component' | 'active' | 'documents'> & _BaseDatetimes
 
 export type TableComponent = 'data-table' | 'graph-table'

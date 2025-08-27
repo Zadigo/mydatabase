@@ -33,7 +33,7 @@ class UploadFileSerializer(serializers.Serializer):
     name = serializers.CharField(allow_blank=True, max_length=255)
     file = serializers.FileField(allow_null=True)
     url = serializers.URLField(allow_blank=True)
-    entry_key = serializers.ChartField(allow_null=True, required=False)
+    entry_key = serializers.CharField(allow_null=True, required=False)
     # google_sheet_id = serializers.CharField(allow_blank=True)
 
     def validate(self, data):
@@ -45,10 +45,14 @@ class UploadFileSerializer(serializers.Serializer):
         fields_are_none = [
             file is None,
             url is None,
-            # google_sheet_id is None
         ]
 
-        if all(fields_are_none):
+        fields_are_blank = [
+            file is None,
+            url == ''
+        ]
+
+        if any([all(fields_are_none), all(fields_are_blank)]):
             raise serializers.ValidationError(
                 'Either a file, a URL, or a Google Sheet ID '
                 'must be provided'
@@ -62,10 +66,11 @@ class UploadFileSerializer(serializers.Serializer):
             )
 
         if name is None and file is not None:
-            file_extension = file.name.split(
-                '.')[-1] if file is not None else None
+            file_extension = file.name.split('.')[-1]
             random_name = f'{get_random_string(32)}.{file_extension}'
-            data['name'] = file.name if file is not None else random_name
+            data['name'] = random_name
+        else:
+            data['name'] = get_random_string(32)
 
         return data
 
@@ -86,13 +91,12 @@ class UploadFileSerializer(serializers.Serializer):
         document = TableDocument.objects.create(**validated_data)
         table.documents.add(document)
 
-        request_document_by_url.apply_async(
-            args=[document.url],
-            countdown=10,
-            link=create_csv_file_from_data.s(document.pk, entry_key)
-        )
-        if document.url and document.file is None:
-            print('apply_async')
+        if document.url and document.file == None:
+            request_document_by_url.apply_async(
+                args=[document.url],
+                countdown=10,
+                link=create_csv_file_from_data.s(document.pk, entry_key)
+            )
 
         return document
 

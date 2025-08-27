@@ -1,17 +1,20 @@
 import { EditorTablesDataTable } from '#components'
 import type { Component, MaybeRef } from 'vue'
-import type { Database, Table, TableComponent } from '~/types'
+import type { Database, SimpleTable, TableComponent } from '~/types'
 
 export {
   useTableWebocketManager
 } from './ws_manager'
+
+
+type MaybeTable = MaybeRef<SimpleTable | undefined> | ComputedRef<SimpleTable | undefined> | undefined
 
 /**
  * Composable used to working with a single table such as
  * table edition the display component to show etc.
  * @param table The table to manipulate
  */
-export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Table | undefined> | undefined) {
+export function useTable(table: MaybeTable) {
   const componentMapping: Record<TableComponent, Component> = {
     'data-table': EditorTablesDataTable,
     'graph-table': EditorTablesDataTable
@@ -54,7 +57,7 @@ export function useTable(table: Table | Ref<Table | undefined> | ComputedRef<Tab
  * page usually makes the data null)
  * @param currentTable The current table being viewed/edited
  */
-export function useEditorPageRefresh(currentTable: MaybeRef<Table | undefined> | ComputedRef<Table | undefined> | undefined) {
+export function useEditorPageRefresh(currentTable: MaybeTable) {
   const dbStore = useDatabasesStore()
   const { availableTables } = storeToRefs(dbStore)
 
@@ -80,6 +83,14 @@ export function useEditorPageRefresh(currentTable: MaybeRef<Table | undefined> |
       console.log('databaseToView.value', databaseToView.value)
     }
   })
+
+  if (currentTable) {
+    watch(currentTable, (value) => {
+      if (value) {
+        queryParams.table = useToString(value.id || '').value
+      }
+    })
+  }
 }
 
 /**
@@ -107,7 +118,7 @@ export function useCreateTable() {
 
     const { data } = await useAsyncData('createTable', async () => {
       return Promise.all([
-        $fetch<Table>(`/v1/tables/create`, {
+        $fetch<SimpleTable>(`/v1/tables/create`, {
           method: 'POST',
           baseURL: useRuntimeConfig().public.prodDomain,
           body: newTable.value
