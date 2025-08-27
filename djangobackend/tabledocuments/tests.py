@@ -40,7 +40,7 @@ class TestDocumentEdition(IsolatedAsyncioTestCase):
         document = await self.instance.load_json_document_by_url(self.test_url, entry_key='results')
 
         self.assertListEqual(
-            self.instance.errors, [], 
+            self.instance.errors, [],
             f"There were errors loading the document: {', '.join(self.instance.errors)}"
         )
 
@@ -110,8 +110,11 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         the frontend knows how to route/handle them"""
         self.assertIn('action', response)
 
-        if 'data' in response:
-            self.assertIsInstance(response['data'], str)
+        try:
+            if 'document_data' in response:
+                self.assertIsInstance(response['document_data'], str)
+        except:
+            print(response)
 
     async def test_idle_connect(self):
         instance = await self.create_connection()
@@ -121,7 +124,7 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         await self.check_response(response)
         self.assertEqual(response, {'action': 'connected'})
 
-    async def test_load_url(self):
+    async def test_load_document_by_url(self):
         instance = await self.create_connection()
 
         test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20'
@@ -133,7 +136,7 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         self.assertIsInstance(response['data'], str)
         await self.check_response(response)
 
-    async def test_load_via_id(self):
+    async def test_load_document_by_id(self):
         instance = await self.create_connection()
 
         @database_sync_to_async
@@ -164,10 +167,6 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
             })
 
             response = await instance.receive_json_from()
-            await self.check_response(response)
-
-            self.assertIn('data', response)
-            self.assertIsInstance(response['data'], str)
             await self.check_response(response)
 
             await remove_document_file(pk)

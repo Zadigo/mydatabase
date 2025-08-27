@@ -8,6 +8,7 @@ import pytz
 import requests
 from channels.db import database_sync_to_async
 from django.core.cache import cache
+from django.db.models import Q
 from django.utils.crypto import get_random_string
 from requests.models import Response
 from tabledocuments.models import TableDocument
@@ -15,12 +16,12 @@ from tabledocuments.models import TableDocument
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
 
 PostReadTrigger: TypeAlias = dict[
-    str, 
+    str,
     Callable[[
         str, pandas.DataFrame
-    ], 
-    pandas.DataFrame
-]]
+    ],
+        pandas.DataFrame
+    ]]
 
 
 @dataclasses.dataclass
@@ -90,12 +91,23 @@ class DocumentEdition:
 
         @database_sync_to_async
         def get_document() -> tuple[bool, pandas.DataFrame | None]:
-            document = TableDocument.objects.get(id=id)
+            document = TableDocument.objects.get(
+                Q(id=id) |
+                Q(document_uuid=id)
+            )
 
             if document.file is None:
                 self.errors.append(
                     'The document does not have a file associated with it')
                 return False, None
+
+            # This function reads the csv document on every call.
+            # We need to pre-cache the document content before the
+            # read below (via the clean method which caches the content)
+            # cache_key = f"pre-doc-{document.document_uuid}"
+            # df = cache.get(cache_key, None):
+            # if df is not None:
+            #     return True, df
 
             try:
                 # Some csv files contain ";" and Pandas will throw an
@@ -117,10 +129,15 @@ class DocumentEdition:
                         "Accepted separators are: ',' or ';'"
                     )
                     return False, None
+
         is_valid, df = await get_document()
 
         if not is_valid:
             return False
+
+        # Pre-cache the document content here. Does not matter
+        # if it re-cached afterwards by the clean method
+        # cache.set(cache_key, df, timeout=(60 * 60 * 24))
 
         return await self.clean(df)
 
@@ -176,7 +193,6 @@ class DocumentEdition:
                     # By any means, if the data is not valid, pandas
                     # will also automatically raise an error
                     df = pandas.DataFrame(data)
-                    print(df)
                 except:
                     self.errors.append(
                         "Failed to create DataFrame from JSON data")
@@ -194,9 +210,8 @@ class DocumentTransform:
         self.initial_dataframe: pandas.DataFrame | None = None
 
         self.column_names: list[str] = []
-        self.column_type_options: list[dict[str, str | bool ]] = []
+        self.column_type_options: list[dict[str, str | bool]] = []
         self.column_options: list[dict[str, str | bool]] = []
-        # self.column_types: list[dict[str, str]] = []
 
     @property
     def can_transform(self):
@@ -207,7 +222,11 @@ class DocumentTransform:
         """Returns a string version of the data which can
         then be sent over websockets essentially"""
         if self.current_document is not None:
-            return self.current_document.content.to_json(orient='records', force_ascii=False)
+            return self.current_document.content.to_json(
+                orient='records',
+                force_ascii=False,
+                index=True
+            )
         return ''
 
     async def load_document(self, document: Document):
@@ -234,7 +253,7 @@ class DocumentTransform:
             )
         )
 
-        # Column options allws the user to spcify which columns 
+        # Column options allws the user to spcify which columns
         # are editable, visible etc to the end user
         self.column_options = list(
             map(

@@ -22,6 +22,22 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
 
   const tableData = ref<DocumentData[]>([])
   const hasData = computed(() => tableData.value.length > 0)
+  
+  /**
+   * When the TableDocument already has a datasoure
+   * we need to automatially set the value on the
+   * select input hwne the user selects that table
+   */
+  watch(selectedTable, (value) => {
+    if (value) {
+      if (value.active_document_datasource) {
+        const document = tableDocuments.value.find(doc => doc.document_uuid === value.active_document_datasource)
+        if (document) {
+          selectedTableDocumentName.value = document.name
+        }
+      }
+    }
+  })
 
   return {
     /**

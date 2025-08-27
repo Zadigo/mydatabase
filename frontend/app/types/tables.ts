@@ -31,7 +31,8 @@ export interface Table extends _BaseDatetimes {
    */
   description: string
   /**
-   * The data that the document is expected to return
+   * The UUID of the document which contains the data
+   * that the table is supposed to return
    * @default null
    */
   active_document_datasource: string | null
