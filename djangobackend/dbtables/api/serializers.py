@@ -95,7 +95,9 @@ class UploadFileSerializer(serializers.Serializer):
             request_document_by_url.apply_async(
                 args=[document.url],
                 countdown=10,
-                link=create_csv_file_from_data.s(document.pk, entry_key)
+                link=[
+                    create_csv_file_from_data.s(document.pk, entry_key)
+                ]
             )
 
         return document
