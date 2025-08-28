@@ -32,6 +32,10 @@ urlpatterns = [
         name='token_refresh'
     ),
     path(
+        'v1/documents/',
+        include('tabledocuments.urls')
+    ),
+    path(
         'v1/tables/',
         include('dbtables.urls')
     ),

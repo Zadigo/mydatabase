@@ -13,7 +13,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const selectedTableName = ref<string>()
   const selectedTable = computed(() => currentDatabase.value?.tables.find(table => table.name === selectedTableName.value))
 
-  const tableDocuments = computed(() => selectedTable.value?.documents || [])
+  const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
   const selectedTableDocumentName = ref<string>()

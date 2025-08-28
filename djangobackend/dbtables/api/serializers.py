@@ -33,7 +33,7 @@ class UploadFileSerializer(serializers.Serializer):
     name = serializers.CharField(allow_blank=True, max_length=255)
     file = serializers.FileField(allow_null=True)
     url = serializers.URLField(allow_blank=True)
-    entry_key = serializers.CharField(allow_null=True, required=False)
+    entry_key = serializers.CharField(allow_null=True, allow_blank=True, required=False)
     # google_sheet_id = serializers.CharField(allow_blank=True)
 
     def validate(self, data):
@@ -70,7 +70,7 @@ class UploadFileSerializer(serializers.Serializer):
             random_name = f'{get_random_string(32)}.{file_extension}'
             data['name'] = random_name
         else:
-            data['name'] = get_random_string(32)
+            data['name'] = data.get('name', get_random_string(32))
 
         return data
 
@@ -83,10 +83,18 @@ class UploadFileSerializer(serializers.Serializer):
         # as a CSV to our backend
         # validated_data.pop('google_sheet_id')
 
+
         entry_key = None
         if 'entry_key' in validated_data:
             entry_key = validated_data.pop('entry_key')
 
+            if entry_key == '':
+                entry_key = None
+
+        # TODO: Even when the tasks fails, the document
+        # is still created. We should handle that case
+        # and delete the document if the task fails or
+        # not create the document until the task succeeds
         table = DatabaseTable.objects.get(id=table_id)
         document = TableDocument.objects.create(**validated_data)
         table.documents.add(document)

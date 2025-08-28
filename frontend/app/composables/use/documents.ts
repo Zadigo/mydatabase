@@ -63,3 +63,15 @@ export function useCreateDocument() {
     toggleShowAddDocumentModal
   }
 }
+
+/**
+ * Composable used for editing a document
+ */
+export function useEditDocument() {
+  const [showEditDocumentModal, toggleShowEditDocumentModal] = useToggle()
+
+  return {
+    showEditDocumentModal,
+    toggleShowEditDocumentModal
+  }
+}

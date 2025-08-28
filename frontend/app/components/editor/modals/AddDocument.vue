@@ -5,6 +5,13 @@
     </template>
 
     <template #body>
+      <div class="flex justify-center">
+        <nuxt-button-group orientation="horizontal" class="mb-4">
+          <nuxt-button color="neutral" variant="subtle" label="Basic" />
+          <nuxt-button color="neutral" variant="outline" label="Advanced" />
+        </nuxt-button-group>
+      </div>
+
       <div class="space-y-2">
         <nuxt-alert v-if="!dbStore.hasTables" class="mb-5" title="Missing tables" description="Your database currently has no tables. You will nened to create one in order to upload a file" />
 
@@ -52,6 +59,4 @@ const { newDocument, create } = useCreateDocument()
  */
 
 const dbStore = useDatabasesStore()
-// const tableEditionStore = useTableEditionStore()
-// const {  } = storeToRefs(tableEditionStore)
 </script>

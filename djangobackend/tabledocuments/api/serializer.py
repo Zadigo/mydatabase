@@ -9,3 +9,9 @@ class SimpleDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TableDocument
         fields = ['id', 'document_uuid', 'name', 'updated_at', 'created_at']
+
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
+        return instance

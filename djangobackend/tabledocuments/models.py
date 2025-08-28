@@ -23,9 +23,7 @@ class TableDocument(models.Model):
     file = models.FileField(
         upload_to=upload_file_to,
         help_text="A csv, xls, xlsx, ods or json file.",
-        validators=[
-            validate_file
-        ],
+        validators=[validate_file],
         blank=True,
         null=True
     )

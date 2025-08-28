@@ -21,6 +21,8 @@ markdown = "*"
 django-filter = "*"
 unidecode = "*"
 django-extensions = "*"
+zstd = "*"
+pyarrow = "*"
 
 [dev-packages]
 

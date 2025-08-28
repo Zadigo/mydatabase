@@ -1,5 +1,5 @@
 from typing import Any
-
+import json
 import pandas
 import requests
 import pathlib
@@ -25,23 +25,27 @@ def request_document_by_url(url: str, headers: dict[str, str] = {}):
         if response.status_code == 200:
             try:
                 if 'application/json' in response.headers.get('Content-Type', ''):
-                    logger.success(f"Successfully retrieved JSON document from {url}")
+                    logger.warning(
+                        f"Successfully retrieved JSON document from {url}")
                     return response.json()
-            except:
-                message = f"Error occurred while processing JSON response from {url}"
+            except Exception as e:
+                message = f"Error occurred while processing JSON response from {url}: {str(e.args)}"
                 logger.error(message)
                 return {'error': message}
 
             if 'application/csv' in response.headers.get('Content-Type', ''):
-                logger.success(f"Successfully retrieved CSV document from {url}")   
+                logger.warning(
+                    f"Successfully retrieved CSV document from {url}")
                 return response.text
+    logger.warning(
+        f"Failed to retrieve document from {url}, status code: {response.content}")
     return None
 
 
 @shared_task
 def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None):
     if data is None:
-        logger.warning('No data provided')
+        logger.warning(f'No data provided? Received {data}')
         return
 
     try:
@@ -55,18 +59,34 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
 
         if isinstance(data, dict):
             if entry_key is None:
-                logger.error('Object is a dictionnary and no entry key was provided')
+                string_data = json.dumps(data)
+                logger.error(
+                    'Object is a dictionnary and no '
+                    f'entry key was provided: {string_data[:100]}...'
+                )
                 return
-            data = data[entry_key]
+
+            if 'error' in data:
+                return data
+
+            try:
+                data = data[entry_key]
+            except KeyError:
+                string_data = json.dumps(data)
+                logger.error(f'Entry key {entry_key} not found in data: {string_data[:100]}...')
+                return
 
         if isinstance(data, list):
             df = pandas.DataFrame(data)
-            csv_content = df.to_csv(index=False)
+            # file = df.to_feather(index=True, index_label='record_id')
+            # document.file.save(f'{document.name}.feather', file)
+
+            csv_content = df.to_csv(index=True, index_label='record_id', encoding='utf-8', doublequote=True)
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
 
         document.save()
-        logger.success(f"Successfully created CSV document: {document.name}")
+        logger.warning(f"Successfully created Feather document: {document.name}")
 
 
 @shared_task

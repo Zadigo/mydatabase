@@ -1,0 +1,114 @@
+dabatabase:
+  name: 'my-database-com'
+  uuid: '12345'
+  structure:
+    columns: []
+    keep: []
+  config:
+    triggers:
+      before:
+        delete:
+        insert:
+          - function: lower
+            column: firstname
+            orientation: row
+        update:
+    functions:
+      columns: []
+      count:
+        - columns:
+          aggegrate: true
+      sum:
+        - columns:
+          aggegrate: true
+      avg:
+        - columns:
+          aggegrate: true
+      min:
+        - columns:
+          aggegrate: true
+      max:
+        - columns:
+          aggegrate: true
+      upper:
+        - columns:
+          aggegrate: false
+      lower:
+        - columns: [firstname]
+          aggegrate: false
+      length:
+        - columns:
+          aggegrate: false
+      trim:
+        - columns:
+          aggegrate: false
+      group_concat:
+        - columns:
+          aggegrate: false
+      coalesce:
+        - columns:
+          aggegrate: false
+      extract:
+        - columns:
+          aggegrate: false
+          substring:
+      now:
+        - columns:
+          aggegrate: false
+      date:
+        - columns:
+          aggegrate: false
+      time:
+        - columns:
+          aggegrate: false
+      datetime:
+        - columns:
+          aggegrate: false
+      strftime:
+        - columns:
+          aggegrate: false
+          substring:
+      current_timestamp:
+        - columns:
+          aggegrate: false
+      current_date:
+        - columns:
+          aggegrate: false
+      current_time:
+        - columns:
+          aggegrate: false
+      random:
+        - columns:
+          aggegrate: false
+      md5:
+        - columns:
+          aggegrate: false
+      sha256:
+        - columns:
+          aggegrate: false
+      sha512:
+        - columns:
+          aggegrate: false   
+    constraints:
+      unique: []
+      not_empty: []
+    check_constraints:
+      - column: age
+        operator: greater_than
+        value: 45
+        value_range: []
+        expected_return: bool
+        default_if_fail: null
+
+        chain:
+          - operand: or
+            operator: greater_than
+            value: 45
+            value_range: []
+            expected_return: bool
+    foreign_key:
+      from: 'id'
+      to:
+        name: 'other-table-name'
+        uuid: 'other-uuid'
+        field: 'id'

@@ -12,10 +12,17 @@
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
     <!-- Add Data -->
-    <nuxt-button variant="soft" color="info" @click="() => { toggleShowAddDocumentModal() }">
-      <icon name="i-lucide-file-plus-2" />
-      Add document
-    </nuxt-button>
+     <div class="space-x-2">
+       <nuxt-button variant="soft" color="info" @click="() => { toggleShowAddDocumentModal() }">
+         <icon name="i-lucide-file-plus-2" />
+         Add
+       </nuxt-button>
+   
+       <nuxt-button variant="soft" color="info" @click="() => { toggleShowEditDocumentModal()  }">
+         <icon name="i-lucide-pen" />
+         Update
+       </nuxt-button>
+     </div>
 
     <!-- Columns -->
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
@@ -47,12 +54,13 @@
 
     <!-- Modals -->
     <editor-modals-add-document v-model="showAddDocumentModal" />
+    <editor-modals-edit-document v-model="showEditDocumentModal" />
     <editor-modals-create-table v-model="showCreateTableModal" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useCreateDocument } from '~/composables/use/documents'
+import { useCreateDocument, useEditDocument } from '~/composables/use/documents'
 import { useCreateTable } from '~/composables/use/tables'
 
 const dbStore = useDatabasesStore()
@@ -89,4 +97,10 @@ const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
  */
 
 const { showModal: showCreateTableModal, toggleCreateDocumentModal } = useCreateTable()
+
+/**
+ * Update document
+ */
+
+const { showEditDocumentModal, toggleShowEditDocumentModal } = useEditDocument()
 </script>

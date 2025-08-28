@@ -108,7 +108,7 @@ class DocumentEdition:
             # df = cache.get(cache_key, None):
             # if df is not None:
             #     return True, df
-
+            # return True, pandas.read_feather(document.file.path)
             try:
                 # Some csv files contain ";" and Pandas will throw an
                 # error if this separator is not explicity indicated since it
