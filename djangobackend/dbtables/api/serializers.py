@@ -17,13 +17,16 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
         exclude = ['database_schema']
 
     def validate(self, validated_data):
-        try:
-            database_id = validated_data.pop('database')
-            instance = DatabaseSchema.objects.get(id=database_id)
-        except:
-            raise serializers.ValidationError('Database not found')
+        if 'database' in validated_data:
+            try:
+                database_id = validated_data.pop('database')
+                instance = DatabaseSchema.objects.get(id=database_id)
+            except:
+                raise serializers.ValidationError(detail={
+                    'database': 'Database with this id does not exist'
+                })
 
-        validated_data['database_schema'] = instance
+            validated_data['database_schema'] = instance
         return validated_data
 
 

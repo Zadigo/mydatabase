@@ -25,10 +25,9 @@ class TestApiTables(TransactionTestCase):
         self.assertIn('active_document_datasource', data)
 
     def test_update_table(self):
+        print(self.instance)
         path = reverse('database_tables:update_table', args=[self.instance.pk])
-        data = json.dumps({
-            'name': 'Some simple name'
-        })
+        data = {'name': 'Some simple name'}
         response = self.client.put(
             path, data=data, content_type='application/json')
         self.assertEqual(response.status_code, 200, response.content)

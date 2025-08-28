@@ -1,8 +1,8 @@
-import type { DocumentData } from '~/types'
+import type { DocumentData, SimpleTable } from '~/types'
 
 /**
  * Store used to manage the state of table edition
- * accross multiple components aka which table is
+ * across multiple components aka which table is
  * being edited, what data in the table is being
  * manipulated etc.
  */
@@ -10,24 +10,16 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const dbStore = useDatabasesStore()
   const { currentDatabase } = storeToRefs(dbStore)
 
-  const selectedTableName = ref<string>()
-  const selectedTable = computed(() => currentDatabase.value?.tables.find(table => table.name === selectedTableName.value))
-
-  const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
-  const hasDocuments = computed(() => tableDocuments.value.length > 0)
-  
-  const selectedTableDocumentName = ref<string>()
-  const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
-  const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
-
-  const tableData = ref<DocumentData[]>([])
-  const hasData = computed(() => tableData.value.length > 0)
-  
   /**
-   * When the TableDocument already has a datasoure
-   * we need to automatially set the value on the
-   * select input hwne the user selects that table
+   * Table selection
    */
+
+  const selectedTableName = ref<string>()
+  const selectedTable = computed({ get: () => currentDatabase.value?.tables.find(table => table.name === selectedTableName.value), set: (value) => value })
+
+  // When the TableDocument already has a datasource
+  // we need to automatically set the value on the
+  // select input when the user selects that table
   watch(selectedTable, (value) => {
     if (value) {
       if (value.active_document_datasource) {
@@ -39,6 +31,49 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
     }
   })
 
+  /**
+   * Documents
+   */
+
+  const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
+  const hasDocuments = computed(() => tableDocuments.value.length > 0)
+  
+  const selectedTableDocumentName = ref<string>()
+  const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
+  const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
+
+  // When the user changes the selection of the datasoure,
+  // automatically update the selection on Django
+  watchDebounced(selectedTableDocumentName, async (newSelectedName) => {
+    if (selectedTable.value && selectedTableDocument.value) {
+      if (selectedTableDocument.value.name === newSelectedName) {
+        return
+      }
+
+      const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
+        method: 'PATCH',
+        baseURL: useRuntimeConfig().public.prodDomain,
+        body: {
+          active_document_datasource: selectedTableDocument.value.document_uuid
+        }
+      })
+  
+      if (data) {
+        selectedTable.value = data
+      }
+    }
+  }, {
+    immediate: false,
+    debounce: 4000
+  })
+
+  /**
+   * Data
+   */
+
+  const tableData = ref<DocumentData[]>([])
+  const hasData = computed(() => tableData.value.length > 0)
+  
   return {
     /**
      * The current table

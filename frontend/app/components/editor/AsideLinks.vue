@@ -8,7 +8,7 @@
       Create table
     </nuxt-button>
 
-    <!-- Select Table Data -->
+    <!-- Select Data -->
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
     <!-- Add Data -->

@@ -10,13 +10,13 @@ urlpatterns = [
         name='upload_document'
     ),
     re_path(
-        r'^(?P<pk>\d+)$',
-        views.UpdateTable.as_view(),
-        name='update_table'
-    ),
-    re_path(
         r'^create$',
         views.CreateTable.as_view(),
         name='create_table'
+    ),
+    re_path(
+        r'^(?P<pk>\d+)$',
+        views.UpdateTable.as_view(),
+        name='update_table'
     )
 ]

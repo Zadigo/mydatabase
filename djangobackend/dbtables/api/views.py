@@ -9,6 +9,8 @@ class UpdateTable(RetrieveUpdateDestroyAPIView):
 
     queryset = DatabaseTable.objects.all()
     serializer_class = DatabaseTableSerializer
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'pk'
     permission_classes = []
 
 

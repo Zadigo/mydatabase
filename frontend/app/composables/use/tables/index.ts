@@ -26,14 +26,14 @@ export function useTable(table: MaybeTable) {
     return tableValue ? componentMapping[tableValue.component] : undefined
   })
 
-  const [ showEditTableDrawer, toggleEditTableDrawer ] = useToggle()
+  const [ showModal, toggle ] = useToggle()
   const editableTableRef = toRef(table) // TODO: Create a unique Ref that is not linked to the original data because when we change the values here it changes the orginal Ref too
 
   return {
     /**
      * Show drawer for editing the table's data
      */
-    showEditTableDrawer,
+    showModal,
     /**
      * Reference used to edit table data
      * without modifying the original data
@@ -47,7 +47,7 @@ export function useTable(table: MaybeTable) {
     /**
      * Function to toggle the visibility of the edit table drawer
      */
-    toggleEditTableDrawer
+    toggleEditTableDrawer: toggle
   }
 }
 

@@ -24,28 +24,12 @@
       <!-- Component -->  
       <component :is="displayComponent" v-if="hasData" />
       <template v-else>
-        <div v-if="selectedTable" class="w-full text-center">
-          <p>Your table has no data. Select a datasource or create a new one</p>
-
-          <!-- <nuxt-button class="mt-5" @click="() => { toggleShowAddDocumentModal() }">
-            <icon name="i-lucide-file-plus-2" />
-            Create New Document
-          </nuxt-button> -->
-        </div>
-
-        <div v-else class="w-full text-center">
-          <p>Select a table</p>
-          
-          <nuxt-button class="mt-5">
-            <icon name="i-lucide-table" />
-            Select a table
-          </nuxt-button>
-        </div>
+        No data, no table
       </template>
     </nuxt-card>
 
     <!-- Modals -->
-    <editor-modals-edit-table v-model="showEditTableDrawer" />
+    <editor-modals-edit-table v-model="showModal" />
   </section>
 </template>
 
@@ -65,7 +49,7 @@ definePageMeta({
 const tableEditionStore = useTableEditionStore()
 const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditionStore)
 
-const { displayComponent, editableTableRef, showEditTableDrawer, toggleEditTableDrawer } = useTable(selectedTable)
+const { displayComponent, editableTableRef, showModal, toggleEditTableDrawer } = useTable(selectedTable)
 
 /**
  * Page refreshing

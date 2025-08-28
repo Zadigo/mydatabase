@@ -1,7 +1,8 @@
 from typing import Any
 from unittest import IsolatedAsyncioTestCase
-
+import uuid
 import pandas
+from django.urls import reverse
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from channels.routing import URLRouter
@@ -175,3 +176,31 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
     #     self.use_authentication = True
     #     instance = await self.create_connection()
     #     print(instance.scope)
+
+
+class TestApiEndpoints(TransactionTestCase, UnittestAuthenticationMixin):
+    fixtures = ['fixtures/databases']
+
+    def setUp(self):
+        self.document = TableDocument.objects.first()
+
+    def test_get_document(self):
+        path = reverse('documents:retrieve_update_destroy_document', args=[
+                       self.document.document_uuid])
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIsInstance(response.json(), dict)
+
+    def test_update_document(self):
+        path = reverse('documents:retrieve_update_destroy_document', args=[
+                       self.document.document_uuid])
+        response = self.client.patch(
+            path, data={'name': 'Updated Document Name'}, content_type='application/json')
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertIsInstance(response.json(), dict)
+
+    def test_delete_document(self):
+        path = reverse('documents:retrieve_update_destroy_document', args=[
+                       self.document.document_uuid])
+        response = self.client.delete(path)
+        self.assertEqual(response.status_code, 204, response.content)
