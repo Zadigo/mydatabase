@@ -47,11 +47,14 @@
             An API will be set up so you can easily interact with your new database.
           </p>
 
+          <!-- Name -->
           <nuxt-input v-model="newDatabase.name" class="w-full" placeholder="Name" />
+          <!-- Description -->
           <nuxt-input v-model="newDatabase.description" :disabled="true" class="w-full" placeholder="Description" />
 
           <nuxt-separator class="my-5" />
 
+          <!-- Password -->
           <nuxt-input :disabled="true" class="w-full" placeholder="Password" />
         </div>
       </template>

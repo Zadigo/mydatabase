@@ -9,7 +9,7 @@ export interface NewDatabase {
  * Composable used to create a new database
  */
 export function useDatabaseCreation() {
-  const [showModal, toggleCreationModal] = useToggle()
+  const [showModal, toggle] = useToggle()
 
   const newDatabase = ref<NewDatabase>({
     name: '',
@@ -19,18 +19,17 @@ export function useDatabaseCreation() {
   const config = useRuntimeConfig()
   const dbStore = useDatabasesStore()
 
-  function create() {
-    const { data } = useFetch<Database>('/v1/databases/create', {
+  async function create() {
+    const data = await $fetch<Database>('/v1/databases/create', {
       method: 'POST',
-      immediate: true,
       baseURL: config.public.prodDomain,
       body: newDatabase.value
     })
 
-    if (data.value) {
-      toggleCreationModal()
+    if (data) {
+      dbStore.databases.push(data)
       newDatabase.value = { name: '', description: '' }
-      dbStore.databases.push(data.value)
+      toggle()
     }
   }
 
@@ -47,7 +46,7 @@ export function useDatabaseCreation() {
     /**
      * Toggle the database creation modal
      */
-    toggleCreationModal
+    toggleCreationModal: toggle
   }
 }
 
