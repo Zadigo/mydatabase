@@ -36,6 +36,5 @@ const show = useVModel(props, 'modelValue', emit, { defaultValue: false })
  * Create table
  */
 
-const { create, newTable, showModal } = useCreateTable()
-syncRef(showModal, show, { direction: 'both' })
+const { create, newTable } = useCreateTable(show)
 </script>

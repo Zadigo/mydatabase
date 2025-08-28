@@ -104,10 +104,17 @@ export interface NewTable {
 /**
  * Composable used to create a new table
  */
-export function useCreateTable() {
+export function useCreateTable(modalState?: Ref<boolean>) {
   const dbStore = useDatabasesStore()
 
   const [showModal, toggle] = useToggle()
+
+  if (modalState) {
+    // If an external state was created for the modal,
+    // we can sync it with the local state of showModal
+    syncRef(showModal, modalState, { direction: 'both' })
+  }
+
   const newTable = ref<NewTable>({
     name: '',
     database: undefined
