@@ -8,31 +8,30 @@ export const useDatabasesStore = defineStore('databases', () => {
   console.log('databases', databases.value)
 
   const search = ref<string>('')
-  const searched = computed(() => {
-    return databases.value.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
-  })
+  const searched = useArrayFilter(databases, (database) => database.name.toLowerCase().includes(search.value.toLowerCase()))
+  // const searched = computed(() => {
+  //   return databases.value.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
+  // })
 
   const routeId = ref<number | null>(null)
-  const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
-  const availableTables = computed({ get: () => currentDatabase.value?.tables || [], set:(value) => value })
-  const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
+  const currentDatabase = useArrayFind(databases, (database) => database.id === routeId.value)
+  const availableTables = computed({ get: () => isDefined(currentDatabase) ? currentDatabase.value.tables : [], set:(value) => value })
+  const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)
+  // const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
+  // const availableTables = computed({ get: () => currentDatabase.value?.tables || [], set:(value) => value })
+  // const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
   const hasTables = computed(() => availableTables.value.length > 0)
 
   async function fetch() {
     const config = useRuntimeConfig()
     
-    const { data, error } = await useFetch<Database[]>('/v1/databases', {
+    const data = await $fetch<Database[]>('/v1/databases', {
       method: 'GET',
-      baseURL: config.public.prodDomain,
-      immediate: true
+      baseURL: config.public.prodDomain
     })
 
-    if (error.value) {
-      console.error('Error fetching databases:', error.value)
-    }
-
-    if (data.value) {
-      databases.value = data.value
+    if (data) {
+      databases.value = data
     }
   }
 
