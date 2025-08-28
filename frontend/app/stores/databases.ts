@@ -14,7 +14,7 @@ export const useDatabasesStore = defineStore('databases', () => {
 
   const routeId = ref<number | null>(null)
   const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
-  const availableTables = computed(() => currentDatabase.value?.tables || [])
+  const availableTables = computed({ get: () => currentDatabase.value?.tables || [], set:(value) => value })
   const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
   const hasTables = computed(() => availableTables.value.length > 0)
 

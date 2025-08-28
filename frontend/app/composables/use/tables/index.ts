@@ -1,6 +1,6 @@
 import { EditorTablesDataTable } from '#components'
 import type { Component, MaybeRef } from 'vue'
-import type { Database, SimpleTable, TableComponent } from '~/types'
+import type { SimpleTable, TableComponent } from '~/types'
 
 export {
   useTableWebocketManager
@@ -107,43 +107,34 @@ export interface NewTable {
 export function useCreateTable() {
   const dbStore = useDatabasesStore()
 
-  const [showModal, toggleCreateDocumentModal] = useToggle()
+  const [showModal, toggle] = useToggle()
   const newTable = ref<NewTable>({
     name: '',
     database: undefined
   })
 
+  const { availableTables } = storeToRefs(useDatabasesStore())
+
   async function create() {
     newTable.value.database = dbStore.currentDatabase?.id
 
-    const { data } = await useAsyncData('createTable', async () => {
-      return Promise.all([
-        $fetch<SimpleTable>(`/v1/tables/create`, {
-          method: 'POST',
-          baseURL: useRuntimeConfig().public.prodDomain,
-          body: newTable.value
-        }),
-        $fetch<Database>(`/v1/databases/${dbStore.currentDatabase?.id}`, {
-          method: 'GET',
-          baseURL: useRuntimeConfig().public.prodDomain
-        })
-      ])
+    const data = await $fetch<SimpleTable>(`/v1/tables/create`, {
+      method: 'POST',
+      baseURL: useRuntimeConfig().public.prodDomain,
+      body: newTable.value
     })
 
-    if (data.value) {
-      const [newTableData, updatedDatabase] = data.value
-      showModal.value = false
-      newTable.value = { name: '', database: undefined }
-      // toggleCreateDocumentModal()
-      // dbStore.databases = updatedDatabase
-      console.log(updatedDatabase)
+    if (data) {
+      availableTables.value.push(data)
+      newTable.value.name = ''
+      toggle()
     }
   }
 
   return {
     showModal,
     newTable,
-    toggleCreateDocumentModal,
+    toggleCreateDocumentModal: toggle,
     create
   }
 }

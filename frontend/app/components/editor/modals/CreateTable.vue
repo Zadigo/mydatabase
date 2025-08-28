@@ -30,11 +30,12 @@ import { useCreateTable } from '~/composables/use/tables';
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'udpate:modelValue': [] }>()
-const show = useVModel(props, 'modelValue', emit, { defaultValue: true })
+const show = useVModel(props, 'modelValue', emit, { defaultValue: false })
 
 /**
  * Create table
  */
 
-const { create, newTable } = useCreateTable()
+const { create, newTable, showModal } = useCreateTable()
+syncRef(showModal, show, { direction: 'both' })
 </script>
