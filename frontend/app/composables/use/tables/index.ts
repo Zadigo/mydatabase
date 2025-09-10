@@ -1,5 +1,7 @@
+import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 import { EditorTablesDataTable } from '#components'
-import type { Component, MaybeRef } from 'vue'
+
+import type { Component, Ref } from 'vue'
 import type { SimpleTable, TableComponent } from '~/types'
 
 export {
@@ -7,7 +9,7 @@ export {
 } from './ws_manager'
 
 
-type MaybeTable = MaybeRef<SimpleTable | undefined> | ComputedRef<SimpleTable | undefined> | undefined
+type MaybeTable = Ref<SimpleTable | undefined> | ComputedRef<SimpleTable | undefined> | undefined
 
 /**
  * Composable used to working with a single table such as
@@ -20,14 +22,15 @@ export function useTable(table: MaybeTable) {
     'graph-table': EditorTablesDataTable
   }
 
-  const tableValue = unref(table)
-  
-  const displayComponent = computed(() => {
-    return tableValue ? componentMapping[tableValue.component] : undefined
-  })
+  // const tableValue = unref(table)
+  // const displayComponent = computed(() => {
+  //   return tableValue ? componentMapping[tableValue.component] : undefined
+  // })
+
+  const editableTableRef = ref(table)
+  const displayComponent = computed(() => isDefined(editableTableRef) ? componentMapping[editableTableRef.value.component] : undefined)
 
   const [ showModal, toggle ] = useToggle()
-  const editableTableRef = toRef(table) // TODO: Create a unique Ref that is not linked to the original data because when we change the values here it changes the orginal Ref too
 
   return {
     /**
@@ -62,7 +65,7 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
   const { availableTables } = storeToRefs(dbStore)
 
   const queryParams = useUrlSearchParams() as { table: string }
-  queryParams.table = useToString(currentTable.value?.id || '').value
+  queryParams.table = useToString(isDefined(currentTable) ? currentTable.value.id : '').value
 
   onMounted(() => {
     console.log('params.table', queryParams.table)
@@ -120,6 +123,15 @@ export function useCreateTable(modalState?: Ref<boolean>) {
     database: undefined
   })
 
+  const { errorFields } = useAsyncValidator(newTable, {
+    name: {
+      type: 'string',
+      min: 5,
+      max: 20,
+      required: true
+    }
+  })
+
   const { availableTables } = storeToRefs(useDatabasesStore())
 
   async function create() {
@@ -139,6 +151,7 @@ export function useCreateTable(modalState?: Ref<boolean>) {
   }
 
   return {
+    errorFields,
     showModal,
     newTable,
     toggleCreateDocumentModal: toggle,

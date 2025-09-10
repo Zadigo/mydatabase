@@ -35,17 +35,21 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
    * Documents
    */
 
-  const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
+  const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: (value) => value })
+  // const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
   const selectedTableDocumentName = ref<string>()
-  const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
-  const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
+  const selectedTableDocument = useArrayFind(tableDocuments, (doc) => doc.name === selectedTableDocumentName.value)
+  const selectedTableDocumentNames = useArrayMap(isDefined(selectedTable) ? selectedTable.value.documents : [], doc => doc.name)
+  // const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
+  // const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
 
   // When the user changes the selection of the datasoure,
   // automatically update the selection on Django
   watchDebounced(selectedTableDocumentName, async (newSelectedName) => {
-    if (selectedTable.value && selectedTableDocument.value) {
+    // if (selectedTable.value && selectedTableDocument.value) {
+    if (isDefined(selectedTable) && isDefined(selectedTableDocument)) {
       if (selectedTableDocument.value.name === newSelectedName) {
         return
       }
@@ -219,6 +223,25 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     column[constraint] = !column[constraint]
   }
 
+  /**
+   * Column types
+   */
+
+  const tableStore = useTableEditionStore()
+  const { selectedTableDocument } = storeToRefs(tableStore)
+
+  function save() {
+    if (isDefined(selectedTableDocument)) {
+      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+        method: 'patch',
+        baseURL: useRuntimeConfig().public.prodDomain,
+        body: {
+          column_types: columnTypeOptions.value
+        }
+      })
+    }
+  }
+
   return {
     /**
      * The names of the columns in the table
@@ -244,7 +267,11 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     /**
      * Change the constraint type of the column
      */
-    toggleConstraint
+    toggleConstraint,
+    /**
+     * Persist the column settings to the backend
+     */
+    save
   }
 }, {
   persist: {

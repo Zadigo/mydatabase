@@ -27,6 +27,14 @@ class TableDocument(models.Model):
         blank=True,
         null=True
     )
+    column_types = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            'A mapping of column names to their data types. This is '
+            'used to enforce data types when displaying the table.'
+        )
+    )
     url = models.URLField(
         max_length=500,
         help_text="The url that was used to request the file's content via HTTP",

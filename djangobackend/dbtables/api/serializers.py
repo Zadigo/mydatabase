@@ -1,11 +1,10 @@
-from collections import namedtuple
-from dbtables.models import DatabaseTable
 from dbschemas.models import DatabaseSchema
+from dbtables.models import DatabaseTable
+from dbtables.tasks import create_csv_file_from_data, request_document_by_url
 from django.utils.crypto import get_random_string
 from rest_framework import fields, serializers
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.models import TableDocument
-from dbtables.tasks import request_document_by_url, create_csv_file_from_data
 
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
@@ -36,7 +35,8 @@ class UploadFileSerializer(serializers.Serializer):
     name = serializers.CharField(allow_blank=True, max_length=255)
     file = serializers.FileField(allow_null=True)
     url = serializers.URLField(allow_blank=True)
-    entry_key = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    entry_key = serializers.CharField(
+        allow_null=True, allow_blank=True, required=False)
     # google_sheet_id = serializers.CharField(allow_blank=True)
 
     def validate(self, data):
@@ -85,7 +85,6 @@ class UploadFileSerializer(serializers.Serializer):
         # have the logic yet to upload Google Sheets
         # as a CSV to our backend
         # validated_data.pop('google_sheet_id')
-
 
         entry_key = None
         if 'entry_key' in validated_data:

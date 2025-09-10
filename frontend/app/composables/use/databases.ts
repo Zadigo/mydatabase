@@ -72,7 +72,7 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
   watchDebounced(newDatabaseName, async () => {
     await execute()
 
-    if (data.value) {
+    if (isDefined(data)) {
       database.value = data.value
     }
   }, {

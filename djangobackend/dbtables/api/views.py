@@ -1,6 +1,7 @@
-from dbtables.api.serializers import DatabaseTableSerializer, UploadFileSerializer
+from dbtables.api.serializers import (DatabaseTableSerializer,
+                                      UploadFileSerializer)
 from dbtables.models import DatabaseTable
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 
 
 class UpdateTable(RetrieveUpdateDestroyAPIView):
@@ -12,7 +13,6 @@ class UpdateTable(RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
     lookup_url_kwarg = 'pk'
     permission_classes = []
-
 
 
 class UploadNewDocument(CreateAPIView):

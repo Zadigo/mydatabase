@@ -12,7 +12,7 @@ import { useWebsocketMessage } from '..'
  * 
  * @param table The table to edit
  */
-export function useTableWebocketManager(editableTableRef: MaybeRef<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
+export function useTableWebocketManager(editableTableRef: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 
@@ -55,10 +55,10 @@ export function useTableWebocketManager(editableTableRef: MaybeRef<SimpleTable |
   })
 
   function loadDataViaId() {
-    if (editableTableRef.value && selectedDocument.value) {
+    if (isDefined(editableTableRef) && isDefined(selectedDocument)) {
       wsObject.send(stringify({
         action: 'load_via_id',
-        table_id: editableTableRef.value?.id,
+        table_id: editableTableRef.value.id,
         document: {
           id: selectedDocument.value.id,
           name: selectedDocument.value.name

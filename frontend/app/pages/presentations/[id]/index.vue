@@ -7,14 +7,18 @@
       </div>
     </div>
 
-    <grid class="col-span-12">
+    <div class="col-span-12">
       <div class="py-5">
         <nuxt-button @click="() => { prev() }">Previous Table</nuxt-button>
         <nuxt-button @click="() => { next() }">Next Table</nuxt-button>
   
         {{ state }}
+
+        <div>
+          {{ a }} {{ b }}
+        </div>
       </div>
-    </grid>
+    </div>
   </section>
 </template>
 
@@ -24,11 +28,20 @@ definePageMeta({
   layout: 'presentation'
 })
 
-const { css } = useStyleTag('body { background-color: var(--color-blue-50); }')
+if (import.meta.client) {
+  const { css } = useStyleTag('body { background-color: var(--color-blue-50); }')
+}
 
 const tables = [1, 2 , 3]
 const { next, prev, state } = useCycleList(tables)
 
+
+const a = ref('a')
+const b = extendRef(a, { b: 1 })
+
+// b.b = 2
+
+console.log(b)
 
 // const someRef = ref<Record<string, string>>({ a: 'google' })
 

@@ -22,9 +22,11 @@
               Column types
             </p>
 
+            {{ columnTypeOptions }}
+
             <div v-for="(column, index) in columnTypeOptions" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.name" class="col-span-3" />
-              <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" class="col-span-3" />
+              <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
 
               <!-- Dropdown -->
               <nuxt-dropdown-menu :items="constrainMenuItem">
@@ -47,7 +49,7 @@
 
     <template #footer>
       <div class="flex justify-end">
-        <nuxt-button>
+        <nuxt-button class="ml-2" @click="() => tableColumnsStore.save()">
           Save
         </nuxt-button>
       </div>

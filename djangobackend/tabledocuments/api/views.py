@@ -1,6 +1,6 @@
-from rest_framework.generics import (DestroyAPIView,
+from rest_framework.generics import (DestroyAPIView, UpdateAPIView,
                                      RetrieveUpdateDestroyAPIView)
-from tabledocuments.api.serializer import SimpleDocumentSerializer
+from tabledocuments.api.serializer import SimpleDocumentSerializer, UpdateColumnTypesSerializer
 from tabledocuments.models import TableDocument
 
 
@@ -15,3 +15,9 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
     lookup_url_kwarg = 'document_uuid'
     permission_classes = []
 
+
+
+class UpdateColumnTypes(UpdateAPIView):
+    queryset = TableDocument.objects.all()
+    serializer_class = UpdateColumnTypesSerializer
+    permission_classes = []
