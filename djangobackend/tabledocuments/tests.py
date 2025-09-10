@@ -1,20 +1,36 @@
+import uuid
 from typing import Any
 from unittest import IsolatedAsyncioTestCase
-import uuid
+
 import pandas
-from django.urls import reverse
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.core.files.base import ContentFile
 from django.test import TransactionTestCase
-from django.urls import re_path
+from django.urls import re_path, reverse
 from tabledocuments import consumers
-from tabledocuments.logic.edit import DocumentEdition
+from tabledocuments.logic.edit import DocumentEdition, load_document_by_url
 from tabledocuments.models import TableDocument
 
 from djangobackend.utils import UnittestAuthenticationMixin
+
+
+class TestRequestUtils(IsolatedAsyncioTestCase):
+    async def test_load_document_by_url(self):
+        test_url = 'https://jsonplaceholder.typicode.com/todos'
+        response, errors = await load_document_by_url(test_url)
+        self.assertIsNotNone(response, f'Failed to get response: {response}')
+        self.assertListEqual(errors, [])
+
+    # async def test_load_document_by_url_invalid_endpoint_data(self):
+    #     test_url = 'http://example' # endpoint returns HTML text
+    #     response, errors = await load_document_by_url(test_url)
+
+    #     self.assertIsNotNone(response)
+    #     self.assertListNotEqual(errors, [])
+
 
 
 class TestDocumentEdition(IsolatedAsyncioTestCase):

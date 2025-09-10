@@ -1,6 +1,7 @@
+import dataclasses
 import json
 from typing import Any
-import dataclasses
+
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.files import File
@@ -18,7 +19,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.document_edition = DocumentEdition()
+        self.document_edition = DocumentEdition(self)
         self.document_transform = DocumentTransform()
 
     async def connect(self):
@@ -84,5 +85,23 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
             subaction = content['subaction']
             accepted_subactions = ['visible_columns', 'sortable_columns', 'editable_columns']
             print('acceptable')
+        elif action == 'checkout_url':
+            document = await self.document_edition.load_json_document_by_url(content['url'])
+            if document is not None:
+                columns = document.content.columns.tolist()
+
+                await self.send_json({
+                    'action': 'checkedout_url',
+                    'columns': {
+                        'names': columns,
+                        'type_options': map(
+                            lambda x: {
+                                'name': x,
+                                'columnType': 'String'
+                            },
+                            columns
+                        )
+                    }
+                })
         else:
             await self.send_error(f'Unknown action: {action}')

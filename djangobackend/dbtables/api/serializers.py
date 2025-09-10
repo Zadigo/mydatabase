@@ -1,10 +1,12 @@
 from dbschemas.models import DatabaseSchema
 from dbtables.models import DatabaseTable
-from dbtables.tasks import create_csv_file_from_data, request_document_by_url
 from django.utils.crypto import get_random_string
 from rest_framework import fields, serializers
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.models import TableDocument
+from tabledocuments.tasks import (create_csv_file_from_data,
+                                  get_document_from_url,
+                                  update_document_options)
 
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
@@ -30,13 +32,18 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
 
 
 class UploadFileSerializer(serializers.Serializer):
-    """Serializer used to validate file uploads."""
+    """Serializer used to validate file uploads. In the specific
+    case of using an url, the user can indicate an entry key that
+    will be used to get the actual data nested in the JSON response."""
 
     name = serializers.CharField(allow_blank=True, max_length=255)
     file = serializers.FileField(allow_null=True)
     url = serializers.URLField(allow_blank=True)
     entry_key = serializers.CharField(
-        allow_null=True, allow_blank=True, required=False)
+        allow_null=True, 
+        allow_blank=True, 
+        required=False
+    )
     # google_sheet_id = serializers.CharField(allow_blank=True)
 
     def validate(self, data):
@@ -64,9 +71,7 @@ class UploadFileSerializer(serializers.Serializer):
         # Check the size of the file which can be
         # overwhelming if too big
         if file is not None and file.size > 50 * 1024 * 1024:
-            raise serializers.ValidationError(
-                'File size must be less than 50MB'
-            )
+            raise serializers.ValidationError('File size must be less than 50MB')
 
         if name is None and file is not None:
             file_extension = file.name.split('.')[-1]
@@ -102,13 +107,20 @@ class UploadFileSerializer(serializers.Serializer):
         table.documents.add(document)
 
         if document.url and document.file == None:
-            request_document_by_url.apply_async(
+            get_document_from_url.apply_async(
                 args=[document.url],
                 countdown=10,
                 link=[
                     create_csv_file_from_data.s(document.pk, entry_key)
                 ]
             )
+
+        # Once the document is created, we need to populate
+        # column_options, column_types and column_names
+        update_document_options.apply_async(
+            args=[str(document.document_uuid), document.file.path],
+            countdown=20
+        )
 
         return document
 

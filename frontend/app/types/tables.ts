@@ -17,6 +17,21 @@ export interface TableDocument extends _BaseDatetimes {
    * The unique identifier for the document
    */
   document_uuid: string
+  /**
+   * The names of the columns present
+   * in the document
+   */
+  column_names: string[]
+  /**
+   * The column options used for this document
+   * @default []
+   */
+  column_options: ColumnOptions[]
+  /**
+   * The column type options used for this document
+   * @default []
+   */
+  column_types: ColumnTypeOptions[]
 }
 
 export interface Table extends _BaseDatetimes {

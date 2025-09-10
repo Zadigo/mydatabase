@@ -7,6 +7,7 @@ import pandas
 import pytz
 import requests
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
 from django.db.models import Q
 from django.utils.crypto import get_random_string
@@ -34,11 +35,25 @@ class Document:
         return hash((self.document_cache_key))
 
 
-class DocumentEdition:
-    """A classs that preloads and reads a document
-    for edition in the frontend"""
+async def load_document_by_url(url: str, **request_params: Any) -> tuple[Response | None, list[str]]:
+    """Function used to load the content of document returned via an API endpoint
+    as a json format. The content will be loaded and transformed back to a csv database file"""
+    try:
+        response = requests.get(url, **request_params)
+    except requests.RequestException as e:
+        return None, [str(e)]
+    return response, []
 
-    def __init__(self):
+
+class DocumentEdition:
+    """A class that preloads and reads a document
+    for edition in the frontend. A document can either
+    be a physical file (csv) or or an endpoint that
+    contains csv or json data."""
+
+    def __init__(self, consumer: AsyncJsonWebsocketConsumer | None = None):
+        self.consumer = consumer
+
         self.errors: list[str] = []
         self.columns: list[str] = []
 
@@ -50,7 +65,7 @@ class DocumentEdition:
         metadata['date'] = str(datetime.datetime.now(tz=pytz.UTC))
         return Document(document_cache_key=document_cache_key, content=df, metadata=metadata)
 
-    async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}, **options: dict):
+    async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}, is_temp: bool = False, **options: dict):
         # Before running document operations,
         # save it to the cache with a unique key
         document_cache_key = f"document_{get_random_string(length=10)}"
@@ -141,15 +156,6 @@ class DocumentEdition:
 
         return await self.clean(df)
 
-    async def load_document_by_url(self, url: str, **request_params: Any) -> Response | None:
-        try:
-            response = requests.get(url, headers={}, **request_params)
-        except requests.RequestException as e:
-            self.errors.append(str(e))
-            return None
-        else:
-            return response
-
     async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
         """Function used to load the content of document returned via an API endpoint
         as a json format. The content will be loaded and transformed back to a csv database file.
@@ -158,7 +164,14 @@ class DocumentEdition:
         to specify the path to the data. For example: items in `{'items': []}` or root.items
         in `{'root': {'items': []}}`
         """
-        response = await self.load_document_by_url(url, **request_params)
+        if self.consumer is not None:
+            await self.consumer.send_json({'action': 'processing_url'})
+
+        response, errors = await load_document_by_url(url, **request_params)
+
+        if errors:
+            self.errors.extend(errors)
+
         if response is not None and response.ok:
             try:
                 data = response.json()
@@ -205,7 +218,9 @@ class DocumentTransform:
     """This is the main class that handles live document
     aka data transformation"""
 
-    def __init__(self):
+    def __init__(self, consumer: AsyncJsonWebsocketConsumer | None = None):
+        self.consumer = consumer
+
         self.current_document: Document | None = None
         self.initial_dataframe: pandas.DataFrame | None = None
 

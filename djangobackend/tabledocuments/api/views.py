@@ -18,6 +18,9 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
 
 
 class UpdateColumnTypes(UpdateAPIView):
+    """View to update the column types of a given document.
+    Column types are a mapping of column names to their data types."""
+    
     queryset = TableDocument.objects.all()
     serializer_class = UpdateColumnTypesSerializer
     permission_classes = []

@@ -36,19 +36,15 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
    */
 
   const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: (value) => value })
-  // const tableDocuments = computed({ get: () => selectedTable.value?.documents || [], set: (value) => value })
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
   const selectedTableDocumentName = ref<string>()
   const selectedTableDocument = useArrayFind(tableDocuments, (doc) => doc.name === selectedTableDocumentName.value)
-  const selectedTableDocumentNames = useArrayMap(isDefined(selectedTable) ? selectedTable.value.documents : [], doc => doc.name)
-  // const selectedTableDocument = computed(() => tableDocuments.value.find(doc => doc.name === selectedTableDocumentName.value))
-  // const selectedTableDocumentNames = computed(() => selectedTable.value?.documents.map(doc => doc.name) || [])
+  const selectedTableDocumentNames = computed(() => useArrayMap(isDefined(selectedTable) ? selectedTable.value.documents : [], doc => doc.name).value)
 
   // When the user changes the selection of the datasoure,
   // automatically update the selection on Django
   watchDebounced(selectedTableDocumentName, async (newSelectedName) => {
-    // if (selectedTable.value && selectedTableDocument.value) {
     if (isDefined(selectedTable) && isDefined(selectedTableDocument)) {
       if (selectedTableDocument.value.name === newSelectedName) {
         return
@@ -209,8 +205,26 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
   const columnNames = ref<string[]>([])
   const columnOptions = ref<ColumnOptions[]>([])
 
+  const tableStore = useTableEditionStore()
+  const { selectedTableDocument } = storeToRefs(tableStore)
+
+
+  /**
+   * Column options
+   */
+
   function toggleOption(column: ColumnOptions, option: DefaultColumnOption) {
     column[option] = !column[option]
+
+    if (isDefined(selectedTableDocument)) {
+      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+        method: 'patch',
+        baseURL: useRuntimeConfig().public.prodDomain,
+        body: {
+          column_options: columnOptions.value
+        }
+      })
+    }
   }
 
   const columnTypeOptions = ref<ColumnTypeOptions[]>([])
@@ -226,9 +240,6 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
   /**
    * Column types
    */
-
-  const tableStore = useTableEditionStore()
-  const { selectedTableDocument } = storeToRefs(tableStore)
 
   function save() {
     if (isDefined(selectedTableDocument)) {
@@ -258,6 +269,8 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     columnTypeOptions,
     /**
      * Toggle the visibility, editability, or sortability of a column
+     * @param column The column to modify
+     * @param option The option to toggle
      */
     toggleOption,
     /**

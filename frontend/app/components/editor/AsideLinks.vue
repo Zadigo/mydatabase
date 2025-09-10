@@ -9,20 +9,21 @@
     </nuxt-button>
 
     <!-- Select Data -->
+    hasDocuments {{ hasDocuments }} {{ selectedTableDocumentNames }}
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
 
     <!-- Add Data -->
-     <div class="space-x-2">
-       <nuxt-button variant="soft" color="info" @click="() => { toggleShowAddDocumentModal() }">
-         <icon name="i-lucide-file-plus-2" />
-         Add
-       </nuxt-button>
-   
-       <nuxt-button variant="soft" color="info" @click="() => { toggleShowEditDocumentModal()  }">
-         <icon name="i-lucide-pen" />
-         Update
-       </nuxt-button>
-     </div>
+    <div class="space-x-2">
+      <nuxt-button variant="soft" color="info" @click="() => { toggleShowAddDocumentModal() }">
+        <icon name="i-lucide-file-plus-2" />
+        Add
+      </nuxt-button>
+
+      <nuxt-button variant="soft" color="info" @click="() => { toggleShowEditDocumentModal()  }">
+        <icon name="i-lucide-pen" />
+        Update
+      </nuxt-button>
+    </div>
 
     <!-- Columns -->
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
@@ -66,7 +67,7 @@ import { useCreateTable } from '~/composables/use/tables'
 const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
 
-const { selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
+const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 console.log('Editor.AsideLinks', tableData.value)
 
 const tableColumnsStore = useTableColumnsStore()

@@ -27,6 +27,19 @@ class TableDocument(models.Model):
         blank=True,
         null=True
     )
+    column_names = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='A mapping of the column names present in the document'
+    )
+    column_options = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            'A mapping of column names to their visibility, editability, sortability '
+            'and searchability for the final table presentation'
+        )
+    )
     column_types = models.JSONField(
         default=dict,
         blank=True,

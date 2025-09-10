@@ -16,8 +16,9 @@ class UpdateTable(RetrieveUpdateDestroyAPIView):
 
 
 class UploadNewDocument(CreateAPIView):
-    """Endpoint used to upload a new file either
-    directly or via an url"""
+    """Endpoint used to upload a new file as a document
+    or either via an url. The file is parsed and stored
+    in the database."""
 
     queryset = DatabaseTable.objects.all()
     serializer_class = UploadFileSerializer
@@ -25,8 +26,7 @@ class UploadNewDocument(CreateAPIView):
 
 
 class CreateTable(CreateAPIView):
-    """Endpoint used to update metadata for a 
-    database table."""
+    """Endpoint used to create a new database table."""
 
     queryset = DatabaseTable.objects.all()
     serializer_class = DatabaseTableSerializer

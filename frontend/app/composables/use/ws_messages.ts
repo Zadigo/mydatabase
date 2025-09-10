@@ -1,3 +1,26 @@
+// export type _BaseSendWsAction =
+//   | { action: 'idle_connect' }
+//   | { action: 'load_via_id' }
+//   | { action: 'load_via_url', url: string, entry_key?: string }
+
+
+// export interface DocumentData {
+//   document_data: string
+//   columns: {
+//     names: string[]
+//     options: ColumnOptions[]
+//     type_options: ColumnTypeOptions[]
+//   }
+// }
+
+// export type _BaseReceiveWsAction =
+//   | { action: 'connected' } & DocumentData
+//   | { action: 'loaded_via_id' } & DocumentData
+//   | { action: 'loaded_via_url' } & DocumentData
+//   | { action: 'error' }
+//   & { message: string }
+
+
 export type SendWsAction = 'idle_connect' | 'load_via_id' | 'load_via_url'
 
 export type ReceiveWsAction = 'loaded_via_id' | 'connected' | 'loaded_via_url' | 'error'

@@ -8,32 +8,11 @@
       <!-- Stepper -->
       <nuxt-stepper ref="stepper" :items="items">
         <template #content="{ item }">
-          {{ item.title }}
+          {{ item }}
+          <editor-modals-blocks-upload-document v-if="item.title === 'Upload file'" v-model="newDocument" />
+          <editor-modals-blocks-select-columns v-else-if="item.title === 'Select columns'" v-model="newDocument" />
         </template>
       </nuxt-stepper>
-
-      <div class="space-y-2">
-        <nuxt-alert v-if="!dbStore.hasTables" class="mb-5" title="Missing tables" description="Your database currently has no tables. You will nened to create one in order to upload a file" />
-
-        <!-- Name -->
-        <nuxt-input v-model="newDocument.name" variant="subtle" class="w-full" placeholder="Document Name" />
-
-        <!-- Entry Key -->
-        <p class="mb-3 text-sm font-light mt-3">If applicable, for a JSON object specify the entry key to extract the relevant data from</p>
-        <nuxt-input v-model="newDocument.entry_key" variant="subtle" class="w-full" placeholder="Entry Key e.g. results, data" />
-
-        <!-- CSV/Json -->
-        <nuxt-file-upload v-model="newDocument.file" class="w-full min-h-48" accept=".csv,.json,.xlsx" />
-      </div>
-
-      <nuxt-separator class="my-5" />
-
-      <!-- Other -->
-      <div class="space-y-2">
-        <p class="mb-3 text-sm font-light">You can also provide a URL or a Google Sheet ID to import data from external sources.</p>
-        <nuxt-input v-model="newDocument.url" class="w-full" placeholder="Url hosting the CSV or JSON file" />
-        <nuxt-input v-model="newDocument.google_sheet_id" :disabled="true" class="w-full" placeholder="Google Sheet ID" />
-      </div>
     </template>
 
     <template #footer>
@@ -50,8 +29,12 @@ import { useCreateDocument } from '~/composables/use/documents'
 import type { StepperItem } from '@nuxt/ui'
 
 const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'udpate:modelValue': [] }>()
+const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
 const show = useVModel(props, 'modelValue', emit, { defaultValue: true })
+
+/**
+ * Document creation
+ */
 
 const { newDocument, create } = useCreateDocument()
 
@@ -63,7 +46,7 @@ const dbStore = useDatabasesStore()
 
 const items: StepperItem[] = [
   {
-    title: 'Uplaod file',
+    title: 'Upload file',
     icon: 'i-lucide-file'
   }, 
   {
