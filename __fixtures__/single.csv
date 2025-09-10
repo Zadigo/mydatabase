@@ -1,0 +1,11 @@
+id,firstname,lastname,fullname,age,is_celebrity,date_of_birth
+1,Addison,Rae,Addison Rae,27,true,1996-10-05
+2,Kimberly,Lopez,Kimberly Lopez,34,true,1989-02-12
+3,John,Smith,John Smith,45,false,1978-07-22
+4,Jane,Doe,Jane Doe,29,false,1994-11-30
+5,Michael,Johnson,Michael Johnson,52,false,1971-03-15
+6,Emily,Davis,Emily Davis,31,false,1992-08-19
+7,David,Wilson,David Wilson,40,false,1983-05-12
+8,Sarah,Martinez,Sarah Martinez,27,false,1996-02-20
+9,Chris,Brown,Chris Brown,36,false,1987-09-15
+10,Ashley,Jones,Ashley Jones,22,false,2001-01-30
