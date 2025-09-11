@@ -19,6 +19,8 @@ class PublicApiEndpointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PublicApiEndpoint
-        fields = ['id', 'methods', 'endpoint',
-                  'endpoint_uuid', 'database_schema']
         read_only_fields = ['id']
+        fields = [
+            'id', 'methods', 'endpoint',
+            'endpoint_uuid', 'database_schema'
+        ]

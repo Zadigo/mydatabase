@@ -1,7 +1,8 @@
 from typing import Generic, TypeVar
-
+from django.shortcuts import get_object_or_404
 from dbschemas.api.serializers import DatabaseSchemaSerializer
 from dbschemas.models import DatabaseSchema
+from endpoints.api.serializers import PublicApiEndpointSerializer
 from rest_framework import status
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      GenericAPIView, ListAPIView,
@@ -60,3 +61,17 @@ class RestartProject(GenericAPIView):
             table.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListDatabaseEndpoints(ListAPIView):
+    """List all public API endpoints associated with a 
+    specific database schema."""
+
+    queryset = DatabaseSchema.objects.all()
+    serializer_class = PublicApiEndpointSerializer
+    permission_classes = []
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        database = get_object_or_404(qs, pk=self.kwargs['pk'])
+        return database.publicapiendpoint_set.all()
