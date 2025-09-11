@@ -1,5 +1,5 @@
 from django.urls import re_path
-from endpoints import views
+from endpoints.api import views
 
 app_name = 'endpoints'
 
@@ -10,13 +10,18 @@ urlpatterns = [
         name='secret-api-endpoint'
     ),
     re_path(
-        r'^api/public/(?P<endpoint>[^/]+)/(?P<database>[a-z\-]+)/(?P<table>[a-z\-]+)$',
+        r'^api/public/(?P<endpoint>[a-z\-]+)/(?P<database>\d+)/(?P<table>\d+)$',
         views.PublicApiEndpointRouter.as_view(),
         name='table-level-endpoint'
     ),
     re_path(
-        r'^api/public/(?P<endpoint>[^/]+)/(?P<database>[a-z\-]+)$',
+        r'^api/public/(?P<endpoint>[a-z\-]+)/(?P<database>\d+)$',
         views.PublicApiEndpointRouter.as_view(),
         name='database-level-endpoint'
+    ),
+    re_path(
+        r'^$',
+        views.ListEndpoints.as_view(),
+        name='list-endpoints'
     )
 ]

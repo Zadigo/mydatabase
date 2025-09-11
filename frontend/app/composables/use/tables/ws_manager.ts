@@ -19,8 +19,8 @@ export function useTableWebocketManager(editableTableRef: Ref<SimpleTable | unde
   const tableEditionStore = useTableEditionStore()
   const { tableData } = storeToRefs(tableEditionStore)
 
-  const tableColumnsStore = useTableColumnsStore()
-  const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
+  // const tableColumnsStore = useTableColumnsStore()
+  // const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
 
   const wsObject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
@@ -38,12 +38,14 @@ export function useTableWebocketManager(editableTableRef: Ref<SimpleTable | unde
               console.log('Parsed data', JSON.parse(data.document_data))
               tableData.value = JSON.parse(data.document_data)
             }
-
-            if (data.columns) {
-              columnNames.value = data.columns.names
-              columnOptions.value = data.columns.options
-              columnTypeOptions.value = data.columns.type_options
-            }
+            
+            // TODO: Remove this now comes directly within
+            // the API when loading the databases
+            // if (data.columns) {
+            //   columnNames.value = data.columns.names
+            //   columnOptions.value = data.columns.options
+            //   columnTypeOptions.value = data.columns.type_options
+            // }
             break
 
           default:

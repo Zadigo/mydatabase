@@ -53,8 +53,8 @@ INSTALLED_APPS = [
 
     'tabledocuments',
     'dbschemas',
-    'dbtables'
-
+    'dbtables',
+    'endpoints'
 ]
 
 MIDDLEWARE = [

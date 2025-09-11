@@ -202,12 +202,14 @@ export interface ColumnTypeOptions {
  * e.g. search, modifying column types etc.
  */
 export const useTableColumnsStore = defineStore('tableColumns', () => {
-  const columnNames = ref<string[]>([])
-  const columnOptions = ref<ColumnOptions[]>([])
+  // const columnNames = ref<string[]>([])
+  // const columnOptions = ref<ColumnOptions[]>([])
 
   const tableStore = useTableEditionStore()
   const { selectedTableDocument } = storeToRefs(tableStore)
 
+  const columnNames = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [], set: (value) => value })
+  const columnOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [], set: (value) => value })
 
   /**
    * Column options
@@ -227,7 +229,8 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     }
   }
 
-  const columnTypeOptions = ref<ColumnTypeOptions[]>([])
+  // const columnTypeOptions = ref<ColumnTypeOptions[]>([])
+  const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: (value) => value })
 
   function changeTypeOption(column: ColumnTypeOptions, columnType: ColumnType) {
     column.columnType = columnType

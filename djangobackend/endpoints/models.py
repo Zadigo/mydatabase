@@ -11,10 +11,16 @@ from endpoints.utils import create_endpoint
 class ApiEndpoint(models.Model):
     """This class provides functionnalities so that users
     external or internal can interact with databases.
-    
+
     An endpoint can be public or private (only accessible from 
     an organization standpoint) depending on the user's preferences
     """
+
+    database_schema = models.ForeignKey(
+        'dbschemas.DatabaseSchema',
+        models.CASCADE,
+        null=True,
+    )
     endpoint_uuid = models.UUIDField(
         default=uuid.uuid4(),
         unique=True
@@ -30,10 +36,10 @@ class ApiEndpoint(models.Model):
     )
 
     class Meta:
-        proxy = True
+        abstract = True
 
     def __str__(self):
-        return
+        return str(self.endpoint_uuid)
 
 
 class PublicApiEndpoint(ApiEndpoint):
@@ -74,7 +80,7 @@ class SecretApiEndpoint(ApiEndpoint):
     )
 
 
-@receiver(pre_save, sender=PublicApiEndpoint())
+@receiver(pre_save, sender=PublicApiEndpoint)
 def create_public_endpoint(instance, **kwargs):
     if not instance.public_key:
         instance.public_key = create_endpoint('public')
@@ -95,5 +101,5 @@ def create_bearer_token(instance, **kwargs):
 @receiver(post_save, sender=PublicApiEndpoint)
 def set_http_methods(instance, created, **kwargs):
     if created:
-        if not instance.methods:
+        if not instance.methods or instance.methods == '':
             instance.methods = 'GET,POST,PUT,DELETE'

@@ -1,15 +1,13 @@
-import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 import { EditorTablesDataTable } from '#components'
+import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 
 import type { Component, Ref } from 'vue'
-import type { SimpleTable, TableComponent } from '~/types'
+import type { MaybeTable, SimpleTable, TableComponent } from '~/types'
 
 export {
   useTableWebocketManager
 } from './ws_manager'
 
-
-type MaybeTable = Ref<SimpleTable | undefined> | ComputedRef<SimpleTable | undefined> | undefined
 
 /**
  * Composable used to working with a single table such as
@@ -22,11 +20,6 @@ export function useTable(table: MaybeTable) {
     'graph-table': EditorTablesDataTable
   }
 
-  // const tableValue = unref(table)
-  // const displayComponent = computed(() => {
-  //   return tableValue ? componentMapping[tableValue.component] : undefined
-  // })
-
   const editableTableRef = ref(table)
   const displayComponent = computed(() => isDefined(editableTableRef) ? componentMapping[editableTableRef.value.component] : undefined)
 
@@ -35,6 +28,7 @@ export function useTable(table: MaybeTable) {
   return {
     /**
      * Show drawer for editing the table's data
+     * @default false
      */
     showModal,
     /**
@@ -64,8 +58,10 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
   const dbStore = useDatabasesStore()
   const { availableTables } = storeToRefs(dbStore)
 
+  const _currentTable = toRef(currentTable)
+
   const queryParams = useUrlSearchParams() as { table: string }
-  queryParams.table = useToString(isDefined(currentTable) ? currentTable.value.id : '').value
+  queryParams.table = useToString(isDefined(_currentTable) ? _currentTable.value.id : '').value
 
   onMounted(() => {
     console.log('params.table', queryParams.table)
@@ -74,7 +70,7 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
     // the "table" query
     if (queryParams.table) {
       const tableToView = availableTables.value.find(table => table.id === useToNumber(queryParams.table).value)
-      console.log('tableToView.value', tableToView.value)
+      console.log('tableToView.value', tableToView)
     }
 
     // Reload database data on page reload
@@ -83,14 +79,14 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
 
     if (!dbStore.currentDatabase) {
       const databaseToView = dbStore.databases.find(database => database.id === id.value)
-      console.log('databaseToView.value', databaseToView.value)
+      console.log('databaseToView.value', databaseToView)
     }
   })
 
   if (currentTable) {
-    watch(currentTable, (value) => {
-      if (value) {
-        queryParams.table = useToString(value.id || '').value
+    watch(currentTable, (table) => {
+      if (table) {
+        queryParams.table = useToString(table.id || '').value
       }
     })
   }

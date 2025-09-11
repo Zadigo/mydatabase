@@ -33,12 +33,12 @@
           <div class="p-1 bg-gray-100 my-5">
             <div class="flex justify-center gap-3 items-center cursor-pointer rounded-md border border-gray-200 hover:bg-gray-100 p-2">
               <icon name="i-lucide-key" />
-              <nuxt-select v-model="primaryKey" placeholder="Primary key" />
+              <nuxt-select v-model="primaryKey" :items="primaryKeyColumns" placeholder="Primary key" />
               
               <icon name="i-lucide-arrow-right" />
               <div class="flex gap-1">
                 <nuxt-select v-model="foreignTableId" :items="availableDocuments" label-key="name" value-key="document_uuid" placeholder="Document" />
-                <nuxt-select v-model="foreignTableForeignKey" placeholder="Foreign key" />
+                <nuxt-select v-model="foreignTableForeignKey" :items="foreignTableColumns" placeholder="Foreign key" />
               </div>
             </div>
           </div>
@@ -103,5 +103,5 @@ const { remove } = useEditDocument()
  * Relationships
  */
 
-const { availableDocuments, primaryKey, foreignTableId, foreignTableForeignKey, create } = useEditDocumentRelationship()
+const { primaryKeyColumns, foreignTableColumns, availableDocuments, primaryKey, foreignTableId, foreignTableForeignKey, create } = useEditDocumentRelationship()
 </script>

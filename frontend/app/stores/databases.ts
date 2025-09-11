@@ -1,33 +1,32 @@
-// import { databasesFixture } from '~/data/__fixtures__'
 import type { Database } from '~/types'
 
 export const useDatabasesStore = defineStore('databases', () => {
-  // const databases = reactive<Database[]>(databasesFixture)
   const databases = ref<Database[]>([])
 
   console.log('databases', databases.value)
 
+  /**
+   * Search
+   */
+
   const search = ref<string>('')
   const searched = useArrayFilter(databases, (database) => database.name.toLowerCase().includes(search.value.toLowerCase()))
-  // const searched = computed(() => {
-  //   return databases.value.filter(database => database.name.toLowerCase().includes(search.value.toLowerCase()))
-  // })
+
+  /**
+   * Current database
+   */
 
   const routeId = ref<number | null>(null)
   const currentDatabase = useArrayFind(databases, (database) => database.id === routeId.value)
+  
   const availableTables = computed({ get: () => isDefined(currentDatabase) ? currentDatabase.value.tables : [], set:(value) => value })
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)
-  // const currentDatabase = computed(() => databases.value.find(database => database.id === routeId.value))
-  // const availableTables = computed({ get: () => currentDatabase.value?.tables || [], set:(value) => value })
-  // const availableTableNames = computed(() => currentDatabase.value?.tables.map(table => table.name) || [])
   const hasTables = computed(() => availableTables.value.length > 0)
 
   async function fetch() {
-    const config = useRuntimeConfig()
-    
     const data = await $fetch<Database[]>('/v1/databases', {
       method: 'GET',
-      baseURL: config.public.prodDomain
+      baseURL: useRuntimeConfig().public.prodDomain
     })
 
     if (data) {

@@ -16,13 +16,12 @@ export function useDatabaseCreation() {
     description: ''
   })
 
-  const config = useRuntimeConfig()
   const dbStore = useDatabasesStore()
 
   async function create() {
     const data = await $fetch<Database>('/v1/databases/create', {
       method: 'POST',
-      baseURL: config.public.prodDomain,
+      baseURL: useRuntimeConfig().public.prodDomain,
       body: newDatabase.value
     })
 
@@ -49,7 +48,6 @@ export function useDatabaseCreation() {
     toggleCreationModal: toggle
   }
 }
-
 
 /**
  * Composable used to edit an existing database
@@ -91,6 +89,9 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
      * Ref that holds the new database name
      */
     newDatabaseName,
+    /**
+     * Whether the database is being updated
+     */
     isUpdating
   }
 }

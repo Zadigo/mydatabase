@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: My Database",
+            "name": "Django: My Database",
             "type": "debugpy",
             "request": "launch",
             "envFile": "${workspaceFolder}/djangobackend/.env",

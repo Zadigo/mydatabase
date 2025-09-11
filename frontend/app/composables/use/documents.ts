@@ -155,10 +155,6 @@ export function useEditDocument() {
  * Composable used for editing the relationships between documents
  */
 export function useEditDocumentRelationship() {
-  const primaryKey = ref<string>()
-  const foreignTableId = ref<string>()
-  const foreignTableForeignKey = ref<string>()
-
   function create() {
     // Do something
   }
@@ -168,7 +164,21 @@ export function useEditDocumentRelationship() {
 
   const availableDocuments = computed(() => useArrayFilter(tableDocuments, (doc) => doc.document_uuid !== selectedTableDocument.value?.document_uuid).value)
 
+  /**
+   * Columns
+   */
+ 
+  const primaryKey = ref<string>()
+  const foreignTableId = ref<string>()
+  const foreignTableForeignKey = ref<string>()
+ 
+  const primaryKeyColumns = computed(() => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [])
+  const foreignTable = useArrayFind(tableDocuments, (doc) => doc.document_uuid === foreignTableId.value)
+  const foreignTableColumns = computed(() => isDefined(foreignTable) ? foreignTable.value.column_names : [])
+
   return {
+    primaryKeyColumns,
+    foreignTableColumns,
     availableDocuments,
     /**
      * The primary key of the current document

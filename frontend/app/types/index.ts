@@ -2,6 +2,8 @@ import type { SimpleTable } from './tables'
 
 export type * from './tables'
 
+export type MaybeTable = MaybeRef<SimpleTable | undefined>
+
 /**
  * @private
  */
