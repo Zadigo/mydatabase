@@ -1,4 +1,5 @@
 import type { Database } from '~/types'
+import type { DatabaseEndpoint } from '~/types/endpoints'
 
 export interface NewDatabase {
   name: string
@@ -95,3 +96,47 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
     isUpdating
   }
 }
+
+export type NewEndpoint = Pick<DatabaseEndpoint, 'endpoint'>
+
+/**
+ * Composable used to fetch the endpoints for a database
+ * @param database The database to fetch endpoints for
+ */
+export const useDatabaseEndpoints = createSharedComposable(() => {
+  const dbStore = useDatabasesStore()
+  const { currentDatabase } = storeToRefs(dbStore)
+
+  const endpoints = ref<DatabaseEndpoint[]>([])
+
+  onMounted(async () => {
+    if (isDefined(currentDatabase)) {
+      const data = await $fetch<DatabaseEndpoint[]>(`/v1/databases/${currentDatabase.value.id}/endpoints`, {
+        baseURL: useRuntimeConfig().public.prodDomain
+      })
+  
+      if (data) {
+        endpoints.value = data
+      }
+    }
+  })
+
+  /**
+   * New endpoint
+   */
+
+  const [showModal, toggleShowModal] = useToggle()
+  const newEndpoint = ref<NewEndpoint>({ endpoint: '' })
+
+  function create() {
+    // Do something
+  }
+
+  return {
+    showModal,
+    newEndpoint,
+    endpoints,
+    toggleShowModal,
+    create
+  }
+})

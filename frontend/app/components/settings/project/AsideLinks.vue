@@ -25,6 +25,10 @@ const endpoints = [
     endpoint: ''
   },
   {
+    name: 'Endpoints',
+    endpoint: 'endpoints'
+  },
+  {
     name: 'Api Keys',
     endpoint: 'api-keys'
   }

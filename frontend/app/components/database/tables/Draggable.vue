@@ -1,12 +1,11 @@
 <template>
   <div id="table" ref="tableEl" class="bg-white shadow-sm w-50 rounde-md rounded-md border-slate-100 z-40" :style="style" style="position: fixed">
-    <div class="bg-slate-300 p-2 rounded-t-md font-bold">
-      <icon name="i-lucide-table" />
-      {{ table.name }}
-
-      <nuxt-button :to="`/databases/${dbStore.currentDatabase?.id}/editor?table=${table.id}`" variant="soft">
-        <icon name="i-lucide-link" />
+    <div class="bg-slate-300 p-2 rounded-t-md font-bold flex items-center justify-between">
+      <nuxt-button variant="ghost" color="neutral" icon="i-lucide-table" :disabled="true">
+        {{ table.name }}
       </nuxt-button>
+
+      <nuxt-button :to="`/databases/${dbStore.currentDatabase?.id}/editor?table=${table.id}`" size="sm" icon="i-lucide-link" variant="soft" />
     </div>
 
     <ul class="cursor-move overflow-y-scroll h-70">
