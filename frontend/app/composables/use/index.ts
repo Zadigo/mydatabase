@@ -1,8 +1,4 @@
 export {
-  useTable
-} from './tables'
-
-export {
   useDatabaseCreation
 } from './databases'
 

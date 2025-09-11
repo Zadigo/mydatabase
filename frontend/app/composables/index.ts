@@ -1,5 +1,4 @@
 export {
-  useTable,
   useDatabaseCreation
 } from './use'
 

@@ -1,5 +1,7 @@
 import type { DocumentData, SimpleTable } from '~/types'
 
+export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>
+
 /**
  * Store used to manage the state of table edition
  * across multiple components aka which table is
@@ -10,20 +12,37 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const dbStore = useDatabasesStore()
   const { currentDatabase } = storeToRefs(dbStore)
 
+  const selectedTableDocumentName = ref<string>()
+
   /**
    * Table selection
    */
 
   const selectedTableName = ref<string>()
-  const selectedTable = computed({ get: () => currentDatabase.value?.tables.find(table => table.name === selectedTableName.value), set: (value) => value })
-
+  const selectedTable = computed({ 
+    get: () => useArrayFind(currentDatabase.value?.tables || [], table => table.name === selectedTableName.value).value, 
+    set: (value) => {
+      if (isDefined(value)) {
+        const table = useArrayFind(currentDatabase.value?.tables || [], table => table.id === value.id)
+        
+        if (isDefined(table)) {
+          table.value.name = value.name
+          table.value.description = value.description
+          table.value.component = value.component
+          selectedTableName.value = value.name
+        }
+      }
+    } 
+  })
+  
   // When the TableDocument already has a datasource
   // we need to automatically set the value on the
   // select input when the user selects that table
-  watch(selectedTable, (value) => {
-    if (value) {
-      if (value.active_document_datasource) {
-        const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === value.active_document_datasource)
+  watch(selectedTable, (table) => {
+    if (isDefined(table)) {
+      if (table.active_document_datasource) {
+        const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === table.active_document_datasource)
+        
         if (tableDocument) {
           selectedTableDocumentName.value = tableDocument.name
         }
@@ -38,33 +57,57 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: (value) => value })
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
   
-  const selectedTableDocumentName = ref<string>()
   const selectedTableDocument = useArrayFind(tableDocuments, (doc) => doc.name === selectedTableDocumentName.value)
   const selectedTableDocumentNames = computed(() => useArrayMap(isDefined(selectedTable) ? selectedTable.value.documents : [], doc => doc.name).value)
 
-  // When the user changes the selection of the datasoure,
-  // automatically update the selection on Django
-  watchDebounced(selectedTableDocumentName, async (newSelectedName) => {
-    if (isDefined(selectedTable) && isDefined(selectedTableDocument)) {
-      if (selectedTableDocument.value.name === newSelectedName) {
-        return
-      }
+  /**
+   * Update
+   */
 
+  const editableTableRef = ref<EditableTableRef>({
+    name: selectedTable.value?.name || '',
+    description: selectedTable.value?.description || '',
+    component: selectedTable.value?.component || 'data-table',
+    active_document_datasource: selectedTable.value?.active_document_datasource || null
+  })
+
+  watch(selectedTable, (table) => {
+    if (isDefined(table)) {
+      editableTableRef.value = {
+        name: table.name,
+        description: table.description,
+        component: table.component,
+        active_document_datasource: table.active_document_datasource || null
+      }
+    }
+  })
+
+  const [showModal, toggleEditTableDrawer] = useToggle()
+
+  async function update() {
+    if (isDefined(selectedTable)) {
       const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
         method: 'PATCH',
         baseURL: useRuntimeConfig().public.prodDomain,
-        body: {
-          active_document_datasource: selectedTableDocument.value.document_uuid
-        }
+        body: editableTableRef.value
       })
   
       if (data) {
         selectedTable.value = data
+        toggleEditTableDrawer(false)
       }
     }
-  }, {
-    immediate: false,
-    debounce: 4000
+  }
+
+  watch(selectedTableDocument, async (doc) => {
+    if (isDefined(selectedTable) && isDefined(doc)) {
+      const data = { ...selectedTable.value }
+
+      data.active_document_datasource = doc.document_uuid
+      selectedTable.value = data
+      
+      await update()
+    }
   })
 
   /**
@@ -75,6 +118,9 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const hasData = computed(() => tableData.value.length > 0)
   
   return {
+    showModal,
+    toggleEditTableDrawer,
+    editableTableRef,
     /**
      * The current table
      */
@@ -113,7 +159,11 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
      * Whether the current table has at least
      * one document linked to it
      */
-    hasDocuments
+    hasDocuments,
+    /**
+     * Updates a documents metadata
+     */
+    update
   }
 }, {
   persist: {
@@ -202,9 +252,6 @@ export interface ColumnTypeOptions {
  * e.g. search, modifying column types etc.
  */
 export const useTableColumnsStore = defineStore('tableColumns', () => {
-  // const columnNames = ref<string[]>([])
-  // const columnOptions = ref<ColumnOptions[]>([])
-
   const tableStore = useTableEditionStore()
   const { selectedTableDocument } = storeToRefs(tableStore)
 
@@ -229,7 +276,6 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     }
   }
 
-  // const columnTypeOptions = ref<ColumnTypeOptions[]>([])
   const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: (value) => value })
 
   function changeTypeOption(column: ColumnTypeOptions, columnType: ColumnType) {

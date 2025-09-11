@@ -18,6 +18,7 @@ export const useDatabasesStore = defineStore('databases', () => {
 
   const routeId = ref<number | null>(null)
   const currentDatabase = useArrayFind(databases, (database) => database.id === routeId.value)
+  console.log('currentDatabase', currentDatabase)
   
   const availableTables = computed({ get: () => isDefined(currentDatabase) ? currentDatabase.value.tables : [], set:(value) => value })
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)

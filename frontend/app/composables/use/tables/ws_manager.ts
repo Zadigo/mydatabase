@@ -12,15 +12,12 @@ import { useWebsocketMessage } from '..'
  * 
  * @param table The table to edit
  */
-export function useTableWebocketManager(editableTableRef: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
+export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 
   const tableEditionStore = useTableEditionStore()
   const { tableData } = storeToRefs(tableEditionStore)
-
-  // const tableColumnsStore = useTableColumnsStore()
-  // const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
 
   const wsObject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
@@ -57,10 +54,10 @@ export function useTableWebocketManager(editableTableRef: Ref<SimpleTable | unde
   })
 
   function loadDataViaId() {
-    if (isDefined(editableTableRef) && isDefined(selectedDocument)) {
+    if (isDefined(selectedTable) && isDefined(selectedDocument)) {
       wsObject.send(stringify({
         action: 'load_via_id',
-        table_id: editableTableRef.value.id,
+        table_id: selectedTable.value.id,
         document: {
           id: selectedDocument.value.id,
           name: selectedDocument.value.name

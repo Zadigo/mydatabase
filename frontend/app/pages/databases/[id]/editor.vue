@@ -2,12 +2,14 @@
   <section id="editor">
     <nuxt-card>
       <template #header>
+        selectedTable {{ selectedTable }}
+
         <div v-if="selectedTable" class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">
             {{ selectedTable.name }}
           </h2>
 
-          <nuxt-button @click="() => { toggleEditTableDrawer() }">
+          <nuxt-button @click="() => { tableEditionStore.toggleEditTableDrawer() }">
             <icon name="i-lucide-pen" class="mr-2" />
             Edit table
           </nuxt-button>
@@ -21,7 +23,7 @@
         </template>
       </template>
 
-      <!-- Component -->  
+      <!-- Component -->
       <component :is="displayComponent" v-if="hasData" />
       <template v-else>
         No data, no table
@@ -35,7 +37,9 @@
 
 <script setup lang="ts">
 // import { useWebsocketMessage } from '~/composables/use'
+import { EditorTablesDataTable } from '#components'
 import { useEditorPageRefresh, useTableWebocketManager } from '~/composables/use/tables'
+import type { TableComponent } from '~/types'
 
 definePageMeta({
   title: 'Editor: Table',
@@ -47,9 +51,14 @@ definePageMeta({
  */
 
 const tableEditionStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument } = storeToRefs(tableEditionStore)
+const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef, showModal } = storeToRefs(tableEditionStore)
 
-const { displayComponent, editableTableRef, showModal, toggleEditTableDrawer } = useTable(selectedTable)
+const componentMapping: Record<TableComponent, Component> = {
+  'data-table': EditorTablesDataTable,
+  'graph-table': EditorTablesDataTable
+}
+
+const displayComponent = computed(() => isDefined(editableTableRef) ? componentMapping[editableTableRef.value.component] : undefined)
 
 /**
  * Page refreshing
@@ -61,16 +70,7 @@ useEditorPageRefresh(selectedTable)
  * Websocket
  */
 
-const { wsObject } = useTableWebocketManager(editableTableRef, selectedTableDocument)
-
-const tableColumnsStore = useTableColumnsStore()
-const { columnOptions } = storeToRefs(tableColumnsStore)
-
-// const { stringify } = useWebsocketMessage()
-
-// watch(columnOptions, () => {
-//   console.log(('edit'))
-// })
+const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 
 /**
  * Provides

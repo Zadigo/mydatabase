@@ -118,14 +118,12 @@ export function useTempDocument(newDocument: Ref<NewDocument>) {
 export function useEditDocument() {
   const [showEditDocumentModal, toggleShowEditDocumentModal] = useToggle()
 
-  const config = useRuntimeConfig()
-
   const tableEditionStore = useTableEditionStore()
   const { tableDocuments } = storeToRefs(tableEditionStore)
 
   async function remove(tableDocument: TableDocument) {
     const { status } = await useFetch(`/v1/documents/${tableDocument.document_uuid}`, {
-      baseURL: config.public.prodDomain,
+      baseURL: useRuntimeConfig().public.prodDomain,
       method: 'DELETE'
     })
 
@@ -162,7 +160,7 @@ export function useEditDocumentRelationship() {
   const tableEditionStore = useTableEditionStore()
   const { tableDocuments, selectedTableDocument } = storeToRefs(tableEditionStore)
 
-  const availableDocuments = computed(() => useArrayFilter(tableDocuments, (doc) => doc.document_uuid !== selectedTableDocument.value?.document_uuid).value)
+  // const availableDocuments = computed(() => useArrayFilter(tableDocuments, (doc) => doc.document_uuid !== selectedTableDocument.value?.document_uuid).value)
 
   /**
    * Columns
@@ -179,7 +177,7 @@ export function useEditDocumentRelationship() {
   return {
     primaryKeyColumns,
     foreignTableColumns,
-    availableDocuments,
+    availableDocuments: tableDocuments,
     /**
      * The primary key of the current document
      */

@@ -46,3 +46,29 @@ class UpdateColumnTypesSerializer(serializers.Serializer):
         instance.column_options = validated_data.get('column_options', instance.column_options)
         instance.save()
         return instance
+
+
+
+class UpdateDocumentSerializer(serializers.ModelSerializer):
+    """A serializer that returns the document details *without*
+    the data it contains. It returns only metadata about the document."""
+
+    column_options = _ColumnOptionsValidator(many=True, required=False)
+    column_types = _ColumnTypesValidator(many=True, required=False)
+
+    class Meta:
+        model = TableDocument
+        fields = [
+            'name', 'document_uuid', 'column_names', 
+            'column_types', 'column_options'
+        ]
+
+    def validate_name(self, value):
+        return value
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.column_types = validated_data.get('column_types', instance.column_types)
+        instance.column_options = validated_data.get('column_options', instance.column_options)
+        instance.save()
+        return instance

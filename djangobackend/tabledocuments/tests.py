@@ -214,6 +214,7 @@ class TestApiEndpoints(TransactionTestCase, UnittestAuthenticationMixin):
             path, data={'name': 'Updated Document Name'}, content_type='application/json')
         self.assertEqual(response.status_code, 200, response.content)
         self.assertIsInstance(response.json(), dict)
+        print(response.json())
 
     def test_delete_document(self):
         path = reverse('documents:retrieve_update_destroy_document', args=[

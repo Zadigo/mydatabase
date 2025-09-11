@@ -11,30 +11,50 @@
             <p class="font-bold">
               <icon name="i-solid-csv" /> Document
             </p>
-  
+
             <nuxt-button-group>
               <nuxt-button color="neutral" variant="subtle" @click="() => { remove(tableDocument) }">
                 <icon name="i-lucide-trash" />
               </nuxt-button>
-  
+
               <nuxt-dropdown-menu :items="dropdownItems">
                 <nuxt-button color="neutral" variant="outline" icon="i-lucide-chevron-down" />
               </nuxt-dropdown-menu>
             </nuxt-button-group>
           </div>
-          
+
           <!-- Table Name -->
           <p class="font-light text-sm">
             {{ tableDocument.name || tableDocument.document_uuid }}
           </p>
-          
+
+          <nuxt-separator class="my-5" />
+
+          <!-- Column Types -->
+          <div class="space-y-2">
+            <p class="font-bold">
+              Column types
+            </p>
+            
+            <div v-for="(column, index) in tableDocument.column_types" :key="index" class="grid grid-cols-7 gap-1 content-center">
+              <nuxt-input v-model="column.name" class="col-span-3" />
+              <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
+
+              <!-- Dropdown -->
+              <nuxt-dropdown-menu :items="constrainMenuItem">
+                <nuxt-button class="col-span-1" variant="soft">
+                  <icon name="i-lucide-ellipsis-vertical" />
+                </nuxt-button>
+              </nuxt-dropdown-menu>
+            </div>
+          </div>
+
           <!-- Relationship -->
-          {{ availableDocuments }}
           <div class="p-1 bg-gray-100 my-5">
             <div class="flex justify-center gap-3 items-center cursor-pointer rounded-md border border-gray-200 hover:bg-gray-100 p-2">
               <icon name="i-lucide-key" />
               <nuxt-select v-model="primaryKey" :items="primaryKeyColumns" placeholder="Primary key" />
-              
+
               <icon name="i-lucide-arrow-right" />
               <div class="flex gap-1">
                 <nuxt-select v-model="foreignTableId" :items="availableDocuments" label-key="name" value-key="document_uuid" placeholder="Document" />
@@ -90,6 +110,23 @@ const dropdownItems: DropdownMenuItem[] = [
   {
     label: 'Lock file',
     icon: 'i-lucide-file-lock'
+  }
+]
+
+const constrainMenuItem: DropdownMenuItem[] = [
+  {
+    label: 'Unique',
+    icon: 'i-lucide-star',
+    onClick: () => {
+      // Handle constrain action
+    }
+  },
+  {
+    label: 'Not nullable',
+    icon: 'i-lucide-lock',
+    onClick: () => {
+      // Handle constrain action
+    }
   }
 ]
 

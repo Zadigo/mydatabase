@@ -1,52 +1,12 @@
-import { EditorTablesDataTable } from '#components'
 import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 
-import type { Component, Ref } from 'vue'
-import type { MaybeTable, SimpleTable, TableComponent } from '~/types'
+import type { Ref } from 'vue'
+import type { MaybeTable, SimpleTable } from '~/types'
 
 export {
   useTableWebocketManager
 } from './ws_manager'
 
-
-/**
- * Composable used to working with a single table such as
- * table edition the display component to show etc.
- * @param table The table to manipulate
- */
-export function useTable(table: MaybeTable) {
-  const componentMapping: Record<TableComponent, Component> = {
-    'data-table': EditorTablesDataTable,
-    'graph-table': EditorTablesDataTable
-  }
-
-  const editableTableRef = ref(table)
-  const displayComponent = computed(() => isDefined(editableTableRef) ? componentMapping[editableTableRef.value.component] : undefined)
-
-  const [ showModal, toggle ] = useToggle()
-
-  return {
-    /**
-     * Show drawer for editing the table's data
-     * @default false
-     */
-    showModal,
-    /**
-     * Reference used to edit table data
-     * without modifying the original data
-     */
-    editableTableRef,
-    /**
-     * The component used to display the data
-     * for the given table
-     */
-    displayComponent,
-    /**
-     * Function to toggle the visibility of the edit table drawer
-     */
-    toggleEditTableDrawer: toggle
-  }
-}
 
 /**
  * Composable that handles how the data is re-integrated
