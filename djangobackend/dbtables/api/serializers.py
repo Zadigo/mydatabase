@@ -109,18 +109,21 @@ class UploadFileSerializer(serializers.Serializer):
         if document.url and document.file == None:
             get_document_from_url.apply_async(
                 args=[document.url],
-                countdown=10,
-                link=[
-                    create_csv_file_from_data.s(document.pk, entry_key)
-                ]
+                link=[create_csv_file_from_data.s(document.pk, entry_key)]
             )
 
         # Once the document is created, we need to populate
         # column_options, column_types and column_names
         update_document_options.apply_async(
-            args=[str(document.document_uuid), document.file.path],
-            countdown=20
+            args=[str(document.document_uuid)],
+            countdown=10
         )
+
+        # Since the document creation is delayed to
+        # 10 seconds, we need to refresh the instance
+        # to get the file field populated when the task
+        # completes
+        document.refresh_from_db(fields=['file'])
 
         return document
 
