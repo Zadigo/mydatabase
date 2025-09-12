@@ -1,4 +1,4 @@
-import type { Database } from '~/types'
+import type { Database, Nullable } from '~/types'
 
 /**
  * Store for managing databases and their tables.
@@ -21,11 +21,12 @@ export const useDatabasesStore = defineStore('databases', () => {
    * Current database
    */
 
-  const routeId = ref<number | null>(null)
+  const routeId = ref<Nullable<number>>(null)
   const currentDatabase = useArrayFind(databases, (database) => database.id === routeId.value)
+  
   console.log('currentDatabase', currentDatabase)
   
-  const availableTables = computed({ get: () => isDefined(currentDatabase) ? currentDatabase.value.tables : [], set:(value) => value })
+  const availableTables = computed(() => isDefined(currentDatabase) ? currentDatabase.value.tables : [])
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)
   const hasTables = computed(() => availableTables.value.length > 0)
 

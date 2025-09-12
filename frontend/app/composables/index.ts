@@ -13,14 +13,21 @@ export function useWsProdDomain(path: string) {
 
 /**
  * Composable used to truncate a string
- * @param value The string value to truncate
- * @param limit The amount to truncate the string by
  */
 export function useTruncateString() {
   function truncate(value: string, limit: number = 50) {
     return `${value.substring(0, limit)}...`
   }
+
+  const truncated = reactify(truncate)
+
   return {
+    truncated,
+    /**
+     * Truncates a string to the specified limit and appends ellipsis
+     * @param value The string value to truncate
+     * @param limit The maximum length of the string before truncation (default is 50)
+     */
     truncate
   }
 }

@@ -1,4 +1,7 @@
-import type { _BaseDatetimes } from '.'
+import type { _BaseDatabaseObject, Nullable } from '..'
+import type { ColumnOptions, ColumnTypeOptions } from './columns'
+
+export type * from './columns'
 
 export type DocumentData = Record<string, unknown>
 
@@ -7,7 +10,7 @@ export type DocumentData = Record<string, unknown>
  * an Excel/Google sheet with the data that
  * is contained within that sheet
  */
-export interface TableDocument extends _BaseDatetimes {
+export interface TableDocument extends _BaseDatabaseObject {
   id: number
   /**
    * The name of the document
@@ -34,7 +37,9 @@ export interface TableDocument extends _BaseDatetimes {
   column_types: ColumnTypeOptions[]
 }
 
-export interface Table extends _BaseDatetimes {
+export type TableComponent = 'data-table' | 'graph-table'
+
+export interface Table extends _BaseDatabaseObject {
   id: number
   /**
    * The name of the table
@@ -50,7 +55,7 @@ export interface Table extends _BaseDatetimes {
    * that the table is supposed to return
    * @default null
    */
-  active_document_datasource: string | null
+  active_document_datasource: Nullable<string>
   /**
    * The component used to display the data for the given table
    * @default "data-table"
@@ -66,11 +71,3 @@ export interface Table extends _BaseDatetimes {
    */
   documents: TableDocument[]
 }
-
-/**
- * A simplified version of the table type which does not include the
- * data stored by the documents for performance reasons
- */
-export type SimpleTable = Pick<Table, 'id' | 'name' | 'description' | 'active_document_datasource' | 'component' | 'active' | 'documents'> & _BaseDatetimes
-
-export type TableComponent = 'data-table' | 'graph-table'

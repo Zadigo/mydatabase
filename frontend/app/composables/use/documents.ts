@@ -1,11 +1,11 @@
-import type { Database, TableDocument } from '~/types'
+import type { Database, TableDocument, Nullable, ColumnType } from '~/types'
 
 export interface NewDocument {
   name: string
   url: string
   google_sheet_id: string
   file: null
-  entry_key: null
+  entry_key: Nullable<string>
 }
 
 /**

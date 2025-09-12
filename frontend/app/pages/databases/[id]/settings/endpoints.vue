@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { useDatabaseEndpoints } from '~/composables/use/databases'
-import type { DatabaseEndpoint } from '~/types/endpoints'
+import type { DatabaseEndpoint } from '~/types/databases/endpoints'
 
 definePageMeta({
   title: 'Settings: Home',

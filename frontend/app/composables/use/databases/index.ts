@@ -1,5 +1,5 @@
 import type { Database } from '~/types'
-import type { DatabaseEndpoint } from '~/types/endpoints'
+import type { DatabaseEndpoint } from '~/types/databases/endpoints'
 
 export * from './functions'
 

@@ -1,12 +1,17 @@
-import type { SimpleTable } from './tables'
+import type { SimpleTable } from './databases'
 
 export type * from './tables'
-
-export type MaybeTable = MaybeRef<SimpleTable | undefined>
-
-export type ReturnAny = string | number | boolean | null
+export type * from './databases'
 
 export type Nullable<T> = T | null
+
+export type Arrayable<T> = T[]
+
+export type RefOrUndefined<T> = Ref<T | undefined>
+
+export type MaybeTable = RefOrUndefined<SimpleTable>
+
+export type ReturnAny = Nullable<string | number | boolean>
 
 /**
  * @private
@@ -17,16 +22,8 @@ export interface _BaseDatetimes {
 }
 
 /**
- * A database is a collection of tables
+ * @private
  */
-export interface Database extends _BaseDatetimes {
+export interface _BaseDatabaseObject extends _BaseDatetimes {
   id: number
-  /**
-   * The name of the database
-   */
-  name: string
-  /**
-   * The list of tables in the database
-   */
-  tables: SimpleTable[]
 }

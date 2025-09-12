@@ -1,4 +1,6 @@
+import type { SelectMenuItem } from '@nuxt/ui'
 import type { DocumentData, SimpleTable } from '~/types'
+import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/tables/columns'
 
 export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>
 
@@ -172,29 +174,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   }
 })
 
-export type DefaultColumnOption = 'visible' | 'editable' | 'sortable' | 'searchable'
-
-export interface ColumnOptions {
-  name: string
-  visible: boolean
-  editable: boolean
-  sortable: boolean
-  searchable: boolean
-}
-
-export const columnTypes = [
-  'String',
-  'Number',
-  'Boolean',
-  'Date',
-  'DateTime',
-  'Array',
-  'Dict'
-] as const
-
-export type ColumnType = typeof columnTypes[number]
-
-export const columnTypesMenuItem: { label: ColumnType; icon: string }[] = [
+export const columnTypesMenuItem: SelectMenuItem[] = [
   {
     label: 'String',
     icon: 'i-lucide-text'
@@ -224,28 +204,6 @@ export const columnTypesMenuItem: { label: ColumnType; icon: string }[] = [
     icon: 'i-lucide-folder'
   }
 ]
-
-export interface ColumnTypeOptions {
-  /**
-   * The column's name
-   */
-  name: string
-  /**
-   * The data type for this column
-   * @default "String"
-   */
-  columnType: ColumnType,
-  /**
-   * Column values should be unique
-   * @default false
-   */
-  unique: boolean
-  /**
-   * Column an be null
-   * @default true
-   */
-  nullable: boolean
-}
 
 /**
  * Store used for working with table columns
