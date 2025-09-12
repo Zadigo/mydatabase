@@ -1,56 +1,11 @@
-// export type _BaseSendWsAction =
-//   | { action: 'idle_connect' }
-//   | { action: 'load_via_id' }
-//   | { action: 'load_via_url', url: string, entry_key?: string }
+export type BaseWsSendMessage =
+  | { action: 'idle_connect' }
+  | { action: 'load_via_id' }
+  | { action: 'load_via_url', url: string, entry_key?: string }
 
 
-// export interface DocumentData {
-//   document_data: string
-//   columns: {
-//     names: string[]
-//     options: ColumnOptions[]
-//     type_options: ColumnTypeOptions[]
-//   }
-// }
-
-// export type _BaseReceiveWsAction =
-//   | { action: 'connected' } & DocumentData
-//   | { action: 'loaded_via_id' } & DocumentData
-//   | { action: 'loaded_via_url' } & DocumentData
-//   | { action: 'error' }
-//   & { message: string }
-
-
-export type SendWsAction = 'idle_connect' | 'load_via_id' | 'load_via_url'
-
-export type ReceiveWsAction = 'loaded_via_id' | 'connected' | 'loaded_via_url' | 'error'
-
-export type AllWsAction = SendWsAction | ReceiveWsAction
-
-export interface BaseWsSendMessage {
-  action: SendWsAction
-  url: string
-  table_id: string | number
-  document: {
-    id: number
-    name: string
-  }
-}
-
-export interface BaseWsReceiveMessage {
-  action: ReceiveWsAction,
-  message: string
-  
-  document_id: number
-  /**
-   * The actual document's data
-   */
+interface DocumentData {
   document_data: string
-
-  /**
-   * Metadata on the columns returned
-   * from the underlying data
-   */
   columns: {
     names: string[]
     options: ColumnOptions[]
@@ -58,15 +13,23 @@ export interface BaseWsReceiveMessage {
   }
 }
 
+export type BaseReceiveWsAction =
+  | { action: 'connected' } & DocumentData
+  | { action: 'loaded_via_id' } & DocumentData
+  | { action: 'loaded_via_url' } & DocumentData
+  | { action: 'checkedout_url' | 'checkedout_file' } & DocumentData
+  | { action: 'processing_url' }
+  | { action: 'error' | 'success', message: string }
+
 /**
  * WebSocket message utilities
  */
 export function useWebsocketMessage() {
-  function stringify<T extends Partial<BaseWsSendMessage>>(message: T): string {
+  function stringify<T extends BaseWsSendMessage>(message: T): string {
     return JSON.stringify(message)
   }
 
-  function parse<M extends Partial<BaseWsReceiveMessage>>(message: string): M | undefined {
+  function parse<M extends BaseReceiveWsAction>(message: string): M | undefined {
     try {
       return JSON.parse(message) as M
     } catch {

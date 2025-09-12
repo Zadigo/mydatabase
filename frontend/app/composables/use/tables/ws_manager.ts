@@ -1,4 +1,5 @@
 import type { SimpleTable, TableDocument } from '~/types'
+import type { BaseReceiveWsAction } from '..'
 import { useWebsocketMessage } from '..'
 
 /**
@@ -9,8 +10,8 @@ import { useWebsocketMessage } from '..'
  * faster and more efficient especially when dealing with big
  * datasets. Also, websockets allow for collaborative editing
  * that we will implement in future releases
- * 
- * @param table The table to edit
+ * @param selectedTable The table to edit
+ * @param selectedDocument The document to edit
  */
 export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
   const config = useRuntimeConfig()
@@ -19,13 +20,14 @@ export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefin
   const tableEditionStore = useTableEditionStore()
   const { tableData } = storeToRefs(tableEditionStore)
 
-  const wsObject = useWebSocket(`${config.public.wsProdDomain}/ws/documents`, {
+  const wsObject = useWebSocket<BaseReceiveWsAction>(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
     onConnected(ws) {
       ws.send(stringify({ action: 'idle_connect' }))
     },
-    onMessage(ws, event) {
+    onMessage(ws, event: MessageEvent<string>) {
       const data = parse(event.data)
+      
       console.log('String data', data)
 
       if (data) {
@@ -35,14 +37,12 @@ export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefin
               console.log('Parsed data', JSON.parse(data.document_data))
               tableData.value = JSON.parse(data.document_data)
             }
-            
-            // TODO: Remove this now comes directly within
-            // the API when loading the databases
-            // if (data.columns) {
-            //   columnNames.value = data.columns.names
-            //   columnOptions.value = data.columns.options
-            //   columnTypeOptions.value = data.columns.type_options
-            // }
+            break
+
+          case 'checkedout_url':
+            break
+
+          case 'checkedout_file':
             break
 
           default:

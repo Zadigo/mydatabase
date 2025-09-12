@@ -1,5 +1,10 @@
 import type { Database } from '~/types'
 
+/**
+ * Store for managing databases and their tables.
+ * Provides functionality to fetch databases, filter them by search term,
+ * and access details of the currently selected database.
+ */
 export const useDatabasesStore = defineStore('databases', () => {
   const databases = ref<Database[]>([])
 
