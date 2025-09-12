@@ -22,9 +22,22 @@
         "model": "dbtables.DatabaseTable",
         "pk": 1,
         "fields": {
-            "name": "A simple table",
+            "name": "A simple table 1",
             "database_schema": 1,
             "documents": [1],
+            "updated_at": "2023-10-01T12:00:00Z",
+            "created_at": "2023-10-01T12:00:00Z"
+        }
+    },
+    {
+        "model": "dbtables.DatabaseTable",
+        "pk": 2,
+        "fields": {
+            "name": "A simple table 2",
+            "database_schema": 1,
+            "documents": [
+                1
+            ],
             "updated_at": "2023-10-01T12:00:00Z",
             "created_at": "2023-10-01T12:00:00Z"
         }

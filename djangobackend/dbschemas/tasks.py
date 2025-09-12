@@ -5,7 +5,11 @@ import pandas
 import pytz
 from celery import shared_task
 from celery.utils.log import get_logger
+from dbschemas.models import DatabaseSchema
+from dbtables.models import DatabaseTable
+from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django.db.models import QuerySet
 from tabledocuments.models import TableDocument
 
 logger = get_logger(__name__)
@@ -269,3 +273,36 @@ FUNCTION_MAP = {
     'sha256': func_sha256,
     'sha512': func_sha512
 }
+
+
+@shared_task
+def prefetch_relationships(database_id: str):
+    """Function that reads the documents and creates an association that
+    is then stored in Redis cache for quick retrieval when needed.
+    
+    The direction parameter indicates the type of relationship:
+        - '1-1': one-to-one"""
+
+    database = DatabaseSchema.objects.get(id=database_id)
+
+    tables: QuerySet[DatabaseTable] = database.databasetable_set.all()
+
+    for item in database.document_relationships:    
+        table1 = tables.get(id=item['from_table'])
+        table2 = tables.get(id=item['to_table'])
+
+        if table1.active_document_datasource is None or table2.active_document_datasource is None:
+            logger.error("One of the tables does not have an active document datasource.")
+            return
+
+        doc1 = table1.documents.get(document_uuid=table1.active_document_datasource)
+        doc2 = table2.documents.get(document_uuid=table2.active_document_datasource)
+        
+        df1 = pandas.read_json(io.StringIO(doc1.file.read().decode('utf-8')))
+        df2 = pandas.read_json(io.StringIO(doc2.file.read().decode('utf-8')))
+
+        # Depending on the direction, create the relationship
+        if item['meta_definitions']['type'] == '1-1':
+            df = pandas.merge(df1, df2, how='inner', left_index=True, right_index=True)
+            cache.set(item['name'], df.to_json(orient='records'), timeout=None)
+            logger.info(f"One-to-one relationship created between {table1.name} and {table2.name}.")

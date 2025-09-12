@@ -40,8 +40,8 @@ class UploadFileSerializer(serializers.Serializer):
     file = serializers.FileField(allow_null=True)
     url = serializers.URLField(allow_blank=True)
     entry_key = serializers.CharField(
-        allow_null=True, 
-        allow_blank=True, 
+        allow_null=True,
+        allow_blank=True,
         required=False
     )
     # google_sheet_id = serializers.CharField(allow_blank=True)
@@ -71,7 +71,8 @@ class UploadFileSerializer(serializers.Serializer):
         # Check the size of the file which can be
         # overwhelming if too big
         if file is not None and file.size > 50 * 1024 * 1024:
-            raise serializers.ValidationError('File size must be less than 50MB')
+            raise serializers.ValidationError(
+                'File size must be less than 50MB')
 
         if name is None and file is not None:
             file_extension = file.name.split('.')[-1]

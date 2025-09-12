@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar
 from django.shortcuts import get_object_or_404
-from dbschemas.api.serializers import DatabaseSchemaSerializer
+from dbschemas.api.serializers import DatabaseSchemaSerializer, RelationshipSerializer
 from dbschemas.models import DatabaseSchema
 from endpoints.api.serializers import PublicApiEndpointSerializer
 from rest_framework import status
@@ -10,6 +10,7 @@ from rest_framework.generics import (CreateAPIView, DestroyAPIView,
 from rest_framework.response import Response
 
 T = TypeVar('T', bound=GenericAPIView)
+
 
 class QuerysetMixin(Generic[T]):
     def get_queryset(self):
@@ -57,7 +58,7 @@ class RestartProject(GenericAPIView):
 
             for document in documents:
                 document.delete()
-            
+
             table.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -75,3 +76,28 @@ class ListDatabaseEndpoints(ListAPIView):
         qs = super().get_queryset()
         database = get_object_or_404(qs, pk=self.kwargs['pk'])
         return database.publicapiendpoint_set.all()
+
+
+class RetrieveUpdateDestroyRelationships(GenericAPIView):
+    """Endpoint used to retrieve, update or delete
+    relationships for a database table."""
+
+    queryset = DatabaseSchema.objects.all()
+    serializer_class = RelationshipSerializer
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'pk'
+    permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance=instance.database_schema.relationships, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        database_serializer = DatabaseSchemaSerializer(instance=serializer.instance)
+        return Response(database_serializer.data, status=status.HTTP_201_CREATED)

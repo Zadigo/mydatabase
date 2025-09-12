@@ -1,5 +1,10 @@
+from re import S
 from dbtables import choices
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.crypto import get_random_string
+from django.utils.text import slugify
 
 
 class DatabaseTable(models.Model):
@@ -39,6 +44,11 @@ class DatabaseTable(models.Model):
         choices=choices.TableComponentChoices.choices,
         default=choices.TableComponentChoices.DATA_TABLE
     )
+    slug = models.SlugField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
     active = models.BooleanField(
         default=True
     )
@@ -60,3 +70,14 @@ class DatabaseTable(models.Model):
 
     def __str__(self):
         return self.name
+
+@receiver(pre_save, sender=DatabaseTable)
+def create_table_slug(instance, **kwargs):
+    if instance.slug is None or instance.slug == '':
+        instance.slug = slugify(instance.name) + '-' + get_random_string(6)
+    else:
+        old_name_tokens = instance.slug.split('-')[:-1]
+        if instance.name.lower().split(' ') != old_name_tokens:
+            instance.slug = slugify(instance.name) + '-' + get_random_string(6)
+
+
