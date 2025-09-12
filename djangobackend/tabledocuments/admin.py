@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.messages import SUCCESS, add_message
 from tabledocuments.models import TableDocument
-from tabledocuments.tasks import update_document_options, get_document_from_url, create_csv_file_from_data
+from tabledocuments.tasks import (create_csv_file_from_data,
+                                  get_document_from_url,
+                                  update_document_options)
 
 
 @admin.register(TableDocument)

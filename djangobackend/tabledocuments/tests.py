@@ -1,8 +1,11 @@
+import dataclasses
 import uuid
 from typing import Any
 from unittest import IsolatedAsyncioTestCase
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pandas
+import requests
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from channels.routing import URLRouter
@@ -32,10 +35,11 @@ class TestRequestUtils(IsolatedAsyncioTestCase):
     #     self.assertListNotEqual(errors, [])
 
 
-
 class TestDocumentEdition(IsolatedAsyncioTestCase):
+    """Tests for the DocumentEdition class"""
+
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         cls.fake_data = [
             {
                 'firstname': 'Kendall',
@@ -50,49 +54,97 @@ class TestDocumentEdition(IsolatedAsyncioTestCase):
         ]
 
     def setUp(self):
-        self.instance = DocumentEdition()
-        self.test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=2'
+        self.test_url = 'http://example.com/endpoint.json'
 
     async def test_json_load_document_by_url_with_entry_key(self):
-        document = await self.instance.load_json_document_by_url(self.test_url, entry_key='results')
+        with patch.object(requests, 'get') as mocked_get:
+            instance = DocumentEdition()
 
-        self.assertListEqual(
-            self.instance.errors, [],
-            f"There were errors loading the document: {', '.join(self.instance.errors)}"
-        )
+            mocked_response = MagicMock()
 
-        # Assertions
-        self.assertIsNotNone(document)
-        self.assertIsInstance(document.document_id, str)
-        self.assertIsInstance(document.content, pandas.DataFrame)
+            type(mocked_response).status_code = PropertyMock(return_value=200)
+            type(mocked_response).headers = PropertyMock(
+                return_value={'Content-Type': 'application/json'})
+            mocked_response.json.return_value = self.fake_data
 
-        final_df = document.content
-        self.assertEqual(final_df.shape[0], 2)
+            mocked_get.return_value = mocked_response
+
+            document = await instance.load_json_document_by_url(self.test_url)
+
+            self.assertListEqual(
+                instance.errors, [],
+                "There were errors loading "
+                f"the document: {', '.join(instance.errors)}"
+            )
+
+            self.assertIsNotNone(document)
+            self.assertTrue(dataclasses.is_dataclass(document))
+            self.assertIsInstance(document.document_cache_key, str)
+            self.assertIsInstance(document.content, pandas.DataFrame)
+
+            final_df = document.content
+            self.assertEqual(final_df.shape[0], 2)
+
+    async def test_fail_json_load_document_by_url(self):
+        with patch.object(requests, 'get') as mocked_get:
+            instance = DocumentEdition()
+
+            mocked_response = MagicMock()
+
+            type(mocked_response).status_code = PropertyMock(return_value=500)
+            type(mocked_response).headers = PropertyMock(
+                return_value={'Content-Type': 'application/json'})
+            mocked_response.json.return_value = {
+                'error': 'Internal Server Error'}
+
+            mocked_get.return_value = mocked_response
+
+            document = await instance.load_json_document_by_url(self.test_url)
+            self.assertIsNone(document)
+            self.assertIn('Failed to load document', ' '.join(
+                instance.errors), instance.errors)
 
     async def test_clean(self):
         df = pandas.DataFrame(self.fake_data)
 
-        self.instance.columns = ['firstname', 'lastname']
-        cleaned_document = await self.instance.clean(df)
+        instance = DocumentEdition()
+        instance.columns = ['firstname', 'lastname']
+        cleaned_document = await instance.clean(df)
 
         # Assertions
         self.assertIsNotNone(cleaned_document)
-        self.assertIsInstance(cleaned_document.document_id, str)
+        self.assertIsInstance(cleaned_document.document_cache_key, str)
         self.assertIsInstance(cleaned_document.content, pandas.DataFrame)
 
         final_df = cleaned_document.content
-        self.assertListEqual(final_df.columns.tolist(), self.instance.columns)
+        self.assertListEqual(final_df.columns.tolist(), instance.columns)
 
         def lowercase_trigger(column: str, df: pandas.DataFrame) -> pandas.DataFrame:
             return df.assign(**{column: df[column].str.lower()})
 
-        self.instance.column_triggers = {'firstname': lowercase_trigger}
-        cleaned_document = await self.instance.clean(df)
+        instance.column_triggers = {'firstname': lowercase_trigger}
+        cleaned_document = await instance.clean(df)
 
         for item in cleaned_document.content.itertuples():
             with self.subTest(item=item):
                 if isinstance(item.firstname, str):
                     self.assertTrue(item.firstname.islower())
+
+    async def test_load_document_by_id(self):
+        instance = DocumentEdition()
+
+        @database_sync_to_async
+        def create_table_document():
+            table_document = TableDocument.objects.create(name='Some name')
+            table_document.file.save(
+                'test.csv', ContentFile('col1,col2\nval1,val2'))
+            return table_document.id
+
+        document_id = await create_table_document()
+
+        dcoument = await instance.load_document_by_id(document_id)
+        self.assertIsNotNone(dcoument)
+        self.assertTrue(dataclasses.is_dataclass(dcoument))
 
 
 class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMixin):
@@ -127,12 +179,6 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         the frontend knows how to route/handle them"""
         self.assertIn('action', response)
 
-        try:
-            if 'document_data' in response:
-                self.assertIsInstance(response['document_data'], str)
-        except:
-            print(response)
-
     async def test_idle_connect(self):
         instance = await self.create_connection()
 
@@ -140,18 +186,6 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
         response = await instance.receive_json_from()
         await self.check_response(response)
         self.assertEqual(response, {'action': 'connected'})
-
-    async def test_load_document_by_url(self):
-        instance = await self.create_connection()
-
-        test_url = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20'
-        await instance.send_json_to({'action': 'load_via_url', 'url': test_url})
-        response = await instance.receive_json_from()
-        await self.check_response(response)
-
-        self.assertIn('data', response)
-        self.assertIsInstance(response['data'], str)
-        await self.check_response(response)
 
     async def test_load_document_by_id(self):
         instance = await self.create_connection()
@@ -188,10 +222,42 @@ class TestDocumentEditionConsumer(TransactionTestCase, UnittestAuthenticationMix
 
             await remove_document_file(pk)
 
-    # async def test_with_authentication(self):
-    #     self.use_authentication = True
-    #     instance = await self.create_connection()
-    #     print(instance.scope)
+    async def test_checkout_url(self):
+        with patch.object(requests, 'get') as mocked_get:
+            instance = await self.create_connection()
+
+            mocked_response = MagicMock()
+
+            type(mocked_response).status_code = PropertyMock(return_value=200)
+
+            headers = {'Content-Type': 'application/json'}
+            type(mocked_response).headers = PropertyMock(return_value=headers)
+
+            mocked_response.json.return_value = [
+                {
+                    'firstname': 'Kendall',
+                    'lastname': 'Jenner',
+                    'age': 31
+                }
+            ]
+
+            mocked_get.return_value = mocked_response
+
+            await instance.send_json_to({
+                'action': 'checkout_url',
+                'url': 'http://example.com/endpoint.json'
+            })
+
+            response = await instance.receive_json_from()
+            await self.check_response(response)
+            action = response['action']
+            self.assertEqual(action, 'processing_url', response)
+
+            response = await instance.receive_json_from()
+            await self.check_response(response)
+            action = response['action']
+            self.assertEqual(action, 'checkedout_url', response)
+            self.assertIn('columns', response)
 
 
 class TestApiEndpoints(TransactionTestCase, UnittestAuthenticationMixin):

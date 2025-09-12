@@ -18,24 +18,6 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def update_document_relationship(lh_document_id: str, rh_document_id: str, relationship_fields: list[str] = [], select: list[str] = []):
-    # Your document relationship update logic here
-    pass
-
-
-@shared_task
-def get_google_sheet_data(sheet_id: str, range_name: str):
-    # Your Google Sheets API fetching logic here
-    pass
-
-
-@shared_task
-def get_airtable_data(base_id: str, table_name: str, view_name: str):
-    # Your Airtable API fetching logic here
-    pass
-
-
-@shared_task
 def update_document_options(document_uuid: str):
     """A trigger that gets fired once the document is created. It fixes
     traditional elements such as the columns the document encoding references
@@ -83,7 +65,7 @@ def update_document_options(document_uuid: str):
 
 @shared_task
 def get_document_from_url(url: str, headers: dict[str, str] = {}):
-    """Function used to load the content of document returned via an API endpoint
+    """Task used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv
     database file"""
     async def proxy_get_url():
@@ -146,8 +128,9 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
 
             headers = clean_data.pop(0)
             df = pandas.DataFrame(clean_data, columns=headers)
-            csv_content = df.to_csv(index=True, index_label='record_id', encoding='utf-8', doublequote=True)
-            
+            csv_content = df.to_csv(
+                index=True, index_label='record_id', encoding='utf-8', doublequote=True)
+
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
             return

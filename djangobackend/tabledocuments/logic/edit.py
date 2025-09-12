@@ -42,14 +42,17 @@ async def load_document_by_url(url: str, **request_params: Any) -> tuple[Respons
         response = requests.get(url, **request_params)
     except requests.RequestException as e:
         return None, [str(e)]
+    else:
+        if response.status_code != 200:
+            return None, [f"Failed to load document. Status code: {response.status_code}"]  
+
     return response, []
 
 
 class DocumentEdition:
-    """A class that preloads and reads a document
-    for edition in the frontend. A document can either
-    be a physical file (csv) or or an endpoint that
-    contains csv or json data."""
+    """A class that implements live document edition and update
+    for Nuxt. A document can either be a physical file (csv) or or 
+    an endpoint that contains csv or json data."""
 
     def __init__(self, consumer: AsyncJsonWebsocketConsumer | None = None):
         self.consumer = consumer

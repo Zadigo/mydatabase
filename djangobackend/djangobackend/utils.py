@@ -13,8 +13,6 @@ class UnittestAuthenticationMixin:
             user.set_password('touparet')
             user.save()
 
-            print('UnittestAuthenticationMixin.user', user)
-
             path = reverse('token_obtain_pair')
             response = self.client.post(path, {
                 'username': user.username,
