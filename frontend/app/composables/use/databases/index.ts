@@ -1,6 +1,8 @@
 import type { Database } from '~/types'
 import type { DatabaseEndpoint } from '~/types/endpoints'
 
+export * from './functions'
+
 export interface NewDatabase {
   name: string
   description: string

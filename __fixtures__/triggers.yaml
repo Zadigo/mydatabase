@@ -1,0 +1,9 @@
+trigger:
+  name: database-name
+  metadata:
+    database: uuid-1
+  when: before
+  event: update
+  functions:
+    - func 1
+    - func 2

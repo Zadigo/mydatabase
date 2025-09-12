@@ -13,7 +13,7 @@
 
     <div class="flex justify-between">
       <nuxt-input v-model="search" :placeholder="placeholder" />
-      <nuxt-button>
+      <nuxt-button @click="emit('create')">
         <icon name="i-lucide-plus" />
         Create function
       </nuxt-button>
@@ -23,6 +23,6 @@
 
 <script setup lang="ts">
 const props = defineProps<{ title: string, modelValue: string, placeholder: string }>()
-const emit = defineEmits<{ 'update:modelValue': [string] }>()
+const emit = defineEmits<{ 'update:modelValue': [string], create: [] }>()
 const search = useVModel(props, 'modelValue', emit)
 </script>

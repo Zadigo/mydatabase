@@ -1,0 +1,14 @@
+functions:
+  name: random
+  table: My table
+  columns:
+    - lastname
+    - firstname
+  returns:
+    type: void
+    value: null
+  chain_to:
+    - some_function
+  on_fail:
+    skip: true
+    default_value: some_value

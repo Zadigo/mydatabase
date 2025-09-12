@@ -4,6 +4,10 @@ export type * from './tables'
 
 export type MaybeTable = MaybeRef<SimpleTable | undefined>
 
+export type ReturnAny = string | number | boolean | null
+
+export type Nullable<T> = T | null
+
 /**
  * @private
  */
