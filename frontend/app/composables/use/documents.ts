@@ -1,10 +1,10 @@
-import type { Database, TableDocument, Nullable, ColumnType } from '~/types'
+import type { ColumnType, Database, Nullable, TableDocument } from '~/types'
 
 export interface NewDocument {
   name: string
   url: string
   google_sheet_id: string
-  file: null
+  file: Nullable<Blob>
   entry_key: Nullable<string>
 }
 
@@ -37,11 +37,17 @@ export function useCreateDocument() {
     const { data } = useAsyncData('createDocument', async () => {
       const formData = new FormData()
 
-      formData.append('file', newDocument.value.file)
       formData.append('name', newDocument.value.name)
       formData.append('url', newDocument.value.url)
       formData.append('google_sheet_id', newDocument.value.google_sheet_id)
-      formData.append('entry_key', newDocument.value.entry_key)
+
+      if (newDocument.value.file) {
+        formData.append('file', newDocument.value.file)
+      }
+
+      if (newDocument.value.entry_key) {
+        formData.append('entry_key', newDocument.value.entry_key)
+      }
 
       return Promise.all([
         $fetch<{ name: string }>(`/v1/tables/${selectedTable.value?.id}/upload`, {

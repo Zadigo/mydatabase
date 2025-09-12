@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Table } from '~/types'
+import type { ColumnType, Table } from '~/types'
 
 defineProps<{ table: Table }>()
 

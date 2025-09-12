@@ -39,11 +39,6 @@
       </template>
     </editor-column-option-block>
 
-    <!-- Foreign Key -->
-    <nuxt-input :disabled="true" icon="i-lucide-arrow-up-right" class="w-full" placeholder="Foreign table" />
-    <nuxt-input :disabled="true" class="w-full" placeholder="Table key" />
-    <nuxt-input :disabled="true" class="w-full" placeholder="Foreign key" />
-
     <!-- Options: Other -->
     <div v-if="selectedTable" class="mt-3 mb-5 rounded-lg">
       <div class="bg-gray-200 rounded-lg px-4 py-2 space-y-2">
@@ -51,7 +46,9 @@
         <nuxt-switch :disabled="true" label="Realtime" />
       </div>
     </div>
-    <nuxt-skeleton v-else class="h-3 w-5" />
+
+    <!-- Delete -->
+    <nuxt-button variant="subtle" color="error" icon="i-lucide-trash" label="Delete" />
 
     <!-- Modals -->
     <editor-modals-add-document v-model="showAddDocumentModal" />
@@ -68,6 +65,7 @@ const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
 
 const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
+
 console.log('Editor.AsideLinks', tableData.value)
 
 const tableColumnsStore = useTableColumnsStore()
