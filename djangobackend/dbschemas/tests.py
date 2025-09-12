@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 class TestDatabaseStructure(TestCase):
     """Tests for the DatabaseSchema model including
     properties that we created as well as the slug creation"""
-    
+
     fixtures = ['fixtures/databases']
 
     def test_optional_properties(self):
@@ -24,7 +24,7 @@ class TestDatabaseStructure(TestCase):
 
     def test_slug_creation(self):
         instance = DatabaseSchema.objects.create(name='Test Database')
-        print(instance.slug)
+
         self.assertIsNotNone(instance.slug)
         self.assertTrue(instance.slug.startswith('test-database-'))
 
@@ -140,7 +140,8 @@ class TestDatabaseRelationshipsApi(APITestCase):
         response = self.client.post(
             path, data, content_type='application/json')
         self.assertEqual(response.status_code, 201, response.content)
-        print(response.json())
+        self.assertIn('tables', response.json())
+        self.assertIn('document_relationships', response.json())
 
 
 class TestDatabaseEndpointsApi(APITestCase):
@@ -151,9 +152,7 @@ class TestDatabaseEndpointsApi(APITestCase):
         self.assertIsNotNone(
             instance, "No DatabaseSchema instance found in fixtures")
 
-        instance.endpoint_set.create(
-            methods='GET,POST'
-        )
+        instance.publicapiendpoint_set.create(methods=['GET', 'POST'])
 
         path = reverse('dbschemas:list_database_endpoints', args=[instance.pk])
         response = self.client.get(path)

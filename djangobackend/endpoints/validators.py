@@ -1,9 +1,11 @@
-def validate_http_method(value: str):
+from django.core.exceptions import ValidationError
+
+
+def validate_http_method(value: list[str]):
     valid_methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-    
-    methods = value.split(',')
-    for method in methods:
-        if method not in valid_methods:
+
+    for item in value:
+        if item not in valid_methods:
             raise ValidationError(
-                f"{method} is not a valid HTTP method. Choose from {valid_methods}."
+                f"{item} is not a valid HTTP method. Choose from {valid_methods}"
             )

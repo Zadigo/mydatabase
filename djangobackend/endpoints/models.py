@@ -58,8 +58,8 @@ class PublicApiEndpoint(ApiEndpoint):
         blank=True,
         null=True
     )
-    methods = models.CharField(
-        max_length=10,
+    methods = models.JSONField(
+        default=list,
         validators=[validators.validate_http_method]
     )
 
@@ -94,12 +94,18 @@ def create_secret_endpoint(instance, **kwargs):
 
 @receiver(pre_save, sender=PublicApiEndpoint)
 def create_bearer_token(instance, **kwargs):
+    """The bearer token is a random string of 32 characters
+    that will be used to authenticate requests to the public API endpoint."""
     if not instance.bearer_token:
         instance.bearer_token = get_random_string(32)
 
 
 @receiver(post_save, sender=PublicApiEndpoint)
 def set_http_methods(instance, created, **kwargs):
+    """The http methods are used to define what kind of operations
+    can be done on the endpoint. If no method is specified,
+    we set all methods by default."""
     if created:
-        if not instance.methods or instance.methods == '':
-            instance.methods = 'GET,POST,PUT,DELETE'
+        if not instance.methods:
+            instance.methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+            instance.save()
