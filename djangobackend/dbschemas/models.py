@@ -11,6 +11,21 @@ class DatabaseSchema(models.Model):
         blank=False,
         null=False
     )
+    database_functions = models.JSONField(
+        default=list,
+        blank=True,
+        null=True
+    )
+    database_triggers = models.JSONField(
+        default=list,
+        blank=True,
+        null=True
+    )
+    document_relationships = models.JSONField(
+        default=list,
+        blank=True,
+        null=True
+    )
     updated_at = models.DateTimeField(
         auto_now_add=True
     )

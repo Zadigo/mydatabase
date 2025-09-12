@@ -1,2 +1,11 @@
-id,fullname,age
-1,Addison Rae,27
+id,fullname,age,date_of_birth
+1,Addison Rae,27,1999-10-06
+2,Charli D'Amelio,20,2004-05-01
+3,Bella Poarch,25,1997-02-08
+4,Dixie D'Amelio,22,2001-08-12
+5,Zach King,32,1990-02-04
+6,Loren Gray,21,2002-04-19
+7,Spencer X,29,1994-09-21
+8,Riyaz Aly,21,2003-09-14
+9,Michael Le,22,2001-06-19
+10,Gilmher Croes,24,1999-07-11

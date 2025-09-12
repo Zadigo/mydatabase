@@ -5,4 +5,4 @@ table:
     left: id
     right: id
   meta:
-    type: 1-1 | 1-many
+    type: 1-1 | many-many
