@@ -1,7 +1,11 @@
+import json
 from typing import Generic, TypeVar
+from rest_framework import serializers
+from dbschemas.api.serializers import (DatabaseSchemaSerializer,
+                                       RelationshipSerializer,
+                                       ValidateIntegrationSerializer, DatabaseProviderSerializer)
+from dbschemas.models import DatabaseProvider, DatabaseSchema
 from django.shortcuts import get_object_or_404
-from dbschemas.api.serializers import DatabaseSchemaSerializer, RelationshipSerializer
-from dbschemas.models import DatabaseSchema
 from endpoints.api.serializers import PublicApiEndpointSerializer
 from rest_framework import status
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
@@ -99,5 +103,52 @@ class RetrieveUpdateDestroyRelationships(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        database_serializer = DatabaseSchemaSerializer(instance=serializer.instance)
+        database_serializer = DatabaseSchemaSerializer(
+            instance=serializer.instance)
         return Response(database_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CreateIntegration(GenericAPIView):
+    """Endpoint used to create integrations with external
+    data providers like Airtable, Google Sheets, etc.
+    """
+
+    serializer_class = ValidateIntegrationSerializer
+    response_serializer = DatabaseProviderSerializer
+
+    def get_response_serializer(self, instance):
+        serializer = self.response_serializer(instance=instance)
+        data = serializer.data
+        return data
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        google_sheets_file = request.FILES.get('google_sheets', None)
+        if google_sheets_file:
+            data = json.load(google_sheets_file)
+
+            # Check the fields that are returned by the JSON file
+            expected_fields = [
+                'type', 'project_id', 'private_key_id',
+                'private_key', 'client_email', 'client_id',
+                'auth_uri', 'token_uri', 'auth_provider_x509_cert_url',
+                'client_x509_cert_url', 'universe_domain'
+            ]
+
+            for key in expected_fields:
+                if key not in data:
+                    raise serializers.ValidationError(
+                        detail={'google_sheets': f'Field "{key}" is missing from the credentials file'})
+
+            instance, created = DatabaseProvider.objects.update_or_create(
+                defaults={'google_sheet_credentials': data},
+                database_schema_id=kwargs.get('pk')
+            )
+
+            return Response(self.get_response_serializer(instance), status=status.HTTP_201_CREATED)
+        elif serializer.validated_data.get('airtable'):
+            serializer.save()
+            return Response({'status': True}, status=status.HTTP_200_OK)
+        return Response({'connected': False}, status=status.HTTP_400_BAD_REQUEST)

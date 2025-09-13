@@ -14,6 +14,7 @@ from tabledocuments.models import TableDocument
 
 logger = get_logger(__name__)
 
+
 @shared_task
 def func_clean(document_uuid: str, columns: list[str], data: str, deep: bool = False) -> str:
     """Runs data cleaning operations on specified columns of the
@@ -34,7 +35,8 @@ def func_clean(document_uuid: str, columns: list[str], data: str, deep: bool = F
         df[column] = df[column].str.lower().str.title()
 
         if deep:
-            df[column] = df[column].str.replace(r'[^a-zA-Z0-9\s]', '', regex=True)
+            df[column] = df[column].str.replace(
+                r'[^a-zA-Z0-9\s]', '', regex=True)
 
     # In deep clean mode, normalize the dataframe columns
     # transform them in to lowercase + replace spaces with underscores
@@ -44,7 +46,8 @@ def func_clean(document_uuid: str, columns: list[str], data: str, deep: bool = F
     try:
         instance = TableDocument.objects.get(uuid=document_uuid)
     except TableDocument.DoesNotExist:
-        logger.error(f"TableDocument with uuid {document_uuid} does not exist.")
+        logger.error(
+            f"TableDocument with uuid {document_uuid} does not exist.")
     else:
         instance.columns = df.columns.tolist()
         file = ContentFile(df.to_json(orient='records').encode('utf-8'))
@@ -167,7 +170,7 @@ def func_now(data: str, **kwargs: str) -> str:
 
     timezone_str = kwargs.get('timezone', 'UTC')
     df['now'] = datetime.datetime.now(pytz.timezone(timezone_str)).isoformat()
-    
+
     return df.to_json(orient='records')
 
 
@@ -179,6 +182,7 @@ def func_date(columns: list[str], data: str, **kwargs: str) -> str:
 @shared_task
 def func_time(columns: list[str], data: str, **kwargs: str) -> str:
     pass
+
 
 @shared_task
 def func_datetime(columns: list[str], data: str, **kwargs: str) -> str:
@@ -197,8 +201,9 @@ def func_current_timestamp(data: str, **kwargs: str) -> str:
     df = pandas.read_json(buffer)
 
     timezone_str = kwargs.get('timezone', 'UTC')
-    df['timestamp'] = datetime.datetime.now(pytz.timezone(timezone_str)).timestamp()
-    
+    df['timestamp'] = datetime.datetime.now(
+        pytz.timezone(timezone_str)).timestamp()
+
     return df.to_json(orient='records')
 
 
@@ -209,7 +214,8 @@ def func_current_date(data: str, **kwargs: str) -> str:
     df = pandas.read_json(buffer)
 
     timezone_str = kwargs.get('timezone', 'UTC')
-    df['date'] = datetime.datetime.now(pytz.timezone(timezone_str)).date().isoformat()
+    df['date'] = datetime.datetime.now(
+        pytz.timezone(timezone_str)).date().isoformat()
 
     return df.to_json(orient='records')
 
@@ -220,7 +226,8 @@ def func_current_time(data: str, **kwargs: str) -> str:
     df = pandas.read_json(buffer)
 
     timezone_str = kwargs.get('timezone', 'UTC')
-    df['datetime'] = datetime.datetime.now(pytz.timezone(timezone_str)).isoformat()
+    df['datetime'] = datetime.datetime.now(
+        pytz.timezone(timezone_str)).isoformat()
 
     return df.to_json(orient='records')
 
@@ -279,7 +286,7 @@ FUNCTION_MAP = {
 def prefetch_relationships(database_id: str):
     """Function that reads the documents and creates an association that
     is then stored in Redis cache for quick retrieval when needed.
-    
+
     The direction parameter indicates the type of relationship:
         - '1-1': one-to-one"""
 
@@ -287,22 +294,27 @@ def prefetch_relationships(database_id: str):
 
     tables: QuerySet[DatabaseTable] = database.databasetable_set.all()
 
-    for item in database.document_relationships:    
+    for item in database.document_relationships:
         table1 = tables.get(id=item['from_table'])
         table2 = tables.get(id=item['to_table'])
 
         if table1.active_document_datasource is None or table2.active_document_datasource is None:
-            logger.error("One of the tables does not have an active document datasource.")
+            logger.error(
+                "One of the tables does not have an active document datasource.")
             return
 
-        doc1 = table1.documents.get(document_uuid=table1.active_document_datasource)
-        doc2 = table2.documents.get(document_uuid=table2.active_document_datasource)
-        
+        doc1 = table1.documents.get(
+            document_uuid=table1.active_document_datasource)
+        doc2 = table2.documents.get(
+            document_uuid=table2.active_document_datasource)
+
         df1 = pandas.read_json(io.StringIO(doc1.file.read().decode('utf-8')))
         df2 = pandas.read_json(io.StringIO(doc2.file.read().decode('utf-8')))
 
         # Depending on the direction, create the relationship
         if item['meta_definitions']['type'] == '1-1':
-            df = pandas.merge(df1, df2, how='inner', left_index=True, right_index=True)
+            df = pandas.merge(df1, df2, how='inner',
+                              left_index=True, right_index=True)
             cache.set(item['name'], df.to_json(orient='records'), timeout=None)
-            logger.info(f"One-to-one relationship created between {table1.name} and {table2.name}.")
+            logger.info(
+                f"One-to-one relationship created between {table1.name} and {table2.name}.")

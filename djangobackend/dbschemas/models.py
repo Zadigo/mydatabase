@@ -86,6 +86,12 @@ class DatabaseProvider(models.Model):
         null=True,
         help_text='API key for accessing a public Google Sheet'
     )
+    google_sheet_credentials = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        help_text='Credentials for accessing a private Google Sheet'
+    )
     updated_at = models.DateTimeField(
         auto_now=True
     )
@@ -99,6 +105,10 @@ class DatabaseProvider(models.Model):
     def __str__(self):
         return 'Provider: ' + self.database_schema.name
     
+    @property
+    def has_google_sheet_connection(self):
+        return bool(self.google_sheet_credentials)
+
 
 @receiver(pre_save, sender=DatabaseSchema)
 def create_table_slug(instance, **kwargs):

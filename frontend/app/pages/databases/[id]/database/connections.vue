@@ -2,28 +2,41 @@
   <base-section-wrapper>
     <template #header>
       <!-- Header -->
-      <base-page-card-header v-model="search" placeholder="Search connections" title="Connections" @create="() => { }" />
+      <base-page-card-header v-model="search" placeholder="Search connections" title="Connections" />
     </template>
 
-    <div class="grid grid-cols-12 gap-2">
-      <div v-for="connection in connections" :key="connection.name" class="col-span-4">
-        <nuxt-card class="text-center cursor-pointer hover:shadow-lg transition">
-          <nuxt-avatar :src="connection.logo" />
-          
-          <p class="font-bold">
-            {{ connection.name }}
-          </p>
+    <!-- Tools -->
+    <suspense>
+      <database-connections-card @connect="showComponent" />
+      
+      <template #fallback>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <nuxt-skeleton-loader v-for="n in 5" :key="n" class="h-32 w-full rounded-lg" />
+        </div>
+      </template>
+    </suspense>
 
-          <p class="font-light my-1 text-sm">
-            {{ connection.short_description }}
-          </p>
-        </nuxt-card>
-      </div>
-    </div>
+    <!-- Modal -->
+    <nuxt-slideover v-model:open="showModal" class="min-w-6xs">
+      <template #header>
+        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+          Connect to
+          {{ selectedTool }}
+        </h3>
+      </template>
+
+      <template #body>
+        <component :is="integrationComponent" />
+      </template>
+    </nuxt-slideover>
   </base-section-wrapper>
 </template>
 
 <script setup lang="ts">
+import type { Nullable, IntegrationTool } from '~/types'
+import GoogleSheets from '~/components/database/connections/GoogleSheets.vue'
+import type { Component } from 'vue'
+
 definePageMeta({
   title: 'Database: Connections',
   layout: 'details'
@@ -31,52 +44,39 @@ definePageMeta({
 
 const search = ref<string>('')
 
-interface ConnectionOptions {
-  name: 'Zapier' | 'Make' | 'Google Sheets' | 'Airtable' | 'Supabase' | 'Excel' | 'N8N' | 'Notion'
-  short_description: string
-  logo: string
+function useConnections() {
+  const [showModal, toggleModal] = useToggle()
+  const selectedTool = ref<Nullable<IntegrationTool>>(null)
+  const integrationComponent = ref<Nullable<Component>>(null)
+
+  watchTriggerable(selectedTool, (tool) => {
+    if (!tool) {
+      integrationComponent.value = null
+    } else {
+      switch (tool) {
+        case 'Google Sheets':
+          integrationComponent.value = GoogleSheets
+          break
+
+        default:
+          break
+      }
+    }
+  })
+
+  function showComponent(tool: IntegrationTool) {
+    selectedTool.value = tool
+    toggleModal()
+  }
+
+  return {
+    showModal,
+    selectedTool,
+    integrationComponent,
+    toggleModal,
+    showComponent
+  }
 }
 
-const connections: ConnectionOptions[] = [
-  {
-    name: 'Zapier',
-    short_description: 'Connect your database to 5,000+ apps',
-    logo: '/logos/zapier.jpeg'
-  },
-  {
-    name: 'Make',
-    short_description: 'Connect your database to 1,000+ apps',
-    logo: '/logos/make.jpeg'
-  },
-  {
-    name: 'Google Sheets',
-    short_description: 'Connect your database to Google Sheets',
-    logo: '/logos/sheets.png'
-  },
-  {
-    name: 'Airtable',
-    short_description: 'Connect your database to Airtable',
-    logo: '/logos/airtable.png'
-  },
-  {
-    name: 'Supabase',
-    short_description: 'Connect your database to Supabase',
-    logo: '/logos/supabase.jpeg'
-  },
-  {
-    name: 'Excel',
-    short_description: 'Connect your database to Excel',
-    logo: '/logos/excel.png'
-  },
-  {
-    name: 'N8N',
-    short_description: 'Connect your database to N8N',
-    logo: '/logos/n8n.png'
-  },
-  {
-    name: 'Notion',
-    short_description: 'Connect your database to Notion',
-    logo: '/logos/notion.png'
-  }
-]
+const { showComponent, integrationComponent, showModal, selectedTool } = useConnections()
 </script>

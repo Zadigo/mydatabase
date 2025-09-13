@@ -2,6 +2,7 @@ import type { _BaseDatabaseObject, _BaseDatetimes } from '..'
 import type { Table } from '../tables'
 
 export type * from './endpoints'
+export type * from './connections'
 
 /**
  * A simplified version of the table type which does not include the

@@ -5,6 +5,11 @@ app_name = 'dbschemas'
 
 urlpatterns = [
     re_path(
+        r'^(?P<pk>\d+)/integrations$',
+        views.CreateIntegration.as_view(),
+        name='create_integration'
+    ),
+    re_path(
         r'^(?P<pk>\d+)/relationships$',
         views.RetrieveUpdateDestroyRelationships.as_view(),
         name='retrieve_update_destroy_relationships'
