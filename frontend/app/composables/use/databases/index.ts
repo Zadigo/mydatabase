@@ -128,15 +128,24 @@ export const useDatabaseEndpoints = createSharedComposable(() => {
    */
 
   const [showModal, toggleShowModal] = useToggle()
-  const newEndpoint = ref<NewEndpoint>({ endpoint: '' })
+  const newEndpointName = ref<string>('')
 
-  function create() {
-    // Do something
+  async function create() {
+    if (isDefined(currentDatabase)) {
+      const data = await $fetch<DatabaseEndpoint[]>(`/v1/endpoints/${currentDatabase.value.id}/create`, {
+        method: 'POST',
+        baseURL: useRuntimeConfig().public.prodDomain,
+        body: { endpoint: newEndpointName.value }
+      })
+
+      endpoints.value = data
+      toggleShowModal()
+    }
   }
 
   return {
     showModal,
-    newEndpoint,
+    newEndpointName,
     endpoints,
     toggleShowModal,
     create

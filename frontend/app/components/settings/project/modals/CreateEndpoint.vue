@@ -1,11 +1,15 @@
 <template>
   <nuxt-modal v-model:open="showModal">
-    <template #content>
-      <nuxt-input v-model="newEndpoint.endpoint" />
+    <template #header>
+      Create an endpoint
+    </template>
+
+    <template #body>
+      <nuxt-input v-model="newEndpointName" placeholder="Endpoint name" class="w-full" variant="subtle" />
     </template>
 
     <template #footer>
-      <nuxt-button color="neutral" variant="outline" @click="() => { toggleShowModal()  }">
+      <nuxt-button class="ms-auto" color="neutral" variant="soft" @click="() => { toggleShowModal()  }">
         Cancel
       </nuxt-button>
 
@@ -19,5 +23,5 @@
 <script setup lang="ts">
 import { useDatabaseEndpoints } from '~/composables/use/databases'
 
-const { create, toggleShowModal, newEndpoint, showModal } = useDatabaseEndpoints()
+const { create, toggleShowModal, newEndpointName, showModal } = useDatabaseEndpoints()
 </script>

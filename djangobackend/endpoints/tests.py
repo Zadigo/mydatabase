@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from dbschemas.models import DatabaseSchema
 
 
 class TestPublicApiEndpoints(TestCase):
@@ -13,7 +14,6 @@ class TestPublicApiEndpoints(TestCase):
 
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
-
 
     def test_get_table_level_endpoint(self):
         path = reverse('endpoints:table-level-endpoint', kwargs={
@@ -76,3 +76,15 @@ class TestPublicApiEndpoints(TestCase):
 
         response = self.client.delete(path)
         self.assertEqual(response.status_code, 200)
+
+
+class TestEndpointApi(TestCase):
+    fixtures = ['fixtures/databases']
+
+    def test_create_endpoint(self):
+        instance = DatabaseSchema.objects.first()
+        path = reverse('endpoints:create', args=[instance.id])
+        response = self.client.post(
+            path, data={'endpoint': 'some-endpoint'})
+        self.assertEqual(response.status_code, 201, response.content)
+        print(response.json())

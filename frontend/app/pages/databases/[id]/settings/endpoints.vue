@@ -2,7 +2,7 @@
   <section id="database-endpoints" class="max-w-5xl mx-auto space-y-2">
     <header>
       <h3 class="font-bold">Endpoints</h3>
-      <nuxt-button>
+      <nuxt-button @click="() => { toggleShowModal() }">
         Add Endpoint
       </nuxt-button>
 
@@ -22,14 +22,20 @@
               <nuxt-button color="neutral" variant="subtle" icon="i-lucide-clipboard" @click="proxyCopy(endpoint)" />
             </nuxt-tooltip>
           </nuxt-button-group>
+
+          <div v-for="method in endpoint.methods" :key="method" class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <span class="font-bold">{{ method }}</span>
+            <span class="font-light">/v1/{{ endpoint.endpoint }}</span>
+            <nuxt-switch />
+          </div>
   
-          <nuxt-input v-model="endpoint.database_schema.name" icon="i-lucide-link" variant="subtle" class="w-full" :disabled="true" />
+          <!-- <nuxt-input v-model="endpoint.database_schema.name" icon="i-lucide-link" variant="subtle" class="w-full" :disabled="true" /> -->
         </div>
       </nuxt-card>
     </header>
 
     <!-- Modals -->
-    <settgings-project-modals-create-endpoint />
+    <settings-project-modals-create-endpoint />
   </section>
 </template>
 
@@ -46,7 +52,7 @@ definePageMeta({
  * Endpoints
  */
 
-const { endpoints } = useDatabaseEndpoints()
+const { endpoints, toggleShowModal } = useDatabaseEndpoints()
 
 function proxyCopy(endpoint: DatabaseEndpoint) {
   const { copy } = useClipboard({ source: endpoint.endpoint_uuid })

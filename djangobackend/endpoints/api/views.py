@@ -7,12 +7,12 @@ from dbschemas.models import DatabaseSchema
 from dbtables.models import DatabaseTable
 from django.shortcuts import get_object_or_404
 from endpoints import tasks
+from endpoints.api.serializers import PublicApiEndpointSerializer
 from endpoints.models import PublicApiEndpoint, SecretApiEndpoint
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, ListAPIView
 from rest_framework.response import Response
-from endpoints.api.serializers import PublicApiEndpointSerializer
 
 
 class ApiEndpointRouterMixin:
@@ -158,3 +158,21 @@ class ListEndpoints(ListAPIView):
     queryset = PublicApiEndpoint.objects.all()
     serializer_class = PublicApiEndpointSerializer
     permission_classes = []
+
+
+class CreateEndpoint(GenericAPIView):
+    queryset = PublicApiEndpoint.objects.all()
+    serializer_class = PublicApiEndpointSerializer
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        endpoint_path = request.data.get('endpoint', None)
+        if endpoint_path is None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        database = get_object_or_404(DatabaseSchema, id=kwargs.get('database'))
+        instance = PublicApiEndpoint.objects.create(endpoint=endpoint_path, database_schema=database)
+
+        qs = self.get_queryset()
+        serializer = self.get_serializer(instance=qs, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

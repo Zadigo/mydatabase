@@ -18,7 +18,7 @@ interface _DatabaseSchema extends _BaseDatabaseObject {
 }
 
 export interface DatabaseEndpoint extends _BaseDatabaseObject {
-	methods: string
+	methods: ('GET' | 'POST' | 'PUT' | 'DELETE')[]
 	endpoint: string
 	endpoint_uuid: string
   database_schema: _DatabaseSchema
