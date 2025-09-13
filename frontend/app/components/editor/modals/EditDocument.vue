@@ -5,7 +5,7 @@
     </template>
 
     <template #body>
-      <div class="space-y-2">
+      <div v-if="availableDocuments.length > 0" class="space-y-2">
         <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50">
           <div class="flex justify-between items-center">
             <p class="font-bold">
@@ -35,16 +35,14 @@
             <p class="font-bold">
               Column types
             </p>
-            
+
             <div v-for="(column, index) in tableDocument.column_types" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.name" class="col-span-3" />
               <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
 
               <!-- Dropdown -->
               <nuxt-dropdown-menu :items="constrainMenuItem">
-                <nuxt-button class="col-span-1" variant="soft">
-                  <icon name="i-lucide-ellipsis-vertical" />
-                </nuxt-button>
+                <nuxt-button icon="i-lucide-ellipsis-vertical" class="col-auto" variant="soft" />
               </nuxt-dropdown-menu>
             </div>
           </div>
@@ -60,9 +58,17 @@
                 <nuxt-select v-model="foreignTableId" :items="availableDocuments" label-key="name" value-key="document_uuid" placeholder="Document" />
                 <nuxt-select v-model="foreignTableForeignKey" :items="foreignTableColumns" placeholder="Foreign key" />
               </div>
+
+              <nuxt-button icon="i-lucide-save" variant="soft" color="success" @click="() => { create() }" />
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-else class="space-y-2">
+        <nuxt-skeleton class="h-20 w-full" />
+        <nuxt-skeleton class="h-20 w-full" />
+        <nuxt-skeleton class="h-20 w-full" />
       </div>
     </template>
   </nuxt-slideover>

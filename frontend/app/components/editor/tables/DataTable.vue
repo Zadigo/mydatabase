@@ -19,7 +19,7 @@ const items = inject<ComputedRef<DocumentData[]>>('tableData')
 console.log('DataTable', items)
 
 const tableColumnsStore = useTableColumnsStore()
-const { columnNames, columnOptions, columnTypeOptions } = storeToRefs(tableColumnsStore)
+const { columnNames, columnOptions } = storeToRefs(tableColumnsStore)
 
 
 const tableColumns = computed<TableColumn<DocumentData>[]>(() => {

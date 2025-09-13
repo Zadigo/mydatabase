@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ColumnOptions } from '~/composables/use/tables'
+import type { ColumnOptions } from '~/types'
 
 defineProps<{ title: string, columnOptions: ColumnOptions[] }>()
 </script>

@@ -10,7 +10,6 @@
 </template>
 
 <script setup lang="ts">
-import type { SelectItem } from '@nuxt/ui'
 import { useDatabaseFunctions } from '~/composables/use/databases/functions'
 
 /**

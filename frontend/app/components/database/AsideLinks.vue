@@ -35,6 +35,10 @@ const endpoints = [
   {
     name: 'Triggers',
     endpoint: 'database/triggers'
+  },
+  {
+    name: 'Connections',
+    endpoint: 'database/connections'
   }
 ]
 </script>

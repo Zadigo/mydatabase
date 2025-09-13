@@ -6,6 +6,8 @@ from typing import Any
 
 import pandas
 import requests
+from django.core.cache import cache
+import gspread
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.files.base import ContentFile
@@ -170,3 +172,38 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
         document.save()
         logger.warning(
             f"Successfully created Feather document: {document.name}")
+
+
+@shared_task
+def load_google_sheet(api_key: str, sheet_id: str, range: str = None) -> str:
+    """Loads data from a public Google Sheet using an API key and sheet ID."""
+    instance = gspread.api_key(api_key)
+    sheet = instance.open_by_key(sheet_id)
+
+    # data = sheet.values_get(range or 'A1:B2')
+
+    # sheet.sheet1.add_cols(1)
+    # sheet.sheet1.update('C1', 'New Column')
+
+    # values = data['values']
+    # headers = values.pop(0)
+
+    # df = pandas.DataFrame(values, columns=headers)
+    # return df.to_csv(index=True, index_label='record_id', encoding='utf-8', doublequote=True)
+
+
+@shared_task
+def load_google_sheet_via_service_account(credentials: dict[str, str], sheet_id: str) -> str:
+    """Loads data from a public Google Sheet using a service account and sheet ID.
+    Reference: https://docs.gspread.org/en/latest/oauth2.html#service-account
+    """
+    instance = gspread.service_account_from_dict(credentials)
+    sheet = instance.open_by_key(sheet_id)
+    sheet.sheet1.insert_cols([['record_id']], 1)
+
+    headers = sheet.sheet1.row_values(1)
+    records = sheet.sheet1.get_all_records()
+    cache.set(sheet_id, [headers, records], timeout=3600)
+
+    df = pandas.DataFrame(records, columns=headers)
+    return df.to_csv(index=False, encoding='utf-8', doublequote=True)

@@ -1,23 +1,28 @@
 <template>
   <nuxt-card>
-    <div class="flex justify-between">
+    <div class="flex justify-between items-center">
       <h3 class="font-bold text-2xl">
         {{ title }}
       </h3>
 
-      <nuxt-button variant="outline">
+      <nuxt-button size="sm" color="info" variant="outline">
         <icon name="i-lucide-book" />
         Documentation
       </nuxt-button>
     </div>
 
-    <div class="flex justify-between">
-      <nuxt-input v-model="search" :placeholder="placeholder" />
-      <nuxt-button @click="emit('create')">
-        <icon name="i-lucide-plus" />
-        Create function
-      </nuxt-button>
-    </div>
+    <slot name="actions">
+      <div class="flex justify-between mt-3">
+        <nuxt-input v-model="search" :placeholder="placeholder" class="w-5/12" />
+
+        <slot name="actionButton">
+          <nuxt-button @click="emit('create')">
+            <icon name="i-lucide-plus" />
+            Create function
+          </nuxt-button>
+        </slot>
+      </div>
+    </slot>
   </nuxt-card>
 </template>
 

@@ -54,6 +54,12 @@ class TableDocument(models.Model):
         blank=True,
         null=True
     )
+    google_sheet_id = models.CharField(
+        max_length=255,
+        help_text="The Google Sheet ID if the document was imported from Google Sheets",
+        blank=True,
+        null=True
+    )
     updated_at = models.DateTimeField(
         auto_now_add=True
     )
