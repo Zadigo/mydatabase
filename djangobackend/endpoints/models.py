@@ -22,7 +22,7 @@ class ApiEndpoint(models.Model):
         null=True,
     )
     endpoint_uuid = models.UUIDField(
-        default=uuid.uuid4(),
+        default=uuid.uuid4,
         unique=True
     )
     endpoint = models.CharField(

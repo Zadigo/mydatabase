@@ -313,8 +313,15 @@ def prefetch_relationships(database_id: str):
 
         # Depending on the direction, create the relationship
         if item['meta_definitions']['type'] == '1-1':
-            df = pandas.merge(df1, df2, how='inner',
-                              left_index=True, right_index=True)
+            df = pandas.merge(**{
+                'left': df1,
+                'right': df2,
+                'how': 'inner',
+                'left_index': True,
+                'right_index': True
+            })
             cache.set(item['name'], df.to_json(orient='records'), timeout=None)
             logger.info(
-                f"One-to-one relationship created between {table1.name} and {table2.name}.")
+                f"One-to-one relationship "
+                "created between {table1.name} and {table2.name}."
+            )

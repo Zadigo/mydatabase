@@ -5,17 +5,17 @@ app_name = 'endpoints'
 
 urlpatterns = [
     re_path(
-        r'^api/secret/(?P<endpoint>[^/]+)$',
+        r'^secret/(?P<endpoint>[^/]+)$',
         views.SecretApiEndpointRouter.as_view(),
         name='secret-api-endpoint'
     ),
     re_path(
-        r'^api/public/(?P<endpoint>[a-z\-]+)/(?P<database>\d+)/table/(?P<table>\d+)$',
+        r'^public/(?P<database>\d+)/table/(?P<table>\d+)/(?P<endpoint>[a-z\-]+)$',
         views.PublicApiEndpointRouter.as_view(),
         name='table-level-endpoint'
     ),
     re_path(
-        r'^api/public/(?P<endpoint>[a-z\-]+)/(?P<database>\d+)$',
+        r'^public/(?P<database>\d+)/(?P<endpoint>[a-z\-]+)$',
         views.PublicApiEndpointRouter.as_view(),
         name='database-level-endpoint'
     ),

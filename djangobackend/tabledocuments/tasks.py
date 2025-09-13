@@ -1,15 +1,16 @@
 import asyncio
+import csv
+import io
 import json
 import pathlib
-import csv
 from typing import Any
 
+import gspread
 import pandas
 import requests
-from django.core.cache import cache
-import gspread
-from celery import shared_task
+from celery import shared_task, chain
 from celery.utils.log import get_task_logger
+from django.core.cache import cache
 from django.core.files.base import ContentFile
 from tabledocuments.logic.edit import load_document_by_url
 from tabledocuments.logic.utils import (create_column_options,
@@ -207,3 +208,35 @@ def load_google_sheet_via_service_account(credentials: dict[str, str], sheet_id:
 
     df = pandas.DataFrame(records, columns=headers)
     return df.to_csv(index=False, encoding='utf-8', doublequote=True)
+
+
+@shared_task
+def merge_dataframes(document_uuid: str, data_to_append: str):
+    buffer1 = io.StringIO(data_to_append)
+
+    df1 = pandas.read_csv(buffer1)
+
+    try:
+        document = TableDocument.objects.get(document_uuid=document_uuid)
+    except:
+        logger.error(f'Failed to get document with UUID {document_uuid}')
+        return
+
+    df2 = pandas.read_csv(document.file.path)
+
+    # 1. Run the before insert functions here on df1
+
+    # 2. Merge the dataframes
+    merged = pandas.concat([df1, df2], ignore_index=True)
+    
+    # 3. Run after insert functions here on merged
+
+    # 4. Update the content of the physical file
+    csv_content = merged.to_csv(index=False, encoding='utf-8', doublequote=True)
+    content = ContentFile(csv_content)
+
+    # 5. Sync the saved data with the database
+    # providers if required
+
+    document.file.save(f'{document.name}.csv', content)
+    return content
