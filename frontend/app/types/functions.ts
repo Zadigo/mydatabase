@@ -1,4 +1,4 @@
-import type { ReturnAny } from '.'
+import type { ReturnAny, Nullable } from '.'
 
 export const baseDatabaseFunctions = [
   'Count',
@@ -54,18 +54,19 @@ export const functionFailures = [
 export type FunctionFailures = typeof functionFailures[number]
 
 export interface DatabaseFunction {
-  function: {
-    name: DatabaseFunctions
-    table: string
-    columns: string[]
-    returns: {
-      value: ReturnAny
-      type: FunctionReturnTypes
-    }
-    chain_to: string[]
-    failure: {
-      on: FunctionFailures
-      default_value: ReturnAny
-    }
+  name: DatabaseFunctions
+  table: Nullable<number>
+  columns: string[]
+  returns: {
+    value: ReturnAny
+    /**
+     * @default "void"
+     */
+    type: FunctionReturnTypes
+  }
+  chain_to: string[]
+  on_fail: {
+    do: FunctionFailures
+    default_value: ReturnAny
   }
 }

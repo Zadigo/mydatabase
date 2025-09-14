@@ -9,7 +9,7 @@
     </div>
 
     <ul class="cursor-move overflow-y-scroll h-70">
-      <li v-for="typeOption in columnTypeOptions" :key="typeOption.name" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
+      <li v-for="typeOption in tableDocument?.column_types || []" :key="typeOption.name" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
         <div class="space-x-2">
           <span>{{ typeOption.name }}</span>
         </div>
@@ -23,9 +23,10 @@
 </template>
 
 <script setup lang="ts">
-import type { ColumnType, Table } from '~/types'
+import { useColumnTypeOptions, useTableActualDocument } from '~/composables/use/documents'
+import type { Table } from '~/types'
 
-defineProps<{ table: Table }>()
+const props = defineProps<{ table: Table }>()
 
 /**
  * Dragging
@@ -54,45 +55,6 @@ const dbStore = useDatabasesStore()
  * Columns
  */
 
-function getTypeIcon(columnType: ColumnType) {
-  let icon: string = 'i-lucide-a-large-small'
-
-  switch (columnType) {
-    case 'String':
-      icon = 'i-lucide-a-large-small'
-      break
-    
-    case 'Number':
-      icon = 'i-lucide-superscript'
-      break
-
-    case 'Array':
-      icon = 'i-lucide-brackets'
-      break
-
-    case 'Boolean':
-      icon = 'i-lucide-check'
-      break
-
-    case 'Date':
-      icon = 'i-lucide-calendar'
-      break
-    
-    case 'DateTime':
-      icon = 'i-lucide-calendar-clock'
-      break
-
-    case 'Dict':
-      icon = 'i-lucide-braces'
-      break
-
-    default:
-      break
-  }
-
-  return icon
-}
-
-const tableColumnsStore = useTableColumnsStore()
-const { columnTypeOptions } = storeToRefs(tableColumnsStore)
+const { getTypeIcon } = useColumnTypeOptions()
+const tableDocument = useTableActualDocument(props.table)
 </script>

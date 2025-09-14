@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view
 from rest_framework.generics import CreateAPIView, GenericAPIView, ListAPIView
 from rest_framework.response import Response
 from tabledocuments.models import TableDocument
-from tablesdocuments.tasks import update_document_options
+from tabledocuments.tasks import update_document_options
 
 
 class ApiEndpointRouterMixin:
@@ -179,7 +179,8 @@ class PublicApiEndpointRouter(GenericAPIView, ApiEndpointRouterMixin):
             update_document_options.apply_async(
                 args=[
                     str(document.document_uuid),
-                    newdf.to_csv(index=False, encoding='utf-8', doublequote=True)
+                    newdf.to_csv(index=False, encoding='utf-8',
+                                 doublequote=True)
                 ],
                 countdown=40
             )

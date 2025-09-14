@@ -40,7 +40,6 @@ export interface TableDocument extends _BaseDatabaseObject {
 export type TableComponent = 'data-table' | 'graph-table'
 
 export interface Table extends _BaseDatabaseObject {
-  id: number
   /**
    * The name of the table
    */

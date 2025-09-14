@@ -1,4 +1,4 @@
-import type { Database, Nullable } from '~/types'
+import type { Database, Nullable, TableDocument } from '~/types'
 
 /**
  * Store for managing databases and their tables.
@@ -15,14 +15,14 @@ export const useDatabasesStore = defineStore('databases', () => {
    */
 
   const search = ref<string>('')
-  const searched = useArrayFilter(databases, (database) => database.name.toLowerCase().includes(search.value.toLowerCase()))
+  const searched = useArrayFilter<Database>(databases, (database) => database.name.toLowerCase().includes(search.value.toLowerCase()))
 
   /**
    * Current database
    */
 
   const routeId = ref<Nullable<number>>(null)
-  const currentDatabase = useArrayFind(databases, (database) => database.id === routeId.value)
+  const currentDatabase = useArrayFind<Database>(databases, (database) => database.id === routeId.value)
   
   console.log('currentDatabase', currentDatabase)
   
@@ -41,7 +41,21 @@ export const useDatabasesStore = defineStore('databases', () => {
     }
   }
 
+  /**
+   * Other
+   */
+
+  const allTableDocuments = computed(() => {
+    if (!isDefined(currentDatabase)) return []
+    return currentDatabase.value.tables.flatMap(table => table.documents)
+  })
+
   return {
+    /**
+     * The documents from all tables in the current database
+     * @default []
+     */
+    allTableDocuments,
     /**
      * List of none-filtered databases
      */

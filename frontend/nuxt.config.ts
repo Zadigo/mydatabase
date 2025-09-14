@@ -27,7 +27,10 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { ssr: true },
-    '/databases/**': { ssr: false }
+    '/databases/**': { ssr: false },
+    '/settings/**': { ssr: false },
+    '/integrations': { ssr: false },
+    '/login': { ssr: false }
   },
 
   ui: {

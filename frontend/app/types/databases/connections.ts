@@ -6,7 +6,8 @@ export const integrationTool = [
   'Supabase',
   'Excel',
   'N8N',
-  'Notion'
+  'Notion',
+  'Scheduling'
 ] as const
 
 export type IntegrationTool = typeof integrationTool[number]

@@ -2,6 +2,7 @@ import type { SimpleTable } from './databases'
 
 export type * from './tables'
 export type * from './databases'
+export type * from './accounts'
 
 export type Nullable<T> = T | null
 
@@ -10,6 +11,8 @@ export type Arrayable<T> = T[]
 export type RefOrUndefined<T> = Ref<T | undefined>
 
 export type MaybeTable = RefOrUndefined<SimpleTable>
+
+export type PlainOrRef<T, M> = T | RefOrUndefined<M>
 
 export type ReturnAny = Nullable<string | number | boolean>
 

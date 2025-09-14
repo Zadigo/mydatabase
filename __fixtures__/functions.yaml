@@ -1,14 +1,13 @@
-functions:
-  name: random
-  table: My table
-  columns:
-    - lastname
-    - firstname
-  returns:
-    type: void
-    value: null
-  chain_to:
-    - some_function
-  on_fail:
-    skip: true
-    default_value: some_value
+name: Count | Sum | Random | ...
+table: My table
+columns:
+  - lastname
+  - firstname
+returns:
+  type: void
+  value: null
+chain_to:
+  - some_function
+on_fail:
+  do: Record | Default | Skip
+  default_value: some_value

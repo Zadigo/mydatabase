@@ -1,4 +1,4 @@
-import type { ColumnType, Database, Nullable, TableDocument } from '~/types'
+import type { ColumnType, Database, SimpleTable, Nullable, PlainOrRef, TableDocument } from '~/types'
 
 export interface NewDocument {
   name: string
@@ -6,6 +6,61 @@ export interface NewDocument {
   google_sheet_id: string
   file: Nullable<Blob>
   entry_key: Nullable<string>
+}
+
+/**
+ * Get the actual document from a table
+ * @param table The table to get the actual document from
+ */
+export function useTableActualDocument<T extends PlainOrRef<SimpleTable, SimpleTable>>(table: T) {
+  const actualTable = ref<T>(table)
+  const availableDocuments = computed(() => isDefined(actualTable) ? actualTable.value?.documents : [])
+  return useArrayFind<TableDocument>(availableDocuments, (doc) => actualTable.value?.active_document_datasource === doc.document_uuid)
+}
+
+export function useColumnTypeOptions() {
+  function getTypeIcon(columnType: ColumnType) {
+    let icon: string = 'i-lucide-a-large-small'
+
+    switch (columnType) {
+      case 'String':
+        icon = 'i-lucide-a-large-small'
+        break
+
+      case 'Number':
+        icon = 'i-lucide-superscript'
+        break
+
+      case 'Array':
+        icon = 'i-lucide-brackets'
+        break
+
+      case 'Boolean':
+        icon = 'i-lucide-check'
+        break
+
+      case 'Date':
+        icon = 'i-lucide-calendar'
+        break
+
+      case 'DateTime':
+        icon = 'i-lucide-calendar-clock'
+        break
+
+      case 'Dict':
+        icon = 'i-lucide-braces'
+        break
+
+      default:
+        break
+    }
+
+    return icon
+  }
+
+  return {
+    getTypeIcon
+  }
 }
 
 /**
