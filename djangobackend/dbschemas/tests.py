@@ -1,6 +1,8 @@
 import json
+from io import BytesIO
 
 from dbschemas.models import DatabaseSchema
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase

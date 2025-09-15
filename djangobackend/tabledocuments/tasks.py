@@ -1,18 +1,19 @@
 import asyncio
 import csv
-import numpy
 import io
 import json
 import pathlib
 from typing import Any
 
 import gspread
+import numpy
 import pandas
 import requests
 from celery import chain, shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from gspread.utils import TableDirection, rowcol_to_a1
 from tabledocuments.logic.edit import load_document_by_url
 from tabledocuments.logic.utils import (create_column_options,
                                         create_column_type_options)
@@ -315,7 +316,8 @@ def get_document_from_public_google_sheet(api_key: str, sheet_id: str, range: st
 
 @shared_task
 def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -> str:
-    """Loads data from a public Google Sheet using a service account and sheet ID.
+    """Loads data from a Google Sheet using a service account and sheet ID and
+    returns the values as string
     Reference: https://docs.gspread.org/en/latest/oauth2.html#service-account
     """
     instance = gspread.service_account_from_dict(credentials)
@@ -325,19 +327,37 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
     except Exception as e:
         logger.error(f'Failed to open spreadsheet: {e}')
 
-    sheet.sheet1.insert_cols([['record_id']], 1)
 
     headers = sheet.sheet1.row_values(1)
     records = sheet.sheet1.get_all_records()
     cache.set(sheet_id, [headers, records], timeout=3600)
+
+    if 'record_id' not in headers:
+        sheet.sheet1.insert_cols([['record_id']], 1)
+
+        # Create the auto-incrementing record_id column
+        cell_name = 'A2:' + rowcol_to_a1(len(records) + 1, 1)
+        cell_list = sheet.sheet1.range(cell_name)
+
+        for i, cell in enumerate(cell_list):
+            cell.value = i + 1
+
+        sheet.sheet1.update_cells(cell_list)
+
+    logger.warning(f'Successfully retrieved data from Google Sheet: {sheet_id}')
 
     df = pandas.DataFrame(records, columns=headers)
     return df.to_csv(index=False, encoding='utf-8', doublequote=True)
 
 
 @shared_task
-def merge_dataframes(document_uuid: str, data_to_append: str):
-    """Function used to merge two existing csv files"""
+def append_to_dataframe(document_uuid: str, data_to_append: str):
+    """Function used to append data to an existing document. The data
+    to append is provided as a CSV string. The function will load the existing
+    document, merge the data and save it back to the file.
+    ### 1. Load the data to append into a dataframe
+    ### 2. Load the existing document into a dataframe
+    """
     buffer1 = io.StringIO(data_to_append)
 
     df1 = pandas.read_csv(buffer1)
@@ -350,6 +370,12 @@ def merge_dataframes(document_uuid: str, data_to_append: str):
 
     df2 = pandas.read_csv(document.file.path)
 
+    # If the documents do not have the same columns,
+    # then do not try to append the documents
+    if df1.columns.tolist() != df2.columns.tolist():
+        logger.warning('Columns mismatch')
+        return
+
     # 1. Run the before insert functions here on df1
 
     # 2. Merge the dataframes
@@ -359,7 +385,10 @@ def merge_dataframes(document_uuid: str, data_to_append: str):
 
     # 4. Update the content of the physical file
     csv_content = merged.to_csv(
-        index=False, encoding='utf-8', doublequote=True)
+        index=False, 
+        encoding='utf-8', 
+        doublequote=True
+    )
     content = ContentFile(csv_content)
 
     # 5. Sync the saved data with the database

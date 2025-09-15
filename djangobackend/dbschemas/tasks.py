@@ -29,19 +29,19 @@ def func_clean(document_uuid: str, columns: list[str], data: str, deep: bool = F
     buffer = io.StringIO(data)
     df = pandas.read_json(buffer)
 
-    for column in columns:
-        df[column] = df[column].str.strip()
-        df[column] = df[column].str.replace(r'\s+', ' ', regex=True)
-        df[column] = df[column].str.lower().str.title()
+    # for column in columns:
+    #     df[column] = df[column].str.strip()
+    #     df[column] = df[column].str.replace(r'\s+', ' ', regex=True)
+    #     df[column] = df[column].str.lower().str.title()
 
-        if deep:
-            df[column] = df[column].str.replace(
-                r'[^a-zA-Z0-9\s]', '', regex=True)
+    #     if deep:
+    #         df[column] = df[column].str.replace(
+    #             r'[^a-zA-Z0-9\s]', '', regex=True)
 
     # In deep clean mode, normalize the dataframe columns
     # transform them in to lowercase + replace spaces with underscores
-    if deep:
-        df.columns = [col.lower().replace(' ', '_') for col in df.columns]
+    # if deep:
+    #     df.columns = [col.lower().replace(' ', '_') for col in df.columns]
 
     try:
         instance = TableDocument.objects.get(uuid=document_uuid)
@@ -87,10 +87,11 @@ def func_upper(columns: list[str], data: str) -> str:
     """Convert specified columns to uppercase."""
     buffer = io.StringIO(data)
 
-    df = pandas.read_json(buffer)
+    df = pandas.read_csv(buffer)
     for column in columns:
         df[column] = df[column].str.upper()
 
+    logger.warning(f'Changed: {int(df[columns[0]].count())}')
     return df.to_json(orient='records')
 
 
@@ -99,10 +100,11 @@ def func_lower(columns: list[str], data: str) -> str:
     """Convert specified columns to lowercase."""
     buffer = io.StringIO(data)
 
-    df = pandas.read_json(buffer)
+    df = pandas.read_csv(buffer)
     for column in columns:
         df[column] = df[column].str.lower()
 
+    logger.warning(f'Changed: {int(df[columns[0]].count())}')
     return df.to_json(orient='records')
 
 
@@ -111,10 +113,11 @@ def func_title(columns: list[str], data: str) -> str:
     """Convert specified columns to title case."""
     buffer = io.StringIO(data)
 
-    df = pandas.read_json(buffer)
+    df = pandas.read_csv(buffer)
     for column in columns:
-        df[column] = df[column].str.lower().str.title()
+        df[column] = df[column].str.title()
 
+    logger.warning(f'Changed: {int(df[columns[0]].count())}')
     return df.to_json(orient='records')
 
 
@@ -128,15 +131,11 @@ def func_trim(columns: list[str], data: str, **kwargs: str) -> str:
     """Trim whitespace from specified columns."""
     buffer = io.StringIO(data)
 
-    df = pandas.read_json(buffer)
+    df = pandas.read_csv(buffer)
     for column in columns:
         df[column] = df[column].str.strip()
 
-    # normalize = kwargs.get('normalize', False)
-    # if normalize:
-    #     for column in columns:
-    #         df[column] = df[column].str.replace(r'\s+', ' ', regex=True)
-
+    logger.warning(f'Changed: {int(df[columns[0]].count())}')
     return df.to_json(orient='records')
 
 
@@ -166,7 +165,7 @@ def func_extract(columns: list[str], data: str, **kwargs: str) -> str:
 def func_now(data: str, **kwargs: str) -> str:
     """Add a new column 'now' with the current timestamp."""
     buffer = io.StringIO(data)
-    df = pandas.read_json(buffer)
+    df = pandas.read_csv(buffer)
 
     timezone_str = kwargs.get('timezone', 'UTC')
     df['now'] = datetime.datetime.now(pytz.timezone(timezone_str)).isoformat()
@@ -291,22 +290,35 @@ def prefetch_relationships(database_id: str):
         - '1-1': one-to-one"""
 
     database = DatabaseSchema.objects.get(id=database_id)
-
     tables: QuerySet[DatabaseTable] = database.databasetable_set.all()
 
     for item in database.document_relationships:
-        table1 = tables.get(id=item['from_table'])
-        table2 = tables.get(id=item['to_table'])
+        try:
+            table1 = tables.get(id=item['from_table'])
+        except:
+            logger.warning('Left table doest not exist')
+            return
+
+        try:
+            table2 = tables.get(id=item['to_table'])
+        except:
+            logger.warning('Right table does not exist')
+            return
 
         if table1.active_document_datasource is None or table2.active_document_datasource is None:
             logger.error(
-                "One of the tables does not have an active document datasource.")
+                "One of the tables does not "
+                "have an active document datasource."
+            )
             return
 
         doc1 = table1.documents.get(
-            document_uuid=table1.active_document_datasource)
+            document_uuid=table1.active_document_datasource
+        )
+        
         doc2 = table2.documents.get(
-            document_uuid=table2.active_document_datasource)
+            document_uuid=table2.active_document_datasource
+        )
 
         df1 = pandas.read_json(io.StringIO(doc1.file.read().decode('utf-8')))
         df2 = pandas.read_json(io.StringIO(doc2.file.read().decode('utf-8')))
@@ -320,6 +332,7 @@ def prefetch_relationships(database_id: str):
                 'left_index': True,
                 'right_index': True
             })
+
             cache.set(item['name'], df.to_json(orient='records'), timeout=None)
             logger.info(
                 f"One-to-one relationship "
