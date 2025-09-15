@@ -5,9 +5,11 @@ def create_column_type_options(columns: list[str]):
         map(
             lambda column: {
                 'name': column,
+                'new_name': column,
                 'columnType': 'String',
                 'unique': False,
-                'nullable': True
+                'nullable': True,
+                'visible': True
             },
             columns
         )

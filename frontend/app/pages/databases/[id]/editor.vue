@@ -26,7 +26,10 @@
       <!-- Component -->
       <component :is="displayComponent" v-if="hasData" />
       <template v-else>
-        No data, no table
+        <div class="space-y-2">
+          <nuxt-skeleton class="w-full h-10" />
+          <nuxt-skeleton class="w-6/12 h-10" />
+        </div>
       </template>
     </nuxt-card>
 
@@ -36,7 +39,6 @@
 </template>
 
 <script setup lang="ts">
-// import { useWebsocketMessage } from '~/composables/use'
 import { EditorTablesDataTable } from '#components'
 import { useEditorPageRefresh, useTableWebocketManager } from '~/composables/use/tables'
 import type { TableComponent } from '~/types'

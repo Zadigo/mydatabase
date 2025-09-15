@@ -1,5 +1,6 @@
 import asyncio
 import csv
+import numpy
 import io
 import json
 import pathlib
@@ -8,7 +9,7 @@ from typing import Any
 import gspread
 import pandas
 import requests
-from celery import shared_task, chain
+from celery import chain, shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
@@ -21,7 +22,7 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def update_document_options(document_uuid: str):
+def update_document_options(document_uuid: str, column_type_options: list[dict[str, Any]] = []):
     """A trigger that gets fired once the document is created. It fixes
     traditional elements such as the columns the document encoding references
     the column names etc"""
@@ -42,28 +43,36 @@ def update_document_options(document_uuid: str):
         else:
             if path.exists() and path.is_file():
                 try:
+                    document = TableDocument.objects.get(
+                        document_uuid=document_uuid
+                    )
+                except TableDocument.DoesNotExist:
+                    logger.error(
+                        f"Document with UUID {document_uuid} "
+                        "does not exist."
+                    )
+
+                try:
                     df = pandas.read_csv(path)
                 except Exception as e:
                     logger.error(f'Failed to load document: {e}')
                     return None
                 else:
-                    column_type_options = create_column_type_options(
-                        df.columns.tolist())
-                    column_options = create_column_options(df.columns.tolist())
+                    if column_type_options:
+                        document.column_types = column_type_options
+                    else:
+                        document.column_types = create_column_type_options(
+                            df.columns.tolist())
 
-                try:
-                    document = TableDocument.objects.get(
-                        document_uuid=document_uuid)
-                except TableDocument.DoesNotExist:
-                    logger.error(
-                        f"Document with UUID {document_uuid} does not exist.")
-                else:
-                    document.column_types = column_type_options
-                    document.column_options = column_options
+                    document.column_options = create_column_options(
+                        df.columns.tolist())
                     document.column_names = df.columns.tolist()
                     document.save()
+
                     logger.warning(
-                        f"Successfully updated document options: {document.name}")
+                        "Successfully updated "
+                        f"document options: {document.name}"
+                    )
 
 
 @shared_task
@@ -110,33 +119,142 @@ def get_document_from_url(url: str, headers: dict[str, str] = {}):
 
 
 @shared_task
-def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None):
-    if data is None:
+def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = []):
+    if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
+
+    df_params = {
+        'index': True,
+        'header': True,
+        'index_label': 'record_id',
+        'encoding': 'utf-8',
+        'doublequote': True
+    }
 
     try:
         document = TableDocument.objects.get(id=document_id)
     except TableDocument.DoesNotExist:
         logger.error(f"Document with ID {document_id} does not exist.")
+        return
     else:
-        # If data is a string, we suspect that it can
-        # be csv content
+        all_column_names = list(
+            map(
+                lambda x: x['name'],
+                column_options
+            )
+        )
+
+        renamed_columns = {}
+        for col in column_options:
+            renamed_columns[col['name']] = col['new_name']
+
+        visible_columns = list(
+            filter(
+                lambda x: x['visible'],
+                column_options
+            )
+        )
+        visible_column_names = list(
+            map(
+                lambda x: x['new_name'],
+                visible_columns
+            )
+        )
+
+        unique_columns = list(
+            filter(lambda x: x['unique'],
+                   visible_columns
+                   )
+        )
+        unique_columns_names = list(
+            map(
+                lambda x: x['new_name'],
+                unique_columns
+            )
+        )
+        none_nullable_columns = list(
+            filter(
+                lambda x: not x['nullable'],
+                visible_columns
+            )
+        )
+        none_nullable_columns_names = list(
+            map(
+                lambda x: x['new_name'],
+                none_nullable_columns
+            )
+        )
+
+        def boolean_converter(value):
+            if value is None:
+                return value
+
+            true_values = ['1', 'true', True]
+            if value in true_values:
+                return True
+            return False
+
+        def json_converter(value):
+            if value is None:
+                return value
+
+            try:
+                data = json.loads(value)
+            except:
+                return value
+            return str(data)
+
+        def create_dataframe(clean_data):
+            df = pandas.DataFrame(
+                clean_data,
+                columns=all_column_names
+            )
+
+            for column in column_options:
+                if column['columnType'] == 'String':
+                    df[column['name']] = df[column['name']].astype(str)
+                elif column['columnType'] == 'Number':
+                    df[column['name']] = df[column['name']].astype(numpy.int64)
+                elif column['columnType'] == 'Boolean':
+                    df[column['name']] = df[column['name']].apply(boolean_converter)
+                elif column['columnType'] == 'Array' or column['columnType'] == 'Dict':
+                    df[column['name']] = df[column['name']].map(json_converter)
+
+            df = df.rename(columns=renamed_columns)
+
+            if none_nullable_columns:
+                df = df.dropna(subset=none_nullable_columns_names)
+
+            if unique_columns:
+                df.drop_duplicates(
+                    subset=unique_columns_names,
+                    inplace=True
+                )
+
+            if visible_column_names:
+                df = df[visible_column_names]
+
+            return df
+
+        data = data.decode('utf-8-sig')
+
         if isinstance(data, str):
             clean_data = list(csv.reader(data.splitlines(), delimiter=','))
-
             first_item = clean_data[0][-1]
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
 
-            headers = clean_data.pop(0)
-            df = pandas.DataFrame(clean_data, columns=headers)
-            csv_content = df.to_csv(
-                index=True, index_label='record_id', encoding='utf-8', doublequote=True)
+            df = create_dataframe(clean_data[1:])
+            csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
-            return
+            document.save()
+            logger.warning(
+                "Successfully created Feather "
+                f"document from csv string: {document.name}"
+            )
 
         if isinstance(data, dict):
             if entry_key is None:
@@ -164,19 +282,21 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             # file = df.to_feather(index=True, index_label='record_id')
             # document.file.save(f'{document.name}.feather', file)
 
-            df = pandas.DataFrame(data)
-            csv_content = df.to_csv(
-                index=True, index_label='record_id', encoding='utf-8', doublequote=True)
+            df = create_dataframe(data)
+            csv_content = df.to_csv(**df_params)
+
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
 
-        document.save()
-        logger.warning(
-            f"Successfully created Feather document: {document.name}")
+            document.save()
+            logger.warning(
+                "Successfully created Feather "
+                f"document from list/json: {document.name}"
+            )
 
 
 @shared_task
-def load_google_sheet(api_key: str, sheet_id: str, range: str = None) -> str:
+def get_document_from_public_google_sheet(api_key: str, sheet_id: str, range: str = None) -> str:
     """Loads data from a public Google Sheet using an API key and sheet ID."""
     instance = gspread.api_key(api_key)
     sheet = instance.open_by_key(sheet_id)
@@ -194,12 +314,17 @@ def load_google_sheet(api_key: str, sheet_id: str, range: str = None) -> str:
 
 
 @shared_task
-def load_google_sheet_via_service_account(credentials: dict[str, str], sheet_id: str) -> str:
+def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -> str:
     """Loads data from a public Google Sheet using a service account and sheet ID.
     Reference: https://docs.gspread.org/en/latest/oauth2.html#service-account
     """
     instance = gspread.service_account_from_dict(credentials)
-    sheet = instance.open_by_key(sheet_id)
+
+    try:
+        sheet = instance.open_by_key(sheet_id)
+    except Exception as e:
+        logger.error(f'Failed to open spreadsheet: {e}')
+
     sheet.sheet1.insert_cols([['record_id']], 1)
 
     headers = sheet.sheet1.row_values(1)
@@ -212,6 +337,7 @@ def load_google_sheet_via_service_account(credentials: dict[str, str], sheet_id:
 
 @shared_task
 def merge_dataframes(document_uuid: str, data_to_append: str):
+    """Function used to merge two existing csv files"""
     buffer1 = io.StringIO(data_to_append)
 
     df1 = pandas.read_csv(buffer1)
@@ -228,11 +354,12 @@ def merge_dataframes(document_uuid: str, data_to_append: str):
 
     # 2. Merge the dataframes
     merged = pandas.concat([df1, df2], ignore_index=True)
-    
+
     # 3. Run after insert functions here on merged
 
     # 4. Update the content of the physical file
-    csv_content = merged.to_csv(index=False, encoding='utf-8', doublequote=True)
+    csv_content = merged.to_csv(
+        index=False, encoding='utf-8', doublequote=True)
     content = ContentFile(csv_content)
 
     # 5. Sync the saved data with the database

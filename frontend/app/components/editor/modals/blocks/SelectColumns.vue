@@ -1,9 +1,7 @@
 <template>
   <div id="select-columns">
-    <div v-for="(column, idx) in tempColumnsTypes" :key="idx" class="flex justify-around">
-      <nuxt-input v-model="column.name" />
-      <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" value-key="label" item-label="label" />
-    </div>
+    {{ newDocument }}
+    <base-column-type-option v-for="(column, idx) in newDocument.using_columns" :key="idx" v-model="newDocument.using_columns[idx]" />
   </div>
 </template>
 
@@ -12,7 +10,5 @@ import type { NewDocument } from '~/composables/use/documents'
 
 const props = defineProps<{ modelValue: NewDocument }>()
 const emit = defineEmits<{ 'update:ModelValue': [document: NewDocument] }>()
-const value = useVModel(props, 'modelValue', emit, { defaultValue: {} as NewDocument })
-
-const { tempColumnsTypes } = useTempDocument(value)
+const newDocument = useVModel(props, 'modelValue', emit, { defaultValue: {} as NewDocument })
 </script>

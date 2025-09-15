@@ -65,19 +65,27 @@ const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentNam
 
 console.log('Editor.AsideLinks', tableData.value)
 
-const tableColumnsStore = useTableColumnsStore()
-const { columnOptions } = storeToRefs(tableColumnsStore)
+/**
+ * Url query parameters
+ */
 
 const queryParams = useUrlSearchParams() as { table: string }
-
 watch(selectedTableDocumentName, (value) => {
   if (value) {
     queryParams.table = useToString(selectedTable.value?.id || '').value
   }
 })
 
+
 /**
- * Fix titles 
+ * Columns
+ */
+
+const tableColumnsStore = useTableColumnsStore()
+const { columnOptions } = storeToRefs(tableColumnsStore)
+
+/**
+ * Fix column names 
  */
 
 const { truncate } = useTruncateString()

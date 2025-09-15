@@ -2,7 +2,7 @@ export type DefaultColumnOption = 'visible' | 'editable' | 'sortable' | 'searcha
 
 export type ColumnOptions = { name: string } & { [K in DefaultColumnOption]: boolean }
 
-export const columnTypes = [
+export const columnType = [
   'String',
   'Number',
   'Boolean',
@@ -12,13 +12,17 @@ export const columnTypes = [
   'Dict'
 ] as const
 
-export type ColumnType = typeof columnTypes[number]
+export type ColumnType = typeof columnType[number]
 
 export interface ColumnTypeOptions {
   /**
    * The column's name
    */
   name: string
+  /**
+   * The new name for this column
+   */
+  new_name: string
   /**
    * The data type for this column
    * @default "String"
@@ -34,4 +38,9 @@ export interface ColumnTypeOptions {
    * @default true
    */
   nullable: boolean
+  /**
+   * Whether the column is visible in the table or not
+   * @default true
+   */
+  visible: boolean
 }

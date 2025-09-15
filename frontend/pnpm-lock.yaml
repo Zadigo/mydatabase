@@ -56,6 +56,9 @@ importers:
       nuxt:
         specifier: ^4.1.1
         version: 4.1.1(@biomejs/biome@2.2.2)(@netlify/blobs@9.1.2)(@parcel/watcher@2.5.1)(@types/node@24.3.0)(@vue/compiler-sfc@3.5.21)(db0@0.3.2)(eslint@9.34.0(jiti@2.5.1))(ioredis@5.7.0)(lightningcss@1.30.1)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.50.1)(terser@5.44.0)(typescript@5.9.2)(vite@7.1.5(@types/node@24.3.0)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.44.0)(yaml@2.8.1))(yaml@2.8.1)
+      papaparse:
+        specifier: ^5.5.3
+        version: 5.5.3
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.9.2)(vue@3.5.19(typescript@5.9.2))
@@ -84,6 +87,9 @@ importers:
       '@iconify-json/lucide':
         specifier: ^1.2.64
         version: 1.2.64
+      '@types/papaparse':
+        specifier: ^5.3.16
+        version: 5.3.16
       '@vue/test-utils':
         specifier: ^2.4.6
         version: 2.4.6
@@ -1686,6 +1692,9 @@ packages:
 
   '@types/node@24.3.0':
     resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
+
+  '@types/papaparse@5.3.16':
+    resolution: {integrity: sha512-T3VuKMC2H0lgsjI9buTB3uuKj3EMD2eap1MOuEQuBQ44EnDx/IkGhU6EwiTf9zG3za4SKlmwKAImdDKdNnCsXg==}
 
   '@types/parse-path@7.1.0':
     resolution: {integrity: sha512-EULJ8LApcVEPbrfND0cRQqutIOdiIgJ1Mgrhpy755r14xMohPTEpkV/k28SJvuOs9bHRFW8x+KeDAEPiGQPB9Q==}
@@ -4004,6 +4013,9 @@ packages:
 
   pako@0.2.9:
     resolution: {integrity: sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==}
+
+  papaparse@5.5.3:
+    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -7314,7 +7326,10 @@ snapshots:
   '@types/node@24.3.0':
     dependencies:
       undici-types: 7.10.0
-    optional: true
+
+  '@types/papaparse@5.3.16':
+    dependencies:
+      '@types/node': 24.3.0
 
   '@types/parse-path@7.1.0':
     dependencies:
@@ -10038,6 +10053,8 @@ snapshots:
 
   pako@0.2.9: {}
 
+  papaparse@5.5.3: {}
+
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
@@ -10960,8 +10977,7 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici-types@7.10.0:
-    optional: true
+  undici-types@7.10.0: {}
 
   unenv@2.0.0-rc.21:
     dependencies:

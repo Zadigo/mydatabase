@@ -8,16 +8,17 @@
       <!-- Stepper -->
       <nuxt-stepper ref="stepper" :items="items">
         <template #content="{ item }">
-          {{ item }}
-          <editor-modals-blocks-upload-document v-if="item.title === 'Upload file'" v-model="newDocument" />
-          <editor-modals-blocks-select-columns v-else-if="item.title === 'Select columns'" v-model="newDocument" />
+          <keep-alive>
+            <editor-modals-blocks-upload-document v-if="item.title === 'Upload file'" v-model="newDocument" @headers="(headers) => getDocumentHeaders(headers)" />
+            <editor-modals-blocks-select-columns v-else-if="item.title === 'Select columns'" v-model="newDocument" />
+          </keep-alive>
         </template>
       </nuxt-stepper>
     </template>
 
     <template #footer>
       <div class="ms-auto flex gap-2">
-        <nuxt-button @click="() => { show = false }">Cancel</nuxt-button>
+        <nuxt-button variant="soft" color="neutral" @click="() => { show = false }">Cancel</nuxt-button>
         <nuxt-button :disabled="!dbStore.hasTables" @click="() => { create() }">Create</nuxt-button>
       </div>
     </template>
@@ -25,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { useCreateDocument } from '~/composables/use/documents'
+import { useColumnTypeOptions, useCreateDocument } from '~/composables/use/documents'
 import type { StepperItem } from '@nuxt/ui'
 
 const props = defineProps<{ modelValue: boolean }>()
@@ -44,6 +45,10 @@ const { newDocument, create } = useCreateDocument()
 
 const dbStore = useDatabasesStore()
 
+/**
+ * Stepper
+ */
+
 const items: StepperItem[] = [
   {
     title: 'Upload file',
@@ -54,4 +59,17 @@ const items: StepperItem[] = [
     icon: 'i-lucide-table'
   }
 ]
+
+/**
+ * Document headers
+ */
+
+const { getTypeOptions } = useColumnTypeOptions()
+
+function getDocumentHeaders(headers: string[]) {
+  console.log('getDocumentHeaders', headers)
+  const columns = getTypeOptions(headers)
+  console.log('getDocumentHeaders', columns)
+  newDocument.value.using_columns = columns
+}
 </script>

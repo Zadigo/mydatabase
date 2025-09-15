@@ -120,8 +120,19 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   const hasData = computed(() => tableData.value.length > 0)
   
   return {
+    /**
+     * Show the modal to edit the table's information
+     * @default false
+     */
     showModal,
+    /**
+     * Toggle the edit table drawer
+     */
     toggleEditTableDrawer,
+    /**
+     * A ref used to edit the current table
+     * of the selected table
+     */
     editableTableRef,
     /**
      * The current table
