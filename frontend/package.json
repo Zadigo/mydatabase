@@ -25,6 +25,7 @@
     "@vueuse/nuxt": "13.7.0",
     "async-validator": "^4.2.5",
     "eslint": "^9.34.0",
+    "jwt-decode": "^4.0.0",
     "nuxt": "^4.1.1",
     "papaparse": "^5.5.3",
     "pinia": "^3.0.3",

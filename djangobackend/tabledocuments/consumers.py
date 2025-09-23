@@ -68,7 +68,5 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                         'type_options': create_column_type_options(columns)
                     }
                 })
-        elif action == 'checkout_file':
-            pass
         else:
             await self.send_error(f'Unknown action: {action}')

@@ -187,7 +187,9 @@ class DocumentEdition:
 
                 if 'application/json' not in content_type:
                     self.errors.append(
-                        "Unhandled document type. Valid types are: json")
+                        "Unhandled document type. "
+                        "Valid types are: json"
+                    )
                     return None
 
                 if entry_key is not None:
@@ -211,7 +213,9 @@ class DocumentEdition:
                     df = pandas.DataFrame(data)
                 except:
                     self.errors.append(
-                        "Failed to create DataFrame from JSON data")
+                        "Failed to create DataFrame "
+                        "from JSON data"
+                    )
                 else:
                     return await self.clean(df, {'url': url})
         return None

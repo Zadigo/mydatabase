@@ -42,7 +42,7 @@ export function useEditDocument() {
  * Composable used for creating a new document
  */
 export function useCreateDocument() {
-  const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle(true)
+  const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle()
 
   const newDocument = ref<NewDocument>({
     name: '',

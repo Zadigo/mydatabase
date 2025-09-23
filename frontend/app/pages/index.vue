@@ -11,4 +11,6 @@ definePageMeta({
   title: 'Home page',
   layout: 'default'
 })
+
+console.log(useState('authTokens').value)
 </script>

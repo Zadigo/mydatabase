@@ -6,6 +6,8 @@
           <nuxt-input v-model="email" label="Email" type="text" class="w-full" />
           <nuxt-input v-model="password" label="Password" type="password" class="w-full" />
 
+          {{ isSuccess }}
+
           <nuxt-button @click="() => { login() }">
             Login
           </nuxt-button>
@@ -18,29 +20,18 @@
 <script setup lang="ts">
 import type { TokenApiResponse } from '~/types'
 
+
+/**
+ * Login
+ */
+
 const email = ref<string>('')
 const password = ref<string>('')
 
-const { data, execute: login } = useFetch<TokenApiResponse>('/v1/auth/token/', {
-  immediate: false,
-  baseURL: useRuntimeConfig().public.prodDomain,
-  method: 'POST',
-  body: {
-    username: email.value,
-    password: password.value
-  } as {
-    username: string
-    password: string
-  }
-})
+const { login, isSuccess } = await useLogin(email, password)
 
+whenever(isSuccess, () => { navigateTo('/') })
 
-if (data.value) {
-  useState('authTokens', () => data.value)
-
-  useCookie('access').value = data.value.access
-  useCookie('refresh').value = data.value.refresh
-
-  navigateTo('/')
-}
+const { userId, payload } = useProfile()
+console.log('userId', userId.value, payload)
 </script>
