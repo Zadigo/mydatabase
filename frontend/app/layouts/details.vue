@@ -1,0 +1,69 @@
+<template>
+  <section id="site">
+    <base-navbar />
+    <base-sidebar :items="items" />
+
+    <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
+      <!-- Aside -->
+      <base-aside v-if="hasAside" />
+
+      <!-- Content -->
+      <slot />
+    </main>
+  </section>
+</template>
+
+<script setup lang="ts">
+const dbStore = useDatabasesStore()
+const { currentDatabase } = storeToRefs(dbStore)
+
+const route = useRoute()
+const hasAside = computed(() => {
+  return route.meta.title && (
+    route.meta.title.startsWith('Database:') || route.meta.title.startsWith('Editor:') || route.meta.title.startsWith('Settings:')
+  )
+})
+
+const { id } = useRoute().params as { id: string }
+dbStore.routeId = Number(id)
+
+const items = [
+  {
+    name: 'Overview',
+    to: `/databases/${currentDatabase.value?.id}`,
+    icon: 'i-lucide-home',
+    isAlpha: false
+  },
+  {
+    name: 'Table editor',
+    to: `/databases/${currentDatabase.value?.id}/editor`,
+    icon: 'i-lucide-table',
+    isAlpha: false
+  },
+  {
+    separator: true
+  },
+  {
+    name:'Integrations',
+    to: `/databases/${currentDatabase.value?.id}/integrations`,
+    icon: 'i-lucide-plug',
+    isAlpha: true
+  },
+  {
+    name: 'Database',
+    to: `/databases/${currentDatabase.value?.id}/database`,
+    icon: 'i-lucide-database',
+    isAlpha: false
+  },
+  {
+    name: 'Project settings',
+    to: `/databases/${currentDatabase.value?.id}/settings`,
+    icon: 'i-lucide-cog',
+    isAlpha: false
+  }
+]
+
+onUnmounted(() => {
+  dbStore.routeId = null
+})
+</script>

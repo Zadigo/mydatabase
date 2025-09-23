@@ -1,0 +1,31 @@
+import os
+
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+from django.core.asgi import get_asgi_application
+from djangobackend.ws_middlewares import JWTTokenAuthMiddleware
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangobackend.settings')
+
+django_asgi_application = get_asgi_application()
+
+# This loads the user model before apps
+# is loaded so we need to do the import
+# at this level after the "get_asgi_application". See:
+# https://github.com/django/daphne/issues/347
+# https://channels.readthedocs.io/en/stable/deploying.html#configuring-the-asgi-application
+
+from tabledocuments.routing import urlpatterns as tabledocuments_urlpatterns  # noqa
+
+application = ProtocolTypeRouter({
+    'http': django_asgi_application,
+    'websocket': AllowedHostsOriginValidator(
+        AuthMiddlewareStack(
+            URLRouter(tabledocuments_urlpatterns)
+            # JWTTokenAuthMiddleware(
+            #     URLRouter(tabledocuments_urlpatterns)
+            # )
+        )
+    )
+})

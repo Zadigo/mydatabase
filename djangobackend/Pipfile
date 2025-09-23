@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+channels = {extras = ["daphne"], version = "*"}
+django = "*"
+pandas = "*"
+pyairtable = "*"
+celery = "*"
+requests = "*"
+djangorestframework = "*"
+djangorestframework-simplejwt = "*"
+psycopg = {extras = ["binary", "pool"], version = "*"}
+django-redis = "*"
+drf-spectacular = "*"
+django-cors-headers = "*"
+django-import-export = "*"
+markdown = "*"
+django-filter = "*"
+unidecode = "*"
+django-extensions = "*"
+zstd = "*"
+pyarrow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"

@@ -1,23 +1,10 @@
-import tailwindcss from '@tailwindcss/vite'
+import tailwind from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  ssr: false,
-
-  css: [
-    '~/assets/css/main.css'
-  ],
-  ui: {
-    prefix: 'Nuxt'
-  },
-
-  vite: {
-    plugins: [
-      tailwindcss()
-    ]
-  },
+  ssr: true,
 
   modules: [
     '@nuxt/eslint',
@@ -26,7 +13,37 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     '@nuxt/ui',
     '@pinia/nuxt',
-    'pinia-plugin-persistedstate',
-    '@vueuse/nuxt'
-  ]
+    '@vueuse/nuxt',
+    '@nuxt/test-utils/module',
+    'pinia-plugin-persistedstate/nuxt'
+  ],
+
+  runtimeConfig: {
+    public: {
+      prodDomain: process.env.NUXT_PUBLIC_PROD_DOMAIN || 'http://127.0.0.1:8000',
+      wsProdDomain: process.env.NUXT_PUBLIC_WS_PROD_DOMAIN  || 'ws://127.0.0.1:8000'
+    }
+  },
+
+  routeRules: {
+    '/': { ssr: true },
+    '/databases/**': { ssr: false },
+    '/settings/**': { ssr: false },
+    '/integrations': { ssr: false },
+    '/login': { ssr: false }
+  },
+
+  ui: {
+    prefix: 'Nuxt'
+  },
+
+  css: [
+    '~/assets/css/tailwind.css'
+  ],
+
+  vite: {
+    plugins: [
+      tailwind()
+    ]
+  }
 })

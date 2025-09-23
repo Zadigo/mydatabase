@@ -1,0 +1,11 @@
+name: table-1-to-table-2
+relationsdhip_uuid: uui-1
+
+from_table: table-1
+to_table: table-1
+
+field_definitions:
+  left: id
+  right: id
+meta_definitions:
+  type: 1-1 | many-many

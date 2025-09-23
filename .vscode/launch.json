@@ -5,15 +5,43 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: My Database",
-            "type": "python",
+            "name": "Django: My Database",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}\\manage.py",
+            "envFile": "${workspaceFolder}/djangobackend/.env",
+            "program": "${workspaceFolder}/djangobackend/manage.py",
             "args": [
                 "runserver"
             ],
             "django": true,
             "justMyCode": true
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Nuxt Client: My Database",
+            "url": "http://localhost:3000",
+            // this should point to your Nuxt `srcDir`, which is `app` by default
+            "webRoot": "${workspaceFolder}/frontend/app"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Nuxt Server: My Database",
+            "outputCapture": "std",
+            "program": "${workspaceFolder}/node_modules/nuxt/bin/nuxt.mjs",
+            "args": [
+                "dev"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Nuxt Fullstack: My Database",
+            "configurations": [
+                "Nuxt Server: My Database",
+                "Nuxt Client: My Database"
+            ]
         }
     ]
 }

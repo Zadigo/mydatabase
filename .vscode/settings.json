@@ -7,12 +7,17 @@
     },
     "tailwindCSS.classAttributes": [
         "class",
-        "ui"
+        "ui",
+        "nuxt"
     ],
     "tailwindCSS.experimental.classRegex": [
         [
             "ui:\\s*{([^)]*)\\s*}",
             "(?:'|\"|`)([^']*)(?:'|\"|`)"
         ]
-    ]
+    ],
+    // FIXME: Update the path to the Biome binary because does not
+    // find the binary 
+    "biome.lsp.bin": "frontend/node_modules/@biomejs/biome/bin",
+    "python.analysis.typeCheckingMode": "off"
 }

@@ -1,5 +1,12 @@
-GET http://127.0.0.1:8000/v1/slides/sl_QWVSd/blocks/bl_TFuSU HTTP/1.1
+POST http://127.0.0.1:8000/v1/endpoints/public/50/table/23/my-endpoint
+Content-Type: application/json
+X-TABLE-TOKEN: lDN2pClGvbcwniFEyRLVAqeXn21Kc3za
 
-GET http://127.0.0.1:8000/v1/slides/sl_QWVSd HTTP/1.1
+{
+    "firstname": "John",
+    "lastname": "Doe"
+}
 
-GET http://127.0.0.1:8000/v1/slides HTTP/1.1
+# GET http://127.0.0.1:8000/v1/endpoints/public/50/table/23/my-endpoint
+# Accept: application/json
+# X-TABLE-TOKEN: lDN2pClGvbcwniFEyRLVAqeXn21Kc3za

@@ -1,19 +1,33 @@
 <template>
   <section id="site">
-    <!-- Header -->
-    <header>
-      <Navbar/>
-      <Sidebar/>
-    </header>
-    
-    <main class="px-5 ms-[calc(256px+1rem)] my-20">
+    <base-navbar />
+    <base-sidebar :items="items" />
+
+    <main class="ps-[calc(var(--sidebar-width)+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10">
       <slot />
     </main>
   </section>
 </template>
 
 <script setup lang="ts">
-onMounted(() => {
-  document.body.classList.add('bg-slate-100')
-})
+const items = [
+  {
+    name: 'Projects',
+    to: '/databases',
+    icon: 'i-lucide-home',
+    isAlpha: false
+  },
+  {
+    name: 'Integrations',
+    to: '/integrations',
+    icon: 'i-lucide-plug',
+    isAlpha: true
+  },
+  {
+    name: 'Organization settings',
+    to: '/settings',
+    icon: 'i-lucide-cog',
+    isAlpha: true
+  }
+]
 </script>
