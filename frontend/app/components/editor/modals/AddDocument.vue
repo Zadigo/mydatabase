@@ -1,5 +1,5 @@
 <template>
-  <nuxt-modal v-model:open="show">
+  <nuxt-modal v-model:open="showAddDocumentModal">
     <template #title>
       Create new document
     </template>
@@ -18,7 +18,7 @@
 
     <template #footer>
       <div class="ms-auto flex gap-2">
-        <nuxt-button variant="soft" color="neutral" @click="() => { show = false }">Cancel</nuxt-button>
+        <nuxt-button variant="soft" color="neutral" @click="() => { toggleShowAddDocumentModal() }">Cancel</nuxt-button>
         <nuxt-button :disabled="!dbStore.hasTables" @click="() => { create() }">Create</nuxt-button>
       </div>
     </template>
@@ -29,15 +29,11 @@
 import { useColumnTypeOptions, useCreateDocument } from '~/composables/use/documents'
 import type { StepperItem } from '@nuxt/ui'
 
-const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
-const show = useVModel(props, 'modelValue', emit, { defaultValue: true })
-
 /**
  * Document creation
  */
 
-const { newDocument, create } = useCreateDocument()
+const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
 
 /**
  * Checks

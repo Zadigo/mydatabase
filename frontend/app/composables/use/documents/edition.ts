@@ -4,7 +4,7 @@ import type { NewDocument } from '.'
 /**
  * Composable used for editing a document
  */
-export function useEditDocument() {
+export const useEditDocument = createGlobalState(() => {
   const [showEditDocumentModal, toggleShowEditDocumentModal] = useToggle()
 
   const tableEditionStore = useTableEditionStore()
@@ -36,12 +36,12 @@ export function useEditDocument() {
      */
     toggleShowEditDocumentModal
   }
-}
+})
 
 /**
  * Composable used for creating a new document
  */
-export function useCreateDocument() {
+export const useCreateDocument = createGlobalState(() => {
   const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle()
 
   const newDocument = ref<NewDocument>({
@@ -103,4 +103,4 @@ export function useCreateDocument() {
     create,
     toggleShowAddDocumentModal
   }
-}
+})

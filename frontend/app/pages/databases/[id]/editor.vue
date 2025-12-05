@@ -35,6 +35,9 @@
 
     <!-- Modals -->
     <editor-modals-edit-table />
+    <editor-modals-add-document />
+    <editor-modals-edit-document />
+    <editor-modals-create-table />
   </section>
 </template>
 

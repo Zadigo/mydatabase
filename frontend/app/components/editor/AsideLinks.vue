@@ -46,11 +46,6 @@
 
     <!-- Delete -->
     <nuxt-button :disabled="!selectedTable" variant="subtle" color="error" label="Delete table" block />
-
-    <!-- Modals -->
-    <editor-modals-add-document v-model="showAddDocumentModal" />
-    <editor-modals-edit-document v-model="showEditDocumentModal" />
-    <editor-modals-create-table v-model="showCreateTableModal" />
   </div>
 </template>
 
@@ -94,17 +89,17 @@ const { truncate } = useTruncateString()
  * Create document
  */
 
-const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
+const { toggleShowAddDocumentModal } = useCreateDocument()
 
 /**
  * Create table
  */
 
-const { showModal: showCreateTableModal, toggleCreateTable } = useCreateTable()
+const { toggleCreateTable } = useCreateTable()
 
 /**
  * Update document
  */
 
-const { showEditDocumentModal, toggleShowEditDocumentModal } = useEditDocument()
+const { toggleShowEditDocumentModal } = useEditDocument()
 </script>

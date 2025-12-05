@@ -1,5 +1,5 @@
 <template>
-  <nuxt-slideover v-model:open="show" direction="right" class="min-w-150">
+  <nuxt-slideover v-model:open="showEditDocumentModal" direction="right" class="min-w-150">
     <template #title>
       Edit document
     </template>
@@ -78,9 +78,9 @@
 import { useEditDocument, useEditDocumentRelationship } from '~/composables/use/documents'
 import type { DropdownMenuItem } from '@nuxt/ui'
 
-const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'update:modelValue': [] }>()
-const show = useVModel(props, 'modelValue', emit, { defaultValue: true })
+/**
+ * Dropdown menu items
+ */
 
 const dropdownItems: DropdownMenuItem[] = [
   {
@@ -140,7 +140,7 @@ const constrainMenuItem: DropdownMenuItem[] = [
  * Edit document
  */
 
-const { remove } = useEditDocument()
+const { remove, showEditDocumentModal } = useEditDocument()
 
 /**
  * Relationships
