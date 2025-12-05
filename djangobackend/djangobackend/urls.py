@@ -1,11 +1,16 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_spectacular import views as drf_views
 from rest_framework_simplejwt import views as auth_views
+from graphene_django.views import GraphQLView
 
 urlpatterns = [
+    re_path(
+        r'v1/graphql/',
+        GraphQLView.as_view(graphiql=True)
+    ),
     path(
         'api/schema/',
         drf_views.SpectacularAPIView.as_view(),

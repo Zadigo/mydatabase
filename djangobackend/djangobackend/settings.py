@@ -19,13 +19,9 @@ if ENV_FILE.exists():
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
-def is_debug():
-    return os.getenv('DEBUG', 'True') == 'True'
-
-
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = is_debug()
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -47,6 +43,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'import_export',
     'django_extensions',
+    'graphene_django',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -254,3 +251,10 @@ FIXTURE_DIRS = [
     # 'fixtures/tables',
     # 'fixtures/users'
 ]
+
+
+# Graphene
+
+GRAPHENE = {
+    'SCHEMA': 'django_root.schema.schema'
+}

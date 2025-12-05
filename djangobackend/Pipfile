@@ -23,6 +23,7 @@ unidecode = "*"
 django-extensions = "*"
 zstd = "*"
 pyarrow = "*"
+graphene-django = "*"
 
 [dev-packages]
 
