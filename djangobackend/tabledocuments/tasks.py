@@ -148,7 +148,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
 
         renamed_columns = {}
         for col in column_options:
-            renamed_columns[col['name']] = col['new_name']
+            renamed_columns[col['name']] = col['newName']
 
         visible_columns = list(
             filter(
@@ -158,19 +158,19 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
         )
         visible_column_names = list(
             map(
-                lambda x: x['new_name'],
+                lambda x: x['newName'] or x['name'],
                 visible_columns
             )
         )
 
         unique_columns = list(
             filter(lambda x: x['unique'],
-                   visible_columns
-                   )
+                visible_columns
+            )
         )
         unique_columns_names = list(
             map(
-                lambda x: x['new_name'],
+                lambda x: x['newName'] or x['name'],
                 unique_columns
             )
         )
@@ -182,7 +182,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
         )
         none_nullable_columns_names = list(
             map(
-                lambda x: x['new_name'],
+                lambda x: x['newName'],
                 none_nullable_columns
             )
         )
@@ -207,10 +207,14 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             return str(data)
 
         def create_dataframe(clean_data):
+            # Create the dataframe with the original
+            # column names that will be renamed later
             df = pandas.DataFrame(
                 clean_data,
                 columns=all_column_names
             )
+
+            print(column_options)
 
             for column in column_options:
                 if column['columnType'] == 'String':
@@ -218,7 +222,8 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 elif column['columnType'] == 'Number':
                     df[column['name']] = df[column['name']].astype(numpy.int64)
                 elif column['columnType'] == 'Boolean':
-                    df[column['name']] = df[column['name']].apply(boolean_converter)
+                    df[column['name']] = df[column['name']].apply(
+                        boolean_converter)
                 elif column['columnType'] == 'Array' or column['columnType'] == 'Dict':
                     df[column['name']] = df[column['name']].map(json_converter)
 
@@ -238,7 +243,8 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
 
             return df
 
-        data = data.decode('utf-8-sig')
+        if isinstance(data, bytes):
+            data = data.decode('utf-8-sig')
 
         if isinstance(data, str):
             clean_data = list(csv.reader(data.splitlines(), delimiter=','))
@@ -256,6 +262,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 "Successfully created Feather "
                 f"document from csv string: {document.name}"
             )
+            return document.document_uuid
 
         if isinstance(data, dict):
             if entry_key is None:
@@ -294,6 +301,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 "Successfully created Feather "
                 f"document from list/json: {document.name}"
             )
+            return document.document_uuid
 
 
 @shared_task
@@ -327,7 +335,6 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
     except Exception as e:
         logger.error(f'Failed to open spreadsheet: {e}')
 
-
     headers = sheet.sheet1.row_values(1)
     records = sheet.sheet1.get_all_records()
     cache.set(sheet_id, [headers, records], timeout=3600)
@@ -344,7 +351,8 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
 
         sheet.sheet1.update_cells(cell_list)
 
-    logger.warning(f'Successfully retrieved data from Google Sheet: {sheet_id}')
+    logger.warning(
+        f'Successfully retrieved data from Google Sheet: {sheet_id}')
 
     df = pandas.DataFrame(records, columns=headers)
     return df.to_csv(index=False, encoding='utf-8', doublequote=True)
@@ -385,8 +393,8 @@ def append_to_dataframe(document_uuid: str, data_to_append: str):
 
     # 4. Update the content of the physical file
     csv_content = merged.to_csv(
-        index=False, 
-        encoding='utf-8', 
+        index=False,
+        encoding='utf-8',
         doublequote=True
     )
     content = ContentFile(csv_content)

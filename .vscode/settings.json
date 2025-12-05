@@ -19,5 +19,6 @@
     // FIXME: Update the path to the Biome binary because does not
     // find the binary 
     "biome.lsp.bin": "frontend/node_modules/@biomejs/biome/bin",
-    "python.analysis.typeCheckingMode": "off"
+    "python.analysis.typeCheckingMode": "off",
+    "tailwind-fold.autoFold": false
 }

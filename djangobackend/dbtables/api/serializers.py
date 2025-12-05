@@ -34,9 +34,11 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
 
 class _ValidateColumnTypes(serializers.Serializer):
     name = fields.CharField()
-    new_name = fields.CharField()
-    column_type = fields.ChoiceField(
-        choices=ColumnTypes.choices, default=ColumnTypes.STRING)
+    newName = fields.CharField()
+    columnType = fields.ChoiceField(
+        choices=ColumnTypes.choices,
+        default=ColumnTypes.STRING
+    )
     unique = fields.BooleanField(default=False)
     visible = fields.BooleanField(default=True)
     nullable = fields.BooleanField(default=True)
@@ -46,7 +48,7 @@ class _ValidateColumnTypes(serializers.Serializer):
         # characters other than "_" or "-"
         if not re.match(r'^[\w-]+$', value):
             raise serializers.ValidationError({
-                'new_name': 'Column name can only contain letters, numbers, underscores, and hyphens'
+                'newName': 'Column name can only contain letters, numbers, underscores, and hyphens'
             })
         return value
 
@@ -74,7 +76,9 @@ class UploadFileSerializer(serializers.Serializer):
         allow_null=True,
         allow_blank=True
     )
-    using_columns = serializers.JSONField(write_only=True)
+    using_columns = serializers.JSONField(
+        write_only=True
+    )
 
     def validate(self, data):
         name = data.get('name')
@@ -128,11 +132,25 @@ class UploadFileSerializer(serializers.Serializer):
 
         column_options = validated_data.pop('using_columns')
 
-        columns_serializer = _ValidateColumnTypes(data=column_options, many=True)
-        columns_serializer.is_valid(raise_exception=True)
+        columns_serializer = _ValidateColumnTypes(
+            data=column_options,
+            many=True
+        )
+
+        try:
+            columns_serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            field_errors = {}
+            for error in e.detail:
+                for field, errors in error.items():
+                    field_errors[field] = str(errors[-1])
+            raise ValidationError({'using_columns': field_errors})
 
         # At least one column should be visible
-        column_state = map(lambda x: x['visible'], columns_serializer.validated_data)
+        column_state = map(
+            lambda x: x['visible'],
+            columns_serializer.validated_data
+        )
         if not any(column_state):
             raise ValidationError('At least one column should be visible')
 
@@ -148,7 +166,12 @@ class UploadFileSerializer(serializers.Serializer):
         file = request.FILES.get('file', None)
         if file:
             tasks.create_csv_file_from_data.apply_async(
-                args=[file.read(), document.pk, entry_key, columns_serializer.validated_data],
+                args=[
+                    file.read(),
+                    document.pk,
+                    entry_key,
+                    columns_serializer.validated_data
+                ],
                 countdown=5
             )
 
@@ -157,8 +180,13 @@ class UploadFileSerializer(serializers.Serializer):
         if document.url and document.file == None:
             tasks.get_document_from_url.apply_async(
                 args=[document.url],
-                link=[tasks.create_csv_file_from_data.s(
-                    document.pk, entry_key, columns_serializer.validated_data)]
+                link=[
+                    tasks.create_csv_file_from_data.s(
+                        document.pk,
+                        entry_key,
+                        columns_serializer.validated_data
+                    )
+                ]
             )
 
         # In the same manner, if we have a google sheet id
@@ -184,7 +212,7 @@ class UploadFileSerializer(serializers.Serializer):
         # column_options, column_types and column_names
         tasks.update_document_options.apply_async(
             args=[
-                str(document.document_uuid), 
+                str(document.document_uuid),
                 columns_serializer.validated_data
             ]
         )

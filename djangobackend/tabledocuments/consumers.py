@@ -20,13 +20,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
-
-        # user = self.scope['user']
-        # print(user)
-
-        # if not user.is_authenticated:
-        #     await self.close(code=1000)
-        #     return
+        await self.send_json({'action': 'connected'})
 
     async def disconnect(self, close_code):
         await self.close(code=close_code)
@@ -34,9 +28,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     async def receive_json(self, content: dict[str, Any], **kwargs):
         action = content['action']
 
-        if action == 'idle_connect':
-            await self.send_json({'action': 'connected'})
-        elif action == 'load_via_id':
+        if action == 'load_via_id':
             document = content['document']
             document = await self.document_edition.load_document_by_id(document['id'])
 
@@ -57,6 +49,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                 )
         elif action == 'checkout_url':
             document = await self.document_edition.load_json_document_by_url(content['url'])
+
             if document is not None:
                 columns = document.content.columns.tolist()
 
@@ -68,5 +61,9 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                         'type_options': create_column_type_options(columns)
                     }
                 })
+            else:
+                await self.send_error(
+                    f"Could not load document from URL: {','.join(self.document_edition.errors)}"
+                )
         else:
             await self.send_error(f'Unknown action: {action}')

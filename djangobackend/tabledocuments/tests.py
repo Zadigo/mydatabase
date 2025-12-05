@@ -1,8 +1,9 @@
 import dataclasses
 import uuid
-from typing import Any
-from unittest import IsolatedAsyncioTestCase
+from typing import Any, override
+from unittest import IsolatedAsyncioTestCase, TestCase
 from unittest.mock import MagicMock, PropertyMock, patch
+from venv import create
 
 import pandas
 import requests
@@ -11,11 +12,12 @@ from channels.db import database_sync_to_async
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.core.files.base import ContentFile
-from django.test import TransactionTestCase
+from django.test import SimpleTestCase, TransactionTestCase, override_settings
 from django.urls import re_path, reverse
 from tabledocuments import consumers
-from tabledocuments.logic.edit import DocumentEdition, load_document_by_url
+from tabledocuments.logic.edit import Document, DocumentEdition, load_document_by_url
 from tabledocuments.models import TableDocument
+from tabledocuments.tasks import create_csv_file_from_data
 
 from djangobackend.utils import UnittestAuthenticationMixin
 
@@ -287,3 +289,42 @@ class TestApiEndpoints(TransactionTestCase, UnittestAuthenticationMixin):
                        self.document.document_uuid])
         response = self.client.delete(path)
         self.assertEqual(response.status_code, 204, response.content)
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+class TestTasks(TransactionTestCase):
+    fixtures = ['fixtures/databases']
+
+    def test_create_csv_file_from_data(self):
+        table_document = TableDocument.objects.first()
+
+        df = pandas.DataFrame(
+            {'col1': ['val1', 'val2'], 'col2': ['val3', 'val4']})
+
+        kwargs = {
+            'data': df.to_csv(index=False),
+            'document_id': table_document.pk,
+            'entry_key': None,
+            'column_options': [
+                {
+                    "name": "col1",
+                    "new_name": "col1",
+                    "columnType": "String",
+                    "unique": False,
+                    "nullable": True,
+                    "visible": True
+                },
+                {
+                    "name": "col2",
+                    "new_name": "col2",
+                    "columnType": "String",
+                    "unique": False,
+                    "nullable": True,
+                    "visible": True
+                }
+            ]
+        }
+
+        result = create_csv_file_from_data.apply(kwargs=kwargs)
+        document_uuid = result.get(timeout=10)
+        self.assertIsNotNone(document_uuid)

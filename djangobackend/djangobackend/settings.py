@@ -6,10 +6,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ENV_FILE = BASE_DIR / '.env'
-
-if ENV_FILE.exists():
-    dotenv.load_dotenv(ENV_FILE)
+dotenv.load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -214,7 +211,8 @@ RABBITMQ_USER = os.getenv('RABBITMQ_DEFAULT_USER')
 
 RABBITMQ_PASSWORD = os.getenv('RABBITMQ_DEFAULT_PASS')
 
-CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:5672'
+CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@localhost:5672/'
+print(CELERY_BROKER_URL)
 
 CELERY_RESULT_BACKEND = REDIS_URL
 
