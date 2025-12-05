@@ -1,12 +1,7 @@
-import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
+import type { MaybeTable } from '~/types'
 
-import type { Ref } from 'vue'
-import type { MaybeTable, SimpleTable } from '~/types'
-
-export {
-  useTableWebocketManager
-} from './ws_manager'
-
+export { useCreateTable } from './creation'
+export { useTableWebocketManager } from './ws_manager'
 
 /**
  * Composable that handles how the data is re-integrated
@@ -48,68 +43,5 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
         queryParams.table = useToString(table.id || '').value
       }
     })
-  }
-}
-
-/**
- * @todo Zod
- */
-export interface NewTable {
-  name: string
-  database: number | undefined
-}
-
-/**
- * Composable used to create a new table
- */
-export function useCreateTable(modalState?: Ref<boolean>) {
-  const dbStore = useDatabasesStore()
-
-  const [showModal, toggle] = useToggle()
-
-  if (modalState) {
-    // If an external state was created for the modal,
-    // we can sync it with the local state of showModal
-    syncRef(showModal, modalState, { direction: 'both' })
-  }
-
-  const newTable = ref<NewTable>({
-    name: '',
-    database: undefined
-  })
-
-  const { errorFields } = useAsyncValidator(newTable, {
-    name: {
-      type: 'string',
-      min: 5,
-      max: 20,
-      required: true
-    }
-  })
-
-  const { availableTables } = storeToRefs(useDatabasesStore())
-
-  async function create() {
-    newTable.value.database = dbStore.currentDatabase?.id
-
-    const data = await $fetch<SimpleTable>(`/v1/tables/create`, {
-      method: 'POST',
-      baseURL: useRuntimeConfig().public.prodDomain,
-      body: newTable.value
-    })
-
-    if (data) {
-      availableTables.value.push(data)
-      newTable.value.name = ''
-      toggle()
-    }
-  }
-
-  return {
-    errorFields,
-    showModal,
-    newTable,
-    toggleCreateDocumentModal: toggle,
-    create
   }
 }

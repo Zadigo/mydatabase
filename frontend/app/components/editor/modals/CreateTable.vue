@@ -1,5 +1,5 @@
 <template>
-  <nuxt-modal v-model:open="show">
+  <nuxt-modal v-model:open="showModal">
     <template #title>
       Create new table
     </template>
@@ -13,7 +13,7 @@
 
     <template #footer>
       <div class="ms-auto flex gap-2">
-        <nuxt-button @click="() => { show = false }">
+        <nuxt-button @click="() => { toggleCreateTable() }">
           Cancel
         </nuxt-button>
 
@@ -26,15 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { useCreateTable } from '~/composables/use/tables';
-
-const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'udpate:modelValue': [] }>()
-const show = useVModel(props, 'modelValue', emit, { defaultValue: false })
+import { useCreateTable } from '~/composables/use/tables/creation'
 
 /**
  * Create table
  */
 
-const { create, newTable } = useCreateTable(show)
+const { create, newTable, showModal, toggleCreateTable } = useCreateTable()
 </script>

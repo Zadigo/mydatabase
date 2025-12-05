@@ -3,7 +3,7 @@
     <!-- Select Table -->
     <nuxt-select-menu v-model="selectedTableName" :items="availableTables" value-key="name" label-key="name" class="w-full" placeholder="Select a table" />
 
-    <nuxt-button icon="i-lucide-plus" label="Create" size="sm" variant="soft" color="info" @click="() => { toggleCreateDocumentModal() }" />
+    <nuxt-button icon="i-lucide-plus" label="Create" size="sm" variant="soft" color="info" @click="() => { toggleCreateTable() }" />
 
     <dev-only>
       <p>
@@ -100,7 +100,7 @@ const { showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
  * Create table
  */
 
-const { showModal: showCreateTableModal, toggleCreateDocumentModal } = useCreateTable()
+const { showModal: showCreateTableModal, toggleCreateTable } = useCreateTable()
 
 /**
  * Update document
