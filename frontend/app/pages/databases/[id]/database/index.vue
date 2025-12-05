@@ -12,7 +12,7 @@
  */
 
 definePageMeta({
-  title: 'Database: Schema',
+  label: 'Database: Schema',
   layout: 'details'
 })
 

@@ -21,7 +21,7 @@
 import { useDatabaseEndpoints } from '~/composables/use/databases'
 
 definePageMeta({
-  title: 'Settings: Home',
+  label: 'Settings: Endpoints',
   layout: 'details'
 })
 

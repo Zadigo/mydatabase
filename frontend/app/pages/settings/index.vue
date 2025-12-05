@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Settings',
+  label: 'Settings',
   layout: 'dashboard'
 })
 </script>

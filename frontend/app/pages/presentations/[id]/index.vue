@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Home page',
+  label: 'Home page',
   layout: 'presentation'
 })
 

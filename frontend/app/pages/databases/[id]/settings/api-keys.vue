@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Settings: Api Keys',
+  label: 'Settings: Api Keys',
   layout: 'details'
 })
 

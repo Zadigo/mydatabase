@@ -19,8 +19,8 @@ const { currentDatabase } = storeToRefs(dbStore)
 
 const route = useRoute()
 const hasAside = computed(() => {
-  return route.meta.title && (
-    route.meta.title.startsWith('Database:') || route.meta.title.startsWith('Editor:') || route.meta.title.startsWith('Settings:')
+  return route.meta.label && (
+    route.meta.label.startsWith('Database:') || route.meta.label.startsWith('Editor:') || route.meta.label.startsWith('Settings:')
   )
 })
 

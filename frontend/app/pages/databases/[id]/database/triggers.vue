@@ -75,7 +75,7 @@
  */
 
 definePageMeta({
-  title: 'Database: Triggers',
+  label: 'Database: Triggers',
   layout: 'details'
 })
 

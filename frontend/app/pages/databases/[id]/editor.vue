@@ -44,7 +44,7 @@ import { useEditorPageRefresh, useTableWebocketManager } from '~/composables/use
 import type { TableComponent } from '~/types'
 
 definePageMeta({
-  title: 'Editor: Table',
+  label: 'Editor: Table',
   layout: 'details'
 })
 
@@ -53,7 +53,7 @@ definePageMeta({
  */
 
 const tableEditionStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef, showModal } = storeToRefs(tableEditionStore)
+const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef } = storeToRefs(tableEditionStore)
 
 const componentMapping: Record<TableComponent, Component> = {
   'data-table': EditorTablesDataTable,

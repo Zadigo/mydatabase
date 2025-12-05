@@ -27,7 +27,7 @@ import { useColumnTypeOptions, useTableActualDocument } from '~/composables/use/
 import type { SimpleTable } from '~/types'
 
 definePageMeta({
-  title: 'Database: Tables',
+  label: 'Database: Tables',
   layout: 'details'
 })
 

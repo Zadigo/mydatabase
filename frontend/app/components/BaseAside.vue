@@ -7,9 +7,9 @@
 
       <nuxt-separator class=" mt-2 mb-5" />
 
-      <editor-aside-links v-if="route.meta.title && route.meta.title.startsWith('Editor:')" />
-      <database-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Database:')" />
-      <settings-project-aside-links v-else-if="route.meta.title && route.meta.title.startsWith('Settings:')" />
+      <editor-aside-links v-if="route.meta.label && route.meta.label.startsWith('Editor:')" />
+      <database-aside-links v-else-if="route.meta.label && route.meta.label.startsWith('Database:')" />
+      <settings-project-aside-links v-else-if="route.meta.label && route.meta.label.startsWith('Settings:')" />
     </div>
   </aside>
 </template>

@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Integrations',
+  label: 'Integrations',
   layout: 'details'
 })
 

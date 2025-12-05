@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  title: 'Project overview',
+  label: 'Project overview',
   layout: 'details'
 })
 </script>

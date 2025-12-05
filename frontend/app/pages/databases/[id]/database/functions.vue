@@ -17,7 +17,7 @@ import { useDatabaseFunctions } from '~/composables/use/databases/functions'
  */
 
 definePageMeta({
-  title: 'Database: Functions',
+  label: 'Database: Functions',
   layout: 'details'
 
 })

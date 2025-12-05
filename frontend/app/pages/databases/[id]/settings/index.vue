@@ -33,7 +33,7 @@
 import { useEditDatabase } from '~/composables/use/databases'
 
 definePageMeta({
-  title: 'Settings: Home',
+  label: 'Settings: Home',
   layout: 'details'
 })
 

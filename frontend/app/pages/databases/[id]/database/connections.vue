@@ -52,7 +52,7 @@ import type { Nullable, IntegrationTool } from '~/types'
 import type { Component } from 'vue'
 
 definePageMeta({
-  title: 'Database: Connections',
+  label: 'Database: Connections',
   layout: 'details'
 })
 
