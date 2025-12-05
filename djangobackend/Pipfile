@@ -24,6 +24,9 @@ django-extensions = "*"
 zstd = "*"
 pyarrow = "*"
 graphene-django = "*"
+dotenv = "*"
+django-celery-beat = "*"
+gspread = "*"
 
 [dev-packages]
 
