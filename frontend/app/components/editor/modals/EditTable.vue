@@ -1,5 +1,5 @@
 <template>
-  <nuxt-slideover v-model:open="show" direction="right" :handle="false" class="w-90">
+  <nuxt-slideover v-model:open="showModal" direction="right" :handle="false" class="w-90">
     <template #header>
       <h2 class="font-bold">
         Update table
@@ -38,10 +38,6 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ 'update:modelValue': [boolean] }>()
-const show = useVModel(props, 'modelValue', emit)
-
 const tableEditionStore = useTableEditionStore()
-const { editableTableRef } = storeToRefs(tableEditionStore)
+const { editableTableRef, showModal } = storeToRefs(tableEditionStore)
 </script>

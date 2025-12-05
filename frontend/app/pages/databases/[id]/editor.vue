@@ -34,7 +34,7 @@
     </nuxt-card>
 
     <!-- Modals -->
-    <editor-modals-edit-table v-model="showModal" />
+    <editor-modals-edit-table />
   </section>
 </template>
 
