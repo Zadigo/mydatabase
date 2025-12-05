@@ -13,7 +13,7 @@ import { useWebsocketMessage } from '..'
  * @param selectedTable The table to edit
  * @param selectedDocument The document to edit
  */
-export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) {
+export const useTableWebocketManager = createGlobalState((selectedTable: Ref<SimpleTable | undefined>, selectedDocument: Ref<TableDocument | undefined>) => {
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 
@@ -89,4 +89,4 @@ export function useTableWebocketManager(selectedTable: Ref<SimpleTable | undefin
   return {
     wsObject
   }
-}
+})

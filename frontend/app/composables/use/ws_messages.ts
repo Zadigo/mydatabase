@@ -1,3 +1,5 @@
+import type { Arrayable, ColumnOptions, ColumnTypeOptions } from '~/types'
+
 export type BaseWsSendMessage =
   | { action: 'idle_connect' }
   | { action: 'load_via_id' }
@@ -7,9 +9,9 @@ export type BaseWsSendMessage =
 interface DocumentData {
   document_data: string
   columns: {
-    names: string[]
-    options: ColumnOptions[]
-    type_options: ColumnTypeOptions[]
+    names: Arrayable<string>
+    options: Arrayable<ColumnOptions>
+    type_options: Arrayable<ColumnTypeOptions>
   }
 }
 

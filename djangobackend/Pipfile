@@ -27,6 +27,7 @@ graphene-django = "*"
 dotenv = "*"
 django-celery-beat = "*"
 gspread = "*"
+channels-redis = "*"
 
 [dev-packages]
 
