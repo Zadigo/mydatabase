@@ -20,5 +20,13 @@
     // find the binary 
     "biome.lsp.bin": "frontend/node_modules/@biomejs/biome/bin",
     "python.analysis.typeCheckingMode": "off",
-    "tailwind-fold.autoFold": false
+    "tailwind-fold.autoFold": false,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.unusedImports": "explicit"
+        }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:pipenv"
+
 }

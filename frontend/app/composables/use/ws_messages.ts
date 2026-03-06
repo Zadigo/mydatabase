@@ -1,10 +1,4 @@
-import type { Arrayable, ColumnOptions, ColumnTypeOptions } from '~/types'
-
-export type BaseWsSendMessage =
-  | { action: 'idle_connect' }
-  | { action: 'load_via_id' }
-  | { action: 'load_via_url', url: string, entry_key?: string }
-
+import type { Arrayable, ColumnOptions, ColumnTypeOptions, Empty, Nullable } from '~/types'
 
 interface DocumentData {
   document_data: string
@@ -15,25 +9,30 @@ interface DocumentData {
   }
 }
 
+export type BaseWsSendMessage =
+  | { action: 'idle_connect' }
+  | { action: 'load_via_id' }
+  | { action: 'load_via_url', url: string, entry_key?: Nullable<string> }
+
 export type BaseReceiveWsAction =
   | { action: 'connected' } & DocumentData
   | { action: 'loaded_via_id' } & DocumentData
   | { action: 'loaded_via_url' } & DocumentData
-  | { action: 'checkedout_url' | 'checkedout_file' } & DocumentData
+  | { action: 'checkedout_url' | 'checkedout_file' } & Omit<DocumentData, 'document_data'>
   | { action: 'processing_url' }
   | { action: 'error' | 'success', message: string }
 
 /**
  * WebSocket message utilities
  */
-export function useWebsocketMessage() {
-  function stringify<T extends BaseWsSendMessage>(message: T): string {
+export function useWebsocketMessage<S extends BaseWsSendMessage, R extends BaseReceiveWsAction>() {
+  function stringify(message: S): string {
     return JSON.stringify(message)
   }
 
-  function parse<M extends BaseReceiveWsAction>(message: string): M | undefined {
+  function parse(message: MaybeRef<Empty<string>>): R | undefined {
     try {
-      return JSON.parse(message) as M
+      return JSON.parse(toValue(message) || '') as R
     } catch {
       return undefined
     }

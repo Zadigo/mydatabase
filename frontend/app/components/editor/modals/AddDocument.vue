@@ -9,8 +9,8 @@
       <nuxt-stepper ref="stepper" :items="items">
         <template #content="{ item }">
           <keep-alive>
-            <editor-modals-blocks-upload-document v-if="item.title === 'Upload file'" v-model="newDocument" @headers="(headers) => getDocumentHeaders(headers)" />
-            <editor-modals-blocks-select-columns v-else-if="item.title === 'Select columns'" v-model="newDocument" />
+            <editor-modals-blocks-upload-document v-if="item.title === 'Upload file'" v-model:edited-document="newDocument" @headers="(headers) => getDocumentHeaders(headers)" />
+            <editor-modals-blocks-select-columns v-else-if="item.title === 'Select columns'" v-model:new-document="newDocument" />
           </keep-alive>
         </template>
       </nuxt-stepper>
@@ -28,12 +28,17 @@
 <script setup lang="ts">
 import { useColumnTypeOptions, useCreateDocument } from '~/composables/use/documents'
 import type { StepperItem } from '@nuxt/ui'
+import { useTableWebocketManager } from '~/composables/use/tables'
 
 /**
  * Document creation
  */
 
-const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument()
+const tableEditionStore = useTableEditionStore()
+const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+
+const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
+const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal } = useCreateDocument(wsObject)
 
 /**
  * Checks

@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-12 gap-1 content-center space-y-2">
+  <div v-if="editedColumn" class="grid grid-cols-12 gap-1 content-center space-y-2">
     <div class="col-span-1">
       <nuxt-checkbox v-model="editedColumn.visible">
         <template #label>
@@ -7,7 +7,9 @@
         </template>
       </nuxt-checkbox>
     </div>
-    <nuxt-input v-model="editedColumn.name" class="col-span-3" />
+
+    <nuxt-input v-model="editedColumn.name" class="col-span-3" disabled />
+    <nuxt-input v-model="editedColumn.newName" class="col-span-3" />
     <nuxt-select v-model="editedColumn.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
 
     <div class="col-span-1">
@@ -26,12 +28,14 @@
       </nuxt-checkbox>
     </div>
   </div>
+
+  <div v-else>
+    <nuxt-skeleton />
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { ColumnTypeOptions } from '~/types'
+import type { ColumnTypeOptions, Undefineable } from '~/types'
 
-const props = defineProps<{ modelValue: ColumnTypeOptions }>()
-const emit = defineEmits<{ 'update:ModelValue': [ColumnTypeOptions] }>()
-const editedColumn = useVModel(props, 'modelValue', emit, { defaultValue: {} as ColumnTypeOptions })
+const editedColumn = defineModel<Undefineable<ColumnTypeOptions>>('editedColumn', { required: true }) 
 </script>

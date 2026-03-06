@@ -1,27 +1,29 @@
 import os
-import dotenv
 from datetime import timedelta
 from pathlib import Path
+
+import environ
+
+env = environ.Env(DEBUG=(bool, False))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-dotenv.load_dotenv(BASE_DIR / '.env')
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
 
 # Application definition
 
@@ -197,22 +199,21 @@ INTERNAL_IPS = ['127.0.0.1']
 # Celery
 # https://docs.celeryq.dev/en/stable/
 
-REDIS_USER = os.getenv('REDIS_USER')
+REDIS_USER = env('REDIS_USER')
 
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
+REDIS_HOST = env('REDIS_HOST', default='127.0.0.1')
 
-REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+REDIS_PASSWORD = env('REDIS_PASSWORD', default='')
 
 REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379'
 
-RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'localhost')
+RABBITMQ_HOST = env('RABBITMQ_HOST', default='localhost')
 
-RABBITMQ_USER = os.getenv('RABBITMQ_DEFAULT_USER')
+RABBITMQ_USER = env('RABBITMQ_DEFAULT_USER', default='guest')
 
-RABBITMQ_PASSWORD = os.getenv('RABBITMQ_DEFAULT_PASS')
+RABBITMQ_PASSWORD = env('RABBITMQ_DEFAULT_PASS', default='guest')
 
 CELERY_BROKER_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@localhost:5672/'
-print(CELERY_BROKER_URL)
 
 CELERY_RESULT_BACKEND = REDIS_URL
 
@@ -245,14 +246,13 @@ CHANNEL_LAYERS = {
 # Fixtures
 
 FIXTURE_DIRS = [
-    'fixtures/databases',
-    # 'fixtures/tables',
-    # 'fixtures/users'
+    'fixtures/databases'
 ]
 
 
 # Graphene
+# https://docs.graphene-python.org/projects/django/en/latest/
 
 GRAPHENE = {
-    'SCHEMA': 'django_root.schema.schema'
+    'SCHEMA': 'djangobackend.schema.schema'
 }

@@ -202,20 +202,19 @@ class UploadFileSerializer(serializers.Serializer):
                     raise ValidationError(
                         'No provider with Google Sheet connection found')
                 tasks.get_document_from_google_sheet.apply_async(
-                    args=[google_provider.google_service_account_credentials,
-                          document.google_sheet_id],
-                    link=[tasks.create_csv_file_from_data.s(
-                        document.pk, entry_key, columns_serializer.validated_data)]
+                    args=[
+                        google_provider.google_service_account_credentials,
+                        document.google_sheet_id
+                    ],
+                    link=[
+                        tasks.create_csv_file_from_data.s(
+                            document.pk, 
+                            entry_key, 
+                            columns_serializer.validated_data
+                        )
+                    ]
                 )
-
-        # Once the document is created, we need to populate
-        # column_options, column_types and column_names
-        tasks.update_document_options.apply_async(
-            args=[
-                str(document.document_uuid),
-                columns_serializer.validated_data
-            ]
-        )
+                
         return document
 
 

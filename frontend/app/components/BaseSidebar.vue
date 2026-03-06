@@ -1,9 +1,9 @@
 <template>
-  <nav class="fixed top-9 left-0 px-5 py-10 bg-gray-50 border-r-1 border-gray-100 h-screen w-(--sidebar-width) z-10">
+  <nav class="fixed top-9 left-0 px-5 py-10 bg-gray-50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 dark:text-slate-50 h-screen w-(--sidebar-width) z-10">
     <ul class="space-y-1">
       <li v-for="item in noneAlphaLinks" :key="item.name">
         <nuxt-separator v-if="item.separator" class="my-5" />
-        <nuxt-link v-else :to="item.to" class="flex items-center justify-start gap-2 space-x-3 py-2 px-3 rounded-md hover:bg-gray-200">
+        <nuxt-link v-else :to="item.to" class="flex items-center justify-start gap-2 space-x-3 py-2 px-3 rounded-md hover:bg-gray-200 dark:hover:bg-slate-700">
           <nuxt-icon v-if="item.icon" :name="item.icon" />
           <span class="font-light text-sm">{{ item.name }}</span>
           <!-- <nuxt-badge size="xs" color="info" variant="subtle">Bêta</nuxt-badge> -->
@@ -28,6 +28,10 @@ const noneAlphaLinks = computed(() => props.items.filter(item => !item.isAlpha))
 </script>
 
 <style scoped>
+.dark li>.router-link-exact-active {
+  background-color: var(--color-slate-800);
+}
+
 li>.router-link-exact-active {
   background-color: var(--color-gray-200);
 }

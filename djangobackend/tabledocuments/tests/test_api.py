@@ -1,21 +1,19 @@
 import dataclasses
-import uuid
-from typing import Any, override
-from unittest import IsolatedAsyncioTestCase, TestCase
+from typing import Any
+from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock, PropertyMock, patch
-from venv import create
 
 import pandas
 import requests
-from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.core.files.base import ContentFile
-from django.test import SimpleTestCase, TransactionTestCase, override_settings
+from django.test import TransactionTestCase, override_settings
 from django.urls import re_path, reverse
 from tabledocuments import consumers
-from tabledocuments.logic.edit import Document, DocumentEdition, load_document_by_url
+from tabledocuments.logic.edit import (DocumentEdition,
+                                       load_document_by_url)
 from tabledocuments.models import TableDocument
 from tabledocuments.tasks import create_csv_file_from_data
 
@@ -327,4 +325,5 @@ class TestTasks(TransactionTestCase):
 
         result = create_csv_file_from_data.apply(kwargs=kwargs)
         document_uuid = result.get(timeout=10)
+        self.assertIsNotNone(document_uuid)
         self.assertIsNotNone(document_uuid)

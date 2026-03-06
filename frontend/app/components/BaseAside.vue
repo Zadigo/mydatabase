@@ -1,5 +1,5 @@
 <template>
-  <aside id="base-aside" class="fixed top-(--navbar-min-height) left-(--sidebar-width) h-screen bg-gray-100 w-64 border-r border-gray-200">
+  <aside id="base-aside" class="fixed top-(--navbar-min-height) left-(--sidebar-width) h-screen bg-gray-100 border-gray-200 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-50 w-64 border-r">
     <div class="p-5">
       <h2 class="text-lg font-semibold">
         Table editor

@@ -3,9 +3,9 @@ import datetime
 import re
 from typing import Any, Callable, TypeAlias
 
+import httpx
 import pandas
 import pytz
-import requests
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
@@ -38,15 +38,26 @@ class Document:
 async def load_document_by_url(url: str, **request_params: Any) -> tuple[Response | None, list[str]]:
     """Function used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv database file"""
-    try:
-        response = requests.get(url, **request_params)
-    except requests.RequestException as e:
-        return None, [str(e)]
-    else:
-        if response.status_code != 200:
-            return None, [f"Failed to load document. Status code: {response.status_code}"]  
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, **request_params)
+            response.raise_for_status()
+        except httpx.RequestError as e:
+            return None, [str(e)]
+        else:
+            if response.status_code != 200:
+                return None, [f"Failed to load document. Status code: {response.status_code}"]  
 
-    return response, []
+            return response, []
+    # try:
+    #     response = httpx.get(url, **request_params)
+    # except httpx.RequestError as e:
+    #     return None, [str(e)]
+    # else:
+    #     if response.status_code != 200:
+    #         return None, [f"Failed to load document. Status code: {response.status_code}"]  
+
+    # return response, []
 
 
 class DocumentEdition:

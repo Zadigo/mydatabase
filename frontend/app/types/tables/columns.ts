@@ -22,7 +22,7 @@ export interface ColumnTypeOptions {
   /**
    * The new name for this column
    */
-  new_name: string
+  newName: string
   /**
    * The data type for this column
    * @default "String"

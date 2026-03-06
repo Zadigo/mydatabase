@@ -1,5 +1,6 @@
-import type { Database, TableDocument } from '~/types'
+import type { Database, TableDocument, VueUseWsReturnType } from '~/types'
 import type { NewDocument } from '.'
+import { useWebsocketMessage } from '../ws_messages'
 
 /**
  * Composable used for editing a document
@@ -41,7 +42,7 @@ export const useEditDocument = createGlobalState(() => {
 /**
  * Composable used for creating a new document
  */
-export const useCreateDocument = createGlobalState(() => {
+export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnType) => {
   const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle()
 
   const newDocument = ref<NewDocument>({
@@ -53,6 +54,11 @@ export const useCreateDocument = createGlobalState(() => {
     using_columns: []
   })
 
+  /**
+   * Creates the new document
+   */
+
+  const toast = useToast()
   const dbStore = useDatabasesStore()
   const tableEditionStore = useTableEditionStore()
   const { selectedTable } = storeToRefs(tableEditionStore)
@@ -65,10 +71,7 @@ export const useCreateDocument = createGlobalState(() => {
       formData.append('url', newDocument.value.url)
       formData.append('google_sheet_id', newDocument.value.google_sheet_id)
       formData.append('using_columns', JSON.stringify(newDocument.value.using_columns || []))
-
-      if (newDocument.value.file) {
-        formData.append('file', newDocument.value.file)
-      }
+      formData.append('file', newDocument.value.file || '')
 
       if (newDocument.value.entry_key) {
         formData.append('entry_key', newDocument.value.entry_key)
@@ -78,11 +81,25 @@ export const useCreateDocument = createGlobalState(() => {
         $fetch<{ name: string }>(`/v1/tables/${selectedTable.value?.id}/upload`, {
           method: 'POST',
           baseURL: useRuntimeConfig().public.prodDomain,
-          body: formData
+          body: formData,
+          onRequestError(error) {
+            toast.add({
+              title: 'Failed to add document',
+              description: useToString(error).value,
+              icon: 'i-lucide-warning-circle'
+            })
+          }
         }),
         $fetch<Database>(`/v1/databases/${dbStore.currentDatabase?.id}`, {
           method: 'GET',
-          baseURL: useRuntimeConfig().public.prodDomain
+          baseURL: useRuntimeConfig().public.prodDomain,
+          onRequestError(error) {
+            toast.add({
+              title: 'Failed to retrieve database update',
+              description: useToString(error).value,
+              icon: 'i-lucide-warning-circle'
+            })
+          }
         })
       ])
     })
@@ -98,9 +115,21 @@ export const useCreateDocument = createGlobalState(() => {
   }
 
   return {
+    /**
+     * The new document being created
+     */
     newDocument,
+    /**
+     * Shows the modal to add a new document
+     */
     showAddDocumentModal,
+    /**
+     * Creates the new document
+     */
     create,
+    /**
+     * Toggles the modal to add a new document
+     */
     toggleShowAddDocumentModal
   }
 })

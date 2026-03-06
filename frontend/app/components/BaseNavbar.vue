@@ -1,5 +1,5 @@
 <template>
-  <nav class="fixed top-0 left-0 w-full bg-gray-50 px-5 py-2 min-h-(--navbar-min-height) border-b-1 border-gray-100 z-20">
+  <nav class="fixed top-0 left-0 w-full bg-gray-50 dark:bg-slate-900 px-5 py-2 min-h-(--navbar-min-height) border-b border-gray-100 dark:border-slate-800 dark:text-slate-50 z-20">
     <div class="flex justify-between">
       <nuxt-breadcrumb :items="dbPageItems" />
 

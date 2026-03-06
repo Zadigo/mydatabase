@@ -1,10 +1,8 @@
 import csv
-import json
 import pathlib
 
 from dbtables.models import DatabaseTable
 from django.conf import settings
-from django.core.files.base import ContentFile
 from django.test import TransactionTestCase
 from django.urls import reverse
 

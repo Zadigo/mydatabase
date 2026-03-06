@@ -8,6 +8,8 @@ export type Nullable<T> = T | null
 
 export type Undefineable<T> = T | undefined
 
+export type Empty<T> = Nullable<T> | Undefineable<T>
+
 export type Arrayable<T> = T[]
 
 export type RefOrUndefined<T> = Ref<Undefineable<T>>
@@ -19,6 +21,8 @@ export type PlainOrRef<T, M> = T | RefOrUndefined<M>
 export type ReturnAny = Nullable<string | number | boolean>
 
 export type Refeable<T> = T | Ref<T>
+
+export type VueUseWsReturnType = ReturnType<typeof import('@vueuse/core').useWebSocket>
 
 /**
  * @private

@@ -4,7 +4,7 @@
       {{ title }}
     </h3>
 
-    <ul class="bg-gray-200 rounded-lg overflow-y-scroll h-50">
+    <ul class="bg-gray-200 dark:bg-slate-800 dark:text-slate-50 rounded-lg overflow-y-scroll h-50">
       <li v-for="column in columnOptions" :key="column.name" class="px-4 py-2 flex justify-between not-last:border-b border-gray-100">
         <slot :column="column" />
       </li>

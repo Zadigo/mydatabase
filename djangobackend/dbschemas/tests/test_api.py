@@ -1,5 +1,4 @@
 import json
-from io import BytesIO
 
 from dbschemas.models import DatabaseSchema
 from django.core.files.uploadedfile import SimpleUploadedFile

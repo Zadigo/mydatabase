@@ -1,0 +1,12 @@
+[project]
+name = "mcpbackend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "factory-boy>=3.3.3",
+    "fastmcp>=2.14.2",
+    "httpx>=0.28.1",
+    "pandas>=2.3.3",
+]

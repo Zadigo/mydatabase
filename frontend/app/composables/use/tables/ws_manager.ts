@@ -22,33 +22,36 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
 
   const wsObject = useWebSocket<BaseReceiveWsAction>(`${config.public.wsProdDomain}/ws/documents`, {
     immediate: false,
-    onConnected(ws) {
-      ws.send(stringify({ action: 'idle_connect' }))
-    },
+    onConnected(_ws) {},
     onMessage(ws, event: MessageEvent<string>) {
       const data = parse(event.data)
-      
-      console.log('String data', data)
 
       if (data) {
-        switch (data.action) {
-          case 'loaded_via_id':
-            if (data.document_data) {
-              console.log('Parsed data', JSON.parse(data.document_data))
-              tableData.value = JSON.parse(data.document_data)
-            }
-            break
-
-          case 'checkedout_url':
-            break
-
-          case 'checkedout_file':
-            break
-
-          default:
-            console.error(`Action not identified: ${JSON.stringify(data)}`)
-            break
+        if (data.action === 'loaded_via_id' && data.document_data) {
+          if (data.document_data) {
+            console.log('Parsed data', JSON.parse(data.document_data))
+            tableData.value = JSON.parse(data.document_data)
+          }
         }
+
+        if (data.action === 'processing_url') {
+          // Handle processing URL case
+        }
+
+        if (data.action === 'checkedout_url') {
+          // Handle checked out URL case
+          console.log('Checked out URL data', data)
+        }
+
+        if (data.action === 'checkedout_file') {
+          // Handle checked out file case
+        }
+
+        if (data.action === 'error') {
+          console.error('WebSocket error:', data.message)
+        }
+      } else {
+        console.error('Failed to parse WebSocket message:', event.data)
       }
     }
   })
@@ -66,13 +69,15 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
     }
   }
 
+  const isConnected = computed(() => wsObject.status.value === 'OPEN')  
+
   onMounted(() => {
-    wsObject.open()
+    // wsObject.open()
     loadDataViaId()
   })
 
   onUnmounted(() => {
-    wsObject.close()
+    if (isConnected.value) wsObject.close()
   })
 
   /**
@@ -87,6 +92,7 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
   })
 
   return {
-    wsObject
+    wsObject,
+    isConnected
   }
 })

@@ -2,14 +2,30 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.decorators.csrf import csrf_exempt as crsf_exempt
 from drf_spectacular import views as drf_views
-from rest_framework_simplejwt import views as auth_views
 from graphene_django.views import GraphQLView
+from oauth_dcr import views as oauth_dcr_views
+from rest_framework_simplejwt import views as auth_views
 
 urlpatterns = [
+    path(
+        'o/',
+        include(('oauth2_provider.urls', 'oauth2_provider'),
+                namespace='oauth2_provider')
+    ),
+    path(
+        'o/register/',
+        oauth_dcr_views.DynamicClientRegistrationView.as_view(),
+        name='oauth2_dcr'
+    ),
+    path(
+        'agents/',
+        include(('mcp_server.urls', 'mcp_server'), namespace='mcp_server')
+    ),
     re_path(
         r'v1/graphql/',
-        GraphQLView.as_view(graphiql=True)
+        crsf_exempt(GraphQLView.as_view(graphiql=True))
     ),
     path(
         'api/schema/',

@@ -79,6 +79,12 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
 
     df = df.rename(columns=renamed_columns)
 
+    visible_columns = list(
+        filter(
+            lambda x: x['visible'],
+            column_options
+        )
+    )
     none_nullable_columns = list(
         filter(
             lambda x: not x['nullable'],
@@ -97,8 +103,8 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
 
     unique_columns = list(
         filter(lambda x: x['unique'],
-               visible_columns
-               )
+            visible_columns
+        )
     )
     unique_columns_names = list(
         map(

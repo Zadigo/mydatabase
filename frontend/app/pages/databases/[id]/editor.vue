@@ -76,6 +76,7 @@ useEditorPageRefresh(selectedTable)
  */
 
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
+wsObject.open()
 
 /**
  * Provides
@@ -85,7 +86,6 @@ provide('hasData', hasData)
 provide('tableData', tableData)
 provide('hasDocuments', hasDocuments)
 provide('editableTableRef', editableTableRef)
-provide('wsObject', wsObject)
 
 console.log('editableTableRef', editableTableRef.value)
 </script>

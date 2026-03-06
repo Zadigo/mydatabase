@@ -1,9 +1,20 @@
 <template>
   <section id="site">
     <base-navbar />
+
+
     <base-sidebar :items="items" />
 
+    <!-- Websocket Alerts -->
+    <div v-if="!isConnected" class="bg-error-500 w-full p-5 mt-(--navbar-min-height) ms-[calc(var(--sidebar-width)+20rem)] text-slate-50 text-light">
+      Disconnected from server
+      <nuxt-button @click="() => { wsObject.open() }">
+        Reconnect
+      </nuxt-button>
+    </div>
+
     <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
+
       <!-- Aside -->
       <base-aside v-if="hasAside" />
 
@@ -14,6 +25,8 @@
 </template>
 
 <script setup lang="ts">
+import { useTableWebocketManager } from '~/composables/use/tables'
+
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
 
@@ -66,4 +79,12 @@ const items = [
 onUnmounted(() => {
   dbStore.routeId = null
 })
+
+/**
+ * Websocket
+ */
+
+const tableEditionStore = useTableEditionStore()
+const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+const { wsObject, isConnected } = useTableWebocketManager(selectedTable, selectedTableDocument)
 </script>

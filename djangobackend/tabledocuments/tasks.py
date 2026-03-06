@@ -2,28 +2,24 @@ import asyncio
 import csv
 import io
 import json
-import pathlib
 from typing import Any
 
 import gspread
-import numpy
 import pandas
-import requests
-from celery import chain, shared_task
+from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from gspread.utils import TableDirection, rowcol_to_a1
+from gspread.utils import rowcol_to_a1
 from tabledocuments.logic.edit import load_document_by_url
-from tabledocuments.logic.utils import (create_column_options,
-                                        create_column_type_options)
 from tabledocuments.models import TableDocument
+from tabledocuments.utils import create_dataframe
 
 logger = get_task_logger(__name__)
 
 
 @shared_task
-def update_document_options(document_uuid: str, column_type_options: list[dict[str, Any]] = []):
+def update_document_options(document_uuid: str, column_options: list[dict[str, str | bool]] = [], from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     traditional elements such as the columns the document encoding references
     the column names etc"""
@@ -33,94 +29,33 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
         logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
-    if document.file is not None:
-        try:
-            path = pathlib.Path(document.file.path)
-        except:
-            logger.error(
-                f"Document with UUID {document_uuid} "
-                "has no file associated."
-            )
-        else:
-            if path.exists() and path.is_file():
-                try:
-                    document = TableDocument.objects.get(
-                        document_uuid=document_uuid
-                    )
-                except TableDocument.DoesNotExist:
-                    logger.error(
-                        f"Document with UUID {document_uuid} "
-                        "does not exist."
-                    )
+    if from_file and document.file is not None:
+        pass
+    else:
+        document.column_options = column_options
+        document.column_names = list(
+            map(lambda x: x['newName'] or x['name'], column_options))
 
-                try:
-                    df = pandas.read_csv(path)
-                except Exception as e:
-                    logger.error(f'Failed to load document: {e}')
-                    return None
-                else:
-                    if column_type_options:
-                        document.column_types = column_type_options
-                    else:
-                        document.column_types = create_column_type_options(
-                            df.columns.tolist())
+        column_types = {}
+        for item in column_options:
+            column_types[item['newName'] or item['name']] = item['columnType']
 
-                    document.column_options = create_column_options(
-                        df.columns.tolist())
-                    document.column_names = df.columns.tolist()
-                    document.save()
+        document.column_types = column_types
+        document.save()
+        
+        other_columns = ['sortability', 'searchability', 'editability']
 
-                    logger.warning(
-                        "Successfully updated "
-                        f"document options: {document.name}"
-                    )
-
-
-@shared_task
-def get_document_from_url(url: str, headers: dict[str, str] = {}):
-    """Task used to load the content of document returned via an API endpoint
-    as a json format. The content will be loaded and transformed back to a csv
-    database file"""
-    async def proxy_get_url():
-        response, errors = await load_document_by_url(url, headers=headers)
-
-        if response.status_code != 200:
-            logger.error(
-                f"Failed to retrieve document from {url}, "
-                f"status code: {response.status_code}"
-            )
-            return
-
-        if errors:
-            logger.error(
-                f"Errors occurred while loading document from {url}: {errors}")
-            return {'error': errors}
-
-        if response is not None:
-            if 'application/json' in response.headers.get('Content-Type', ''):
-                logger.warning(
-                    f"Successfully retrieved JSON document from {url}")
-                return response.json()
-
-            if 'text/csv' in response.headers.get('Content-Type', ''):
-                logger.warning(
-                    f"Successfully retrieved CSV document from {url}")
-                return response.content.decode('utf-8-sig')
-        else:
-            logger.warning(
-                "Failed to retrieve document from "
-                f"{url}, status code: {response.content}"
-            )
-
-    async def main():
-        t1 = asyncio.create_task(proxy_get_url())
-        return await t1
-
-    return asyncio.run(main())
+        logger.warning(
+            f"Successfully updated document options for document: {document.name}")
 
 
 @shared_task
 def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = []):
+    """Creates a CSV file from the provided data which can be either
+    a string (CSV content), a list of records (JSON content) or
+    a dictionary containing the data under a specific entry key. The
+    created CSV file is then saved to the TableDocument instance
+    identified by document_id."""
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -139,110 +74,6 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
         logger.error(f"Document with ID {document_id} does not exist.")
         return
     else:
-        all_column_names = list(
-            map(
-                lambda x: x['name'],
-                column_options
-            )
-        )
-
-        renamed_columns = {}
-        for col in column_options:
-            renamed_columns[col['name']] = col['newName']
-
-        visible_columns = list(
-            filter(
-                lambda x: x['visible'],
-                column_options
-            )
-        )
-        visible_column_names = list(
-            map(
-                lambda x: x['newName'] or x['name'],
-                visible_columns
-            )
-        )
-
-        unique_columns = list(
-            filter(lambda x: x['unique'],
-                visible_columns
-            )
-        )
-        unique_columns_names = list(
-            map(
-                lambda x: x['newName'] or x['name'],
-                unique_columns
-            )
-        )
-        none_nullable_columns = list(
-            filter(
-                lambda x: not x['nullable'],
-                visible_columns
-            )
-        )
-        none_nullable_columns_names = list(
-            map(
-                lambda x: x['newName'],
-                none_nullable_columns
-            )
-        )
-
-        def boolean_converter(value):
-            if value is None:
-                return value
-
-            true_values = ['1', 'true', True]
-            if value in true_values:
-                return True
-            return False
-
-        def json_converter(value):
-            if value is None:
-                return value
-
-            try:
-                data = json.loads(value)
-            except:
-                return value
-            return str(data)
-
-        def create_dataframe(clean_data):
-            # Create the dataframe with the original
-            # column names that will be renamed later
-            df = pandas.DataFrame(
-                clean_data,
-                columns=all_column_names
-            )
-
-            print(column_options)
-
-            for column in column_options:
-                if column['columnType'] == 'String':
-                    df[column['name']] = df[column['name']].astype(str)
-                elif column['columnType'] == 'Number':
-                    df[column['name']] = df[column['name']].astype(numpy.int64)
-                elif column['columnType'] == 'Boolean':
-                    df[column['name']] = df[column['name']].apply(
-                        boolean_converter)
-                elif column['columnType'] == 'Array' or column['columnType'] == 'Dict':
-                    df[column['name']] = df[column['name']].map(json_converter)
-
-            df = df.rename(columns=renamed_columns)
-
-            if none_nullable_columns:
-                df = df.dropna(subset=none_nullable_columns_names)
-
-            if unique_columns:
-                df.drop_duplicates(
-                    subset=unique_columns_names,
-                    inplace=True
-                )
-
-            if visible_column_names:
-                df = df[visible_column_names]
-
-            return df
-
         if isinstance(data, bytes):
             data = data.decode('utf-8-sig')
 
@@ -252,7 +83,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
 
-            df = create_dataframe(clean_data[1:])
+            df = create_dataframe(clean_data[1:], column_options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
@@ -262,7 +93,6 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 "Successfully created Feather "
                 f"document from csv string: {document.name}"
             )
-            return document.document_uuid
 
         if isinstance(data, dict):
             if entry_key is None:
@@ -290,7 +120,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             # file = df.to_feather(index=True, index_label='record_id')
             # document.file.save(f'{document.name}.feather', file)
 
-            df = create_dataframe(data)
+            df = create_dataframe(data, column_options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
@@ -301,7 +131,16 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 "Successfully created Feather "
                 f"document from list/json: {document.name}"
             )
-            return document.document_uuid
+
+    # Once the document is created, we need to populate
+    # column_options, column_types and column_names
+    update_document_options.apply_async(
+        args=[
+            str(document.document_uuid),
+            column_options
+        ],
+        countdown=10
+    )
 
 
 @shared_task
@@ -404,3 +243,46 @@ def append_to_dataframe(document_uuid: str, data_to_append: str):
 
     document.file.save(f'{document.name}.csv', content)
     return content
+
+
+@shared_task
+def get_document_from_url(url: str, headers: dict[str, str] = {}):
+    """Task used to load the content of document returned via an API endpoint
+    as a json format. The content will be loaded and transformed back to a csv
+    database file"""
+    async def proxy_get_url():
+        response, errors = await load_document_by_url(url, headers=headers)
+
+        if response.status_code != 200:
+            logger.error(
+                f"Failed to retrieve document from {url}, "
+                f"status code: {response.status_code}"
+            )
+            return
+
+        if errors:
+            logger.error(
+                f"Errors occurred while loading document from {url}: {errors}")
+            return {'error': errors}
+
+        if response is not None:
+            if 'application/json' in response.headers.get('Content-Type', ''):
+                logger.warning(
+                    f"Successfully retrieved JSON document from {url}")
+                return response.json()
+
+            if 'text/csv' in response.headers.get('Content-Type', ''):
+                logger.warning(
+                    f"Successfully retrieved CSV document from {url}")
+                return response.content.decode('utf-8-sig')
+        else:
+            logger.warning(
+                "Failed to retrieve document from "
+                f"{url}, status code: {response.content}"
+            )
+
+    async def main():
+        t1 = asyncio.create_task(proxy_get_url())
+        return await t1
+
+    return asyncio.run(main())
