@@ -70,7 +70,7 @@ class TableDocument(models.Model):
     class Meta:
         constraints = [
             CheckConstraint(
-                check=Q(file__isnull=False) | Q(url__isnull=False),
+                condition=Q(file__isnull=False) | Q(url__isnull=False),
                 name='file_or_url_required'
             )
         ]

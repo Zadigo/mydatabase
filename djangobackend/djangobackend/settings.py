@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'import_export',
     'django_extensions',
     'graphene_django',
+    'mcp_server',
+    'oauth2_provider',
+    'oauth_dcr',
 
     'rest_framework',
     'rest_framework.authtoken',

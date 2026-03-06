@@ -1,4 +1,3 @@
-import asyncio
 import csv
 import io
 import json
@@ -6,12 +5,13 @@ from typing import Any
 
 import gspread
 import pandas
+from asgiref.sync import async_to_sync
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from gspread.utils import rowcol_to_a1
-from tabledocuments.logic.edit import load_document_by_url
+from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import create_dataframe
 
@@ -42,7 +42,7 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
 
         document.column_types = column_types
         document.save()
-        
+
         other_columns = ['sortability', 'searchability', 'editability']
 
         logger.warning(
@@ -55,7 +55,14 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
     a string (CSV content), a list of records (JSON content) or
     a dictionary containing the data under a specific entry key. The
     created CSV file is then saved to the TableDocument instance
-    identified by document_id."""
+    identified by document_id.
+    
+    Args:
+        data: The input data which can be a CSV string, a list of records, or a dictionary.
+        document_id: The ID of the TableDocument instance to which the file will be saved.
+        entry_key: If data is a dictionary, this key is used to extract the relevant data.
+        column_options: A list of dictionaries containing column options such as name and type.
+    """
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -89,6 +96,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
             document.save()
+            
             logger.warning(
                 "Successfully created Feather "
                 f"document from csv string: {document.name}"
@@ -202,6 +210,7 @@ def append_to_dataframe(document_uuid: str, data_to_append: str):
     """Function used to append data to an existing document. The data
     to append is provided as a CSV string. The function will load the existing
     document, merge the data and save it back to the file.
+
     ### 1. Load the data to append into a dataframe
     ### 2. Load the existing document into a dataframe
     """
@@ -250,39 +259,8 @@ def get_document_from_url(url: str, headers: dict[str, str] = {}):
     """Task used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv
     database file"""
-    async def proxy_get_url():
-        response, errors = await load_document_by_url(url, headers=headers)
-
-        if response.status_code != 200:
-            logger.error(
-                f"Failed to retrieve document from {url}, "
-                f"status code: {response.status_code}"
-            )
-            return
-
-        if errors:
-            logger.error(
-                f"Errors occurred while loading document from {url}: {errors}")
-            return {'error': errors}
-
-        if response is not None:
-            if 'application/json' in response.headers.get('Content-Type', ''):
-                logger.warning(
-                    f"Successfully retrieved JSON document from {url}")
-                return response.json()
-
-            if 'text/csv' in response.headers.get('Content-Type', ''):
-                logger.warning(
-                    f"Successfully retrieved CSV document from {url}")
-                return response.content.decode('utf-8-sig')
-        else:
-            logger.warning(
-                "Failed to retrieve document from "
-                f"{url}, status code: {response.content}"
-            )
-
-    async def main():
-        t1 = asyncio.create_task(proxy_get_url())
-        return await t1
-
-    return asyncio.run(main())
+    instance = DocumentEdition()
+    document = async_to_sync(
+        instance.load_json_document_by_url
+    )(url, headers=headers)
+    logger.warning(f"Successfully retrieved document from {url}")

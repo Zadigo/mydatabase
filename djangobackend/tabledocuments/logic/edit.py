@@ -1,7 +1,7 @@
 import dataclasses
 import datetime
 import re
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable, Optional
 
 import httpx
 import pandas
@@ -16,13 +16,19 @@ from tabledocuments.models import TableDocument
 
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
 
-PostReadTrigger: TypeAlias = dict[
+type PostReadTrigger = dict[
     str,
-    Callable[[
-        str, pandas.DataFrame
-    ],
+    Callable[
+        [str, pandas.DataFrame],
         pandas.DataFrame
-    ]]
+    ]
+]
+
+DOCUMENT_CACHE_KEY_PREFIX = 'document_{name}'
+
+DOCUMENT_CACHE_KEY_TRANSFORMED_SUFFIX = '{name}-transformed'
+
+RAW_DOCUMENT_CACHE_KEY_SUFFIX = '{name}-raw'
 
 
 @dataclasses.dataclass
@@ -46,18 +52,9 @@ async def load_document_by_url(url: str, **request_params: Any) -> tuple[Respons
             return None, [str(e)]
         else:
             if response.status_code != 200:
-                return None, [f"Failed to load document. Status code: {response.status_code}"]  
+                return None, [f"Failed to load document. Status code: {response.status_code}"]
 
             return response, []
-    # try:
-    #     response = httpx.get(url, **request_params)
-    # except httpx.RequestError as e:
-    #     return None, [str(e)]
-    # else:
-    #     if response.status_code != 200:
-    #         return None, [f"Failed to load document. Status code: {response.status_code}"]  
-
-    # return response, []
 
 
 class DocumentEdition:
@@ -82,7 +79,8 @@ class DocumentEdition:
     async def clean(self, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}, is_temp: bool = False, **options: dict):
         # Before running document operations,
         # save it to the cache with a unique key
-        document_cache_key = f"document_{get_random_string(length=10)}"
+        document_cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(
+            name=get_random_string(length=10))
 
         # Some documents might have invalid characters in their
         # column title. Deal with this here.
@@ -91,8 +89,10 @@ class DocumentEdition:
 
         # Cache the whole document to prevent reading
         # the whole file all the time
-        cache.set(document_cache_key + '-raw', df,
-                  timeout=(24 * 60 * 60))  # 24 hour
+        cache.set(
+            RAW_DOCUMENT_CACHE_KEY_SUFFIX.format(name=document_cache_key), df,
+            timeout=(24 * 60 * 60)
+        )  # 24 hour
 
         if self.columns:
             df = df[self.columns]
@@ -100,8 +100,10 @@ class DocumentEdition:
         if self.column_triggers:
             for column, trigger in self.column_triggers.items():
                 df = trigger(column, df)
+
             cache.set(
-                document_cache_key + '-transformed',
+                DOCUMENT_CACHE_KEY_TRANSFORMED_SUFFIX.format(
+                    name=document_cache_key),
                 df, timeout=(60 * 60)
             )  # 1 hour
 
@@ -127,7 +129,8 @@ class DocumentEdition:
 
             if document.file is None:
                 self.errors.append(
-                    'The document does not have a file associated with it')
+                    'The document does not have a file associated with it'
+                )
                 return False, None
 
             # This function reads the csv document on every call.
@@ -162,7 +165,7 @@ class DocumentEdition:
         is_valid, df = await get_document()
 
         if not is_valid:
-            return False
+            return False, None
 
         # Pre-cache the document content here. Does not matter
         # if it re-cached afterwards by the clean method
@@ -170,7 +173,7 @@ class DocumentEdition:
 
         return await self.clean(df)
 
-    async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
+    async def load_json_document_by_url(self, url: str, entry_key: Optional[str] | None = None, **request_params: Any) -> Document | None:
         """Function used to load the content of document returned via an API endpoint
         as a json format. The content will be loaded and transformed back to a csv database file.
 
@@ -186,7 +189,7 @@ class DocumentEdition:
         if errors:
             self.errors.extend(errors)
 
-        if response is not None and response.ok:
+        if response is not None and response.status_code == 200:
             try:
                 data = response.json()
             except ValueError:
@@ -239,8 +242,8 @@ class DocumentTransform:
     def __init__(self, consumer: AsyncJsonWebsocketConsumer | None = None):
         self.consumer = consumer
 
-        self.current_document: Document | None = None
-        self.initial_dataframe: pandas.DataFrame | None = None
+        self.current_document: Optional[Document] = None
+        self.initial_dataframe: Optional[pandas.DataFrame] = None
 
         self.column_names: list[str] = []
         self.column_type_options: list[dict[str, str | bool]] = []
@@ -266,7 +269,9 @@ class DocumentTransform:
         # Since the Document dataclass only contains the partial data
         # contained in the whole dataset, we need to load the original
         # dataset from memory
-        cache_key = self.current_document.document_cache_key + '-raw'
+        cache_key = RAW_DOCUMENT_CACHE_KEY_SUFFIX.format(
+            name=self.current_document.document_cache_key
+        )
         self.initial_dataframe = cache.get(cache_key, None)
 
         self.column_names = document.content.columns.tolist()
