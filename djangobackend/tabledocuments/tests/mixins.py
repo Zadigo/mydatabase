@@ -1,12 +1,13 @@
 from channels.testing import WebsocketCommunicator
 from django.test import TestCase
+from unittest import IsolatedAsyncioTestCase
 from django.urls import re_path
 from tabledocuments import consumers
 
 from djangobackend.asgi import URLRouter
 
 
-class ConsumerMixin(TestCase):
+class ConsumerMixin(IsolatedAsyncioTestCase):
     def setUp(self):
         self.app = URLRouter([
             re_path(

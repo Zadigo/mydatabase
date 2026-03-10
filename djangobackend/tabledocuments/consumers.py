@@ -3,7 +3,10 @@ from typing import Any
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from tabledocuments.logic.edit import DocumentEdition, DocumentTransform
-from tabledocuments.logic.utils import create_column_type_options, create_column_options
+from tabledocuments.logic.utils import (create_column_options,
+                                        create_column_type_options)
+from tabledocuments.utils import WebsocketActions
+
 from djangobackend.consumer_mixins import BaseConsumerMixin
 
 
@@ -26,9 +29,13 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         await self.close(code=close_code)
 
     async def receive_json(self, content: dict[str, Any], **kwargs):
-        action = content['action']
+        try:
+            action = content['action']
+        except KeyError:
+            await self.send_error('No action provided')
+            return
 
-        if action == 'load_via_id':
+        if action == WebsocketActions.LOAD_VIA_ID.value:
             document = content['document']
             document = await self.document_edition.load_document_by_id(document['id'])
 
@@ -47,7 +54,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                 await self.send_error(
                     f"Could not load document: {','.join(self.document_edition.errors)}"
                 )
-        elif action == 'checkout_url':
+        elif action == WebsocketActions.CHECKOUT_URL.value:
             document = await self.document_edition.load_json_document_by_url(content['url'])
 
             if document is not None:

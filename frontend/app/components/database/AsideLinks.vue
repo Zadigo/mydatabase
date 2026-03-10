@@ -4,11 +4,12 @@
       <p class="font-semibold mb-3">Management</p>
 
       <li v-for="item in endpoints" :key="item.name" class="w-full">
-        <nuxt-link id="database-aside-link" :to="`/databases/${currentDatabase.id}/${item.endpoint}`" class="block py-1 ps-3 text-sm rounded-md">
+        <nuxt-link id="database-aside-link" :to="`/databases/${currentDatabase.id}/${item.endpoint}`" class="block py-1 ps-3 text-sm rounded-md dark:bg-slate-800">
           {{ item.name }}
         </nuxt-link>
       </li>
     </ul>
+
     <div v-else class="space-y-2">
       <nuxt-skeleton v-for="i in 5" :key="i" class="w-full h-3" />
     </div>

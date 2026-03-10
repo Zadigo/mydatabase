@@ -23,10 +23,9 @@
     "tailwind-fold.autoFold": false,
     "[python]": {
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit",
-            "source.unusedImports": "explicit"
+            "source.organizeImports": "always",
+            "source.unusedImports": "always"
         }
     },
-    "python-envs.defaultEnvManager": "ms-python.python:pipenv"
-
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

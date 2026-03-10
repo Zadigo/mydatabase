@@ -1,9 +1,16 @@
+import enum
+import json
 from typing import Any
+
 import numpy
 import pandas
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
-import json
+
+
+class WebsocketActions(enum.Enum):
+    LOAD_VIA_ID = 'load_via_id'
+    CHECKOUT_URL = 'checkout_url'
 
 
 def upload_file_to(instance, filename):
@@ -103,8 +110,8 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
 
     unique_columns = list(
         filter(lambda x: x['unique'],
-            visible_columns
-        )
+               visible_columns
+               )
     )
     unique_columns_names = list(
         map(
@@ -135,4 +142,6 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
     if visible_column_names:
         df = df[visible_column_names]
 
+    return df
+    return df
     return df

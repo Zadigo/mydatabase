@@ -3,7 +3,7 @@
     <!-- Header -->
     <base-page-card-header v-model="search" placeholder="Search triggers" title="Database triggers" />
 
-    <nuxt-card class="bg-gray-100 mt-5">
+    <nuxt-card class="bg-gray-100 dark:bg-slate-800 mt-5">
       <p class="font-semibold text-sm mb-2">Name of trigger</p>
       <nuxt-input v-model="triggerName" class="w-60" placeholder="Trigger name" />
 
@@ -38,7 +38,7 @@
         <nuxt-separator class="my-5" />
 
         <p class="font-semibold text-sm mb-2">Function to trigger</p>
-        <div class="p-8 border bg-gray-200 hover:bg-gray-300 border-gray-300 transition-all duration-1000 ease-in-out rounded-md text-center cursor-pointer" @click="() => { toggerFunctionsModal() }">
+        <div class="p-8 border bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 border-gray-300 dark:border-slate-600 transition-all duration-1000 ease-in-out rounded-md text-center cursor-pointer" @click="() => { toggerFunctionsModal() }">
           <icon name="i-lucide-square-function" class="text-xl" />
           Choose a function to trigger
         </div>

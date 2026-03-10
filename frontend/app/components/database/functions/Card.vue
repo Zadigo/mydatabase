@@ -1,5 +1,5 @@
 <template>
-  <nuxt-card class="bg-gray-100">
+  <nuxt-card class="bg-gray-100 dark:bg-slate-800">
     <div v-if="editedFunction" class="space-y-3">
       <!-- <div class="p-5 rounded-md bg-gray-50 text-2xl font-light lowercase">
         {{ selectedColumn }}[tableName].{{ selectedFunction }}("{{ functionArgument }}").{{ selectedReturnType }} >> {{ selectedChain }} || {{ selectedFailureMode }}
@@ -10,7 +10,7 @@
       {{ selectedTable }}
 
       <div class="flex-col gap-2 space-y-2">
-        <p class="text-sm font-semibold">Column on wich to apply the function</p>
+        <p class="text-sm font-semibold">Column on which to apply the function</p>
         <nuxt-select v-model="editedFunction.columns" :multiple="true" :items="['firstname', 'lastname']" class="w-90" />
       </div>
 

@@ -117,7 +117,7 @@ class DocumentEdition:
 
         return await self.finalize(document_cache_key=document_cache_key, df=df, metadata=metadata)
 
-    async def load_document_by_id(self, id: int | str) -> Document | bool:
+    async def load_document_by_id(self, id: int | str) -> tuple[bool, Document | None]:
         """Loads the data in a document using the database"""
 
         @database_sync_to_async
@@ -171,7 +171,7 @@ class DocumentEdition:
         # if it re-cached afterwards by the clean method
         # cache.set(cache_key, df, timeout=(60 * 60 * 24))
 
-        return await self.clean(df)
+        return True, await self.clean(df)
 
     async def load_json_document_by_url(self, url: str, entry_key: Optional[str] | None = None, **request_params: Any) -> Document | None:
         """Function used to load the content of document returned via an API endpoint
