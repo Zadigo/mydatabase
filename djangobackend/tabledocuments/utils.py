@@ -49,10 +49,9 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
             return value
 
         try:
-            data = json.loads(value)
+            return str(json.loads(value))
         except:
             return value
-        return str(data)
 
     all_column_names = list(
         map(
@@ -69,15 +68,22 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
     )
 
     for column in column_options:
-        if column['columnType'] == ColumnTypes.STRING.value:
-            df[column['name']] = df[column['name']].astype(str)
-        elif column['columnType'] == 'Number':
-            df[column['name']] = df[column['name']].astype(numpy.int64)
-        elif column['columnType'] == 'Boolean':
-            df[column['name']] = df[column['name']].apply(
-                boolean_converter)
-        elif column['columnType'] == 'Array' or column['columnType'] == 'Dict':
-            df[column['name']] = df[column['name']].map(json_converter)
+        column_name = column['name']
+        item_series = df[column_name]
+        column_type = column['columnType']
+
+        print(f"Processing column: {column_name} with type {column_type}")
+
+        if column_type == ColumnTypes.STRING.value or column_type == ColumnTypes.STRING:
+            df[column_name] = item_series.astype(str)
+        elif column_type == ColumnTypes.NUMBER.value or column_type == ColumnTypes.NUMBER:
+            df[column_name] = item_series.astype(numpy.int64)
+        elif column_type == ColumnTypes.BOOLEAN.value or column_type == ColumnTypes.BOOLEAN:
+            df[column_name] = item_series.apply(boolean_converter)
+        elif column_type == ColumnTypes.ARRAY.value or column_type == ColumnTypes.ARRAY:
+            df[column_name] = item_series.map(json_converter)
+        elif column_type == ColumnTypes.DICT.value or column_type == ColumnTypes.DICT:
+            df[column_name] = item_series.map(json_converter)
 
     # Resolve column name change
     renamed_columns = {}
@@ -107,13 +113,13 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
     )
     none_nullable_columns_names = list(
         map(
-            lambda x: x['newName'],
+            lambda x: x['newName'] or x['name'],
             none_nullable_columns
         )
     )
 
     if none_nullable_columns:
-        df = df.dropna(subset=none_nullable_columns_names)
+        df.dropna(subset=none_nullable_columns_names, inplace=True)
 
     # Resolve unique data in each columns
     unique_columns = list(

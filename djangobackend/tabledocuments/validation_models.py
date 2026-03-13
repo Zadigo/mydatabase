@@ -8,6 +8,8 @@ class ColumnTypes(enum.Enum):
     STRING = 'String'
     NUMBER = 'Number'
     BOOLEAN = 'Boolean'
+    ARRAY = 'Array'
+    DICT = 'Dict'
 
 
 class ColumnOption(BaseModel):

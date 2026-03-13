@@ -43,7 +43,17 @@ def create_file_based_instance() -> TableDocument:
     return instance
 
 
-def build_column_options(*columns: str, **kwargs: bool):
+def build_column_options(
+    *columns: str, 
+    new_names: dict = {}, 
+    not_visible: list[str] = [], 
+    not_editable: list[str] = [], 
+    not_sortable: list[str] = [], 
+    not_searchable: list[str] = [], 
+    nullable: list[str] = [],
+    unique: list[str] = [],
+    **kwargs: bool
+):
     default_options = {
         'visible': True,
         'editable': True,
@@ -56,11 +66,22 @@ def build_column_options(*columns: str, **kwargs: bool):
     default_options = default_options | kwargs
 
     options = []
-
     for column in columns:
+
         instance = ColumnOption(
             name=column,
             **default_options
         )
+
+        instance.visible = column not in not_visible 
+        instance.editable = column not in not_editable
+        instance.sortable = column in not_sortable 
+        instance.searchable = column in not_searchable
+        instance.nullable = False if column in nullable else True
+        instance.unique = column in unique
+
+        if column in new_names:
+            instance.newName = new_names.get(column, None)
+
         options.append(instance.model_dump())
     return options
