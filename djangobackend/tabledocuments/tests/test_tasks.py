@@ -43,7 +43,7 @@ class TestUpdateDocumentOptions(TestCase):
         self.assertDictEqual(self.instance.column_types, {'name': 'String'})
 
 
-
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestCreateCsvFileFromData(TestCase):
     def setUp(self):
         self.instance: TableDocument = DocumentFactory.create()
@@ -52,40 +52,86 @@ class TestCreateCsvFileFromData(TestCase):
         pass
 
     def test_create_from_bytes(self):
+        instance: TableDocument = DocumentFactory.create()
         result = tasks.create_csv_file_from_data.apply(kwargs={
             'data': b'firstname,lastname\nJane,Doe',
             'document_id': self.instance.id,
-            'column_options': build_column_options()
+            'column_options': build_column_options('firstname', 'lastname')
         })
         result.get()
 
         self.instance.refresh_from_db()
-        print(self.instance.file)
-        self.assertIsNone(self.instance.file)
+        self.assertIsNotNone(instance.file)
+
+        instance.file.delete()
 
     def test_create_from_string(self):
-        pass
+        instance: TableDocument = DocumentFactory.create()
+
+        result = tasks.create_csv_file_from_data.apply(kwargs={
+            'data': 'firstname,lastname\nJane,Doe',
+            'document_id': instance.id,
+            'column_options': build_column_options('firstname', 'lastname')
+        })
+        result.get()
+
+        instance.refresh_from_db()
+        self.assertIsNotNone(instance.file)
 
     def test_create_from_dict_without_entry_key(self):
-        pass
+        instance: TableDocument = DocumentFactory.create()
+
+        result = tasks.create_csv_file_from_data.apply(kwargs={
+            'data': {'firstname': 'Jane', 'lastname': 'Doe'},
+            'document_id': instance.id,
+            'column_options': build_column_options('firstname', 'lastname')
+        })
+        
+        result.get()
+
+        instance.refresh_from_db()
+        self.assertIsNotNone(instance.file)
 
     def test_create_from_dict_with_entry_key(self):
-        pass
+        with self.assertLogs('tabledocuments.tasks', level='WARNING') as cm:
+            instance: TableDocument = DocumentFactory.create()
+
+            result = tasks.create_csv_file_from_data.apply(kwargs={
+                'data': {'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
+                'document_id': instance.id,
+                'entry_key': 'items',
+                'column_options': build_column_options('firstname', 'lastname')
+            })
+            result.get()
+
+            instance.refresh_from_db()
+            self.assertIsNone(instance.file)
 
     def test_create_from_list(self):
-        pass
+        instance: TableDocument = DocumentFactory.create()
 
+        result = tasks.create_csv_file_from_data.apply(kwargs={
+            'data': [{'firstname': 'Jane', 'lastname': 'Doe'}],
+            'document_id': instance.id,
+            'column_options': build_column_options('firstname', 'lastname')
+        })
+        result.get()
+
+        instance.refresh_from_db()
+        self.assertIsNotNone(instance.file)
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-class TestTasks(TestCase):
-
-    def test_get_document_from_url(self):
+class TestGetDocumentFromUrl(TestCase):
+    def test_base_retrieval(self):
         t = tasks.get_document_from_url.apply(
             args=['https://jsonplaceholder.typicode.com/todos/1']
         )
         result = t.get()
 
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+class TestGetDocumentFromGoogleSheet(TestCase):
     def test_append_to_dataframe(self):
         document: TableDocument = DocumentFactory.create()
         document.file.save(

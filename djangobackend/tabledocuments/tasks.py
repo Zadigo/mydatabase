@@ -11,6 +11,8 @@ from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from gspread.utils import rowcol_to_a1
+from django.utils.crypto import get_random_string
+from tabledocuments.logic.utils import create_column_options
 from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import create_dataframe
@@ -29,8 +31,9 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
         logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
-    # if from_file and document.file is not None:
-    #     df = pandas.read_csv(document.file.path)
+    if from_file and document.file is not None:
+        df = pandas.read_csv(document.file.path)
+        column_options = create_column_options(df.columns.tolist())
 
     document.column_options = column_options
     document.column_names = list(
@@ -94,7 +97,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
             first_item = clean_data[0][-1]
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
-            breakpoint()
+
             df = create_dataframe(clean_data[1:], column_options)
             csv_content = df.to_csv(**df_params)
 
@@ -177,8 +180,14 @@ def get_document_from_public_google_sheet(api_key: str, sheet_id: str, range: st
 @shared_task
 def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -> str:
     """Loads data from a Google Sheet using a service account and sheet ID and
-    returns the values as string
-    Reference: https://docs.gspread.org/en/latest/oauth2.html#service-account
+    returns the values as string.
+    
+    https://docs.gspread.org/en/latest/oauth2.html#service-account
+
+    :credentials: A dictionary containing the service account credentials.
+    :sheet_id: The ID of the Google Sheet to retrieve data from.
+    
+    :return: A CSV string containing the data from the Google Sheet.
     """
     instance = gspread.service_account_from_dict(credentials)
 
@@ -186,6 +195,7 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
         sheet = instance.open_by_key(sheet_id)
     except Exception as e:
         logger.error(f'Failed to open spreadsheet: {e}')
+        return
 
     headers = sheet.sheet1.row_values(1)
     records = sheet.sheet1.get_all_records()
@@ -211,27 +221,30 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
 
 
 @shared_task
-def append_to_dataframe(document_uuid: str, data_to_append: str):
+def append_to_dataframe(document_uuid: str, data_to_append: bytes | str):
     """Function used to append data to an existing document. The data
-    to append is provided as a CSV string. The function will load the existing
+    to append is provided as a CSV string or bytes. The function will load the existing
     document, merge the data and save it back to the file.
 
     ### 1. Load the data to append into a dataframe
     ### 2. Load the existing document into a dataframe
     """
-    buffer1 = io.StringIO(data_to_append)
+    if isinstance(data_to_append, bytes):
+        buffer1 = io.BytesIO(data_to_append)
+    else:
+        buffer1 = io.StringIO(data_to_append)
 
     df1 = pandas.read_csv(buffer1)
 
     try:
         document = TableDocument.objects.get(document_uuid=document_uuid)
-    except:
+    except TableDocument.DoesNotExist:
         logger.error(f'Failed to get document with UUID {document_uuid}')
         return
 
     df2 = pandas.read_csv(document.file.path)
 
-    # If the documents do not have the same columns,
+    # If the documents does not have the same columns,
     # then do not try to append the documents
     if df1.columns.tolist() != df2.columns.tolist():
         logger.warning('Columns mismatch')
@@ -265,7 +278,25 @@ def get_document_from_url(url: str, headers: dict[str, str] = {}):
     as a json format. The content will be loaded and transformed back to a csv
     database file"""
     instance = DocumentEdition()
-    document = async_to_sync(
-        instance.load_json_document_by_url
-    )(url, headers=headers)
+    document = async_to_sync(instance.load_json_document_by_url)(url, headers=headers)
     logger.warning(f"Successfully retrieved document from {url}")
+
+    if document is not None:
+        str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
+
+        name = get_random_string(8)
+        content_file = ContentFile(str_data, name=f'{name}.csv')
+
+        instance = TableDocument.objects.create(name=name)
+        instance.file = content_file
+        instance.url = url
+        instance.save()
+
+        update_document_options.apply_async(
+            args=[
+                str(instance.document_uuid),
+                create_column_options(document.content.columns.tolist())
+            ], 
+            countdown=10
+        )
+        logger.warning(f"Successfully create file: {name}")

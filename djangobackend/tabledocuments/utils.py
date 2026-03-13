@@ -30,7 +30,7 @@ def validate_file(name):
     validator(name)
 
 
-def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]]):
+def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_options: list[dict[str, str | bool]]):
     """Create a pandas dataframe from the cleaned data
     after applying the column options such as renaming,
     filtering visible columns, enforcing unique columns"""
