@@ -16,12 +16,12 @@ class ColumnOption(BaseModel):
     name: str
     newName: str = None
     columnType: Annotated[ColumnTypes, Field(default=ColumnTypes.STRING.value)]
+    unique: Annotated[bool, Field(default=False)]
     visible: Annotated[bool, Field(default=True)]
+    nullable: Annotated[bool, Field(default=True)]
     editable: Annotated[bool, Field(default=True)]
     sortable: Annotated[bool, Field(default=True)]
     searchable: Annotated[bool, Field(default=True)]
-    nullable: Annotated[bool, Field(default=True)]
-    unique: Annotated[bool, Field(default=False)]
 
 
 class ColumnTypeOption(BaseModel):

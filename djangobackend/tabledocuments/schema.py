@@ -1,7 +1,6 @@
-
 from graphene import Field, ObjectType, String
 from graphql.type import GraphQLResolveInfo
-from graphene.types import List
+from graphene.types.generic import GenericScalar
 from graphene_django import DjangoObjectType
 from graphene_django.fields import DjangoListField
 
@@ -9,6 +8,10 @@ from tabledocuments.models import TableDocument
 
 
 class TableDocumentsType(DjangoObjectType):
+    column_options = GenericScalar()
+    column_types = GenericScalar()
+    # mixed_options = GenericScalar()
+
     class Meta:
         model = TableDocument
         fields = [
@@ -27,6 +30,15 @@ class TableDocumentsType(DjangoObjectType):
             'file': ['isna'],
             'updated_at': ['gt', 'gte', 'lt', 'lte']
         }
+
+    def resolve_column_options(root, info: GraphQLResolveInfo):
+        return root.column_options or []
+
+    def resolve_column_types(root, info: GraphQLResolveInfo):
+        return root.column_types or {}
+
+    # def resolve_mixed_options(root, info: GraphQLResolveInfo):
+    #     return root.mixed_options or []
 
 
 class TableDocumentsQuery(ObjectType):
