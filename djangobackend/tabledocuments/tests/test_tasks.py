@@ -2,11 +2,50 @@ from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from tabledocuments import tasks
 from tabledocuments.models import TableDocument
-from tabledocuments.tests.utils import DocumentFactory
+from tabledocuments.tests.utils import DocumentFactory, create_file_based_instance
+from tabledocuments.validation_models import ColumnOption
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+class TestUpdateDocumentOptions(TestCase):
+    def setUp(self):
+        column_options = [
+            ColumnOption(
+                name='name',
+                visible=True,
+                editable=True,
+                sortable=True,
+                searchable=True
+            )
+        ]
+
+        column_options = list(map(lambda x: x.model_dump(), column_options))
+
+        instance = create_file_based_instance()
+        instance.column_options = column_options
+        instance.save()
+
+        self.instance = instance
+
+    def test_document_not_found(self):
+        pass
+
+    def test_from_file(self):
+        result = tasks.update_document_options.apply(
+            args=[
+                self.instance.document_uuid, 
+                self.instance.column_options
+            ]
+        )
+        result.get()
+        
+        self.instance.refresh_from_db()
+        self.assertDictEqual(self.instance.column_types, {'name': 'String'})
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestTasks(TestCase):
+
     def test_get_document_from_url(self):
         t = tasks.get_document_from_url.apply(
             args=['https://jsonplaceholder.typicode.com/todos/1']

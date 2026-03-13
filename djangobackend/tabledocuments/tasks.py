@@ -21,8 +21,8 @@ logger = get_task_logger(__name__)
 @shared_task
 def update_document_options(document_uuid: str, column_options: list[dict[str, str | bool]] = [], from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
-    traditional elements such as the columns the document encoding references
-    the column names etc"""
+    elements such as the columns, the document encoding references,
+    the column names, etc."""
     try:
         document = TableDocument.objects.get(document_uuid=document_uuid)
     except TableDocument.DoesNotExist:
@@ -34,11 +34,16 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
     else:
         document.column_options = column_options
         document.column_names = list(
-            map(lambda x: x['newName'] or x['name'], column_options))
+            map(
+                lambda x: x['newName'] or x['name'], 
+                column_options
+            )
+        )
 
         column_types = {}
         for item in column_options:
-            column_types[item['newName'] or item['name']] = item['columnType']
+            column_name = item['newName'] or item['name']
+            column_types[column_name] = item['columnType']
 
         document.column_types = column_types
         document.save()
@@ -46,7 +51,8 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
         other_columns = ['sortability', 'searchability', 'editability']
 
         logger.warning(
-            f"Successfully updated document options for document: {document.name}")
+            f"Successfully updated document options for document: {document.name}"
+        )
 
 
 @shared_task

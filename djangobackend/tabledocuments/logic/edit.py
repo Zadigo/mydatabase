@@ -290,7 +290,7 @@ class DocumentTransform:
             )
         )
 
-        # Column options allws the user to spcify which columns
+        # Column options allows the user to spcify which columns
         # are editable, visible etc to the end user
         self.column_options = list(
             map(
