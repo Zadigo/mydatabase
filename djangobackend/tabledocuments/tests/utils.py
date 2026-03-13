@@ -54,6 +54,7 @@ def build_column_options(
     unique: list[str] = [],
     **kwargs: bool
 ):
+    """Returns a dictionnary of mixed options"""
     default_options = {
         'visible': True,
         'editable': True,

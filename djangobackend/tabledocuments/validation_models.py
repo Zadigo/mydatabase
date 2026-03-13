@@ -24,8 +24,14 @@ class ColumnOption(BaseModel):
     unique: Annotated[bool, Field(default=False)]
 
 
-class ColumnTypeOptions(BaseModel):
+class ColumnTypeOption(BaseModel):
     name: str
     columnType: Annotated[ColumnTypes, Field(default=ColumnTypes.STRING.value)]
     unique: Annotated[bool, Field(default=False)]
     nullable: Annotated[bool, Field(default=True)]
+
+
+class MixedColumnOption(ColumnOption, ColumnTypeOption):
+    """A validator that combines the options of ColumnOption
+    and ColumnTypeOption. This is useful for endpoints that need to validate
+    both sets of options simultaneously."""

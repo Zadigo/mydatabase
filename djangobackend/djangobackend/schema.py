@@ -1,8 +1,8 @@
 import graphene
+from tabledocuments.schema import TableDocumentsQuery
 
-
-class Query(graphene.ObjectType):
-    hello = graphene.String(default_value='Hi!')
+class Query(TableDocumentsQuery, graphene.ObjectType):
+    pass
 
 
 schema = graphene.Schema(query=Query)
