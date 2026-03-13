@@ -47,7 +47,8 @@ def func_clean(document_uuid: str, columns: list[str], data: str, deep: bool = F
         instance = TableDocument.objects.get(uuid=document_uuid)
     except TableDocument.DoesNotExist:
         logger.error(
-            f"TableDocument with uuid {document_uuid} does not exist.")
+            f"TableDocument with uuid {document_uuid} does not exist."
+        )
     else:
         instance.columns = df.columns.tolist()
         file = ContentFile(df.to_json(orient='records').encode('utf-8'))
@@ -112,8 +113,8 @@ def func_lower(columns: list[str], data: str) -> str:
 def func_title(columns: list[str], data: str) -> str:
     """Convert specified columns to title case."""
     buffer = io.StringIO(data)
-
     df = pandas.read_csv(buffer)
+
     for column in columns:
         df[column] = df[column].str.title()
 

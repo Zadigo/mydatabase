@@ -5,6 +5,7 @@
     "editor.quickSuggestions": {
         "strings": "on"
     },
+    "tailwind-fold.autoFold": false,
     "tailwindCSS.classAttributes": [
         "class",
         "ui",
@@ -18,14 +19,13 @@
     ],
     // FIXME: Update the path to the Biome binary because does not
     // find the binary 
-    "biome.lsp.bin": "frontend/node_modules/@biomejs/biome/bin",
+    // "biome.lsp.bin": "frontend/node_modules/@biomejs/biome/bin",
     "python.analysis.typeCheckingMode": "off",
-    "tailwind-fold.autoFold": false,
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": "always",
             "source.unusedImports": "always"
         }
-    },
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    }
 }
