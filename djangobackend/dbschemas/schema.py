@@ -4,6 +4,12 @@ from graphene_django.fields import DjangoListField
 from dbschemas.models import DatabaseProvider, DatabaseSchema
 
 class DatabaseSchemaType(DjangoObjectType):
+    has_relationships = graphene.Boolean()
+    has_triggers = graphene.Boolean()
+    has_functions = graphene.Boolean()
+    table_count = graphene.Int()
+    has_tables = graphene.Boolean()
+
     class Meta:
         model = DatabaseSchema
         fields = [
@@ -20,7 +26,6 @@ class DatabaseSchemaType(DjangoObjectType):
             'name': ['exact', 'icontains']
         }
         
-
 
 class DatabaseProviderType(DjangoObjectType):
     class Meta:
@@ -61,3 +66,23 @@ class DatabaseProviderQuery(graphene.ObjectType):
     
     def resolve_provider_by_id(root, info, schema_id: str):
         return DatabaseProvider.objects.get(database_schema__id=schema_id)
+
+
+class CreateDatabaseMutation(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
+
+    db_schema = graphene.Field(DatabaseSchemaType)
+
+    @classmethod
+    def mutate(cls, root, info, name: str):
+        instance = DatabaseSchema.objects.create(name=name)
+        return CreateDatabaseMutation(db_schema=instance)
+
+    # @classmethod
+    # def mutate(cls, root, info, text, id):
+    #     question = Question.objects.get(pk=id)
+    #     question.text = text
+    #     question.save()
+    #     # Notice we return an instance of this mutation
+    #     return QuestionMutation(question=question)
