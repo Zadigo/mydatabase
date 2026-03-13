@@ -2,7 +2,7 @@ from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from tabledocuments import tasks
 from tabledocuments.models import TableDocument
-from tabledocuments.tests.utils import DocumentFactory, create_file_based_instance
+from tabledocuments.tests.utils import DocumentFactory, build_column_options, create_file_based_instance
 from tabledocuments.validation_models import ColumnOption
 
 
@@ -38,9 +38,43 @@ class TestUpdateDocumentOptions(TestCase):
             ]
         )
         result.get()
-        
+
         self.instance.refresh_from_db()
         self.assertDictEqual(self.instance.column_types, {'name': 'String'})
+
+
+
+class TestCreateCsvFileFromData(TestCase):
+    def setUp(self):
+        self.instance: TableDocument = DocumentFactory.create()
+
+    def test_invalidù_document(self):
+        pass
+
+    def test_create_from_bytes(self):
+        result = tasks.create_csv_file_from_data.apply(kwargs={
+            'data': b'firstname,lastname\nJane,Doe',
+            'document_id': self.instance.id,
+            'column_options': build_column_options()
+        })
+        result.get()
+
+        self.instance.refresh_from_db()
+        print(self.instance.file)
+        self.assertIsNone(self.instance.file)
+
+    def test_create_from_string(self):
+        pass
+
+    def test_create_from_dict_without_entry_key(self):
+        pass
+
+    def test_create_from_dict_with_entry_key(self):
+        pass
+
+    def test_create_from_list(self):
+        pass
+
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)

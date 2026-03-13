@@ -2,6 +2,9 @@ from factory.django import DjangoModelFactory
 from faker import Faker as FakerClass
 from tabledocuments.models import TableDocument
 from django.core.files.base import ContentFile
+from django.core.files.base import ContentFile
+from tabledocuments.models import TableDocument
+from tabledocuments.validation_models import ColumnOption
 
 faker = FakerClass()
 
@@ -38,3 +41,26 @@ def create_file_based_instance() -> TableDocument:
     instance.file.save(f"{instance.document_uuid}.csv", content_file, save=True)
 
     return instance
+
+
+def build_column_options(*columns: str, **kwargs: bool):
+    default_options = {
+        'visible': True,
+        'editable': True,
+        'sortable': True,
+        'searchable': True,
+        'nullable': True,
+        'unique': False
+    }
+
+    default_options = default_options | kwargs
+
+    options = []
+
+    for column in columns:
+        instance = ColumnOption(
+            name=column,
+            **default_options
+        )
+        options.append(instance.model_dump())
+    return options

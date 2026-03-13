@@ -6,6 +6,8 @@ import enum
 
 class ColumnTypes(enum.Enum):
     STRING = 'String'
+    NUMBER = 'Number'
+    BOOLEAN = 'Boolean'
 
 
 class ColumnOption(BaseModel):
@@ -16,6 +18,8 @@ class ColumnOption(BaseModel):
     editable: Annotated[bool, Field(default=True)]
     sortable: Annotated[bool, Field(default=True)]
     searchable: Annotated[bool, Field(default=True)]
+    nullable: Annotated[bool, Field(default=True)]
+    unique: Annotated[bool, Field(default=False)]
 
 
 class ColumnTypeOptions(BaseModel):

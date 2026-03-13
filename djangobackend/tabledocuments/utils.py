@@ -6,6 +6,7 @@ import numpy
 import pandas
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+from tabledocuments.validation_models import ColumnTypes
 
 
 class WebsocketActions(enum.Enum):
@@ -67,10 +68,8 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
         columns=all_column_names
     )
 
-    print(column_options)
-
     for column in column_options:
-        if column['columnType'] == 'String':
+        if column['columnType'] == ColumnTypes.STRING.value:
             df[column['name']] = df[column['name']].astype(str)
         elif column['columnType'] == 'Number':
             df[column['name']] = df[column['name']].astype(numpy.int64)
@@ -80,11 +79,17 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
         elif column['columnType'] == 'Array' or column['columnType'] == 'Dict':
             df[column['name']] = df[column['name']].map(json_converter)
 
+    # Resolve column name change
     renamed_columns = {}
     for col in column_options:
-        renamed_columns[col['name']] = col['newName']
+        new_name = col['newName']
+        if new_name is None:
+            continue
 
-    df = df.rename(columns=renamed_columns)
+        renamed_columns[col['name']] = new_name
+    
+    if renamed_columns:
+        df = df.rename(columns=renamed_columns)
 
     visible_columns = list(
         filter(
@@ -92,6 +97,8 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
             column_options
         )
     )
+
+    # Resolve fields with "null" values
     none_nullable_columns = list(
         filter(
             lambda x: not x['nullable'],
@@ -108,10 +115,12 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
     if none_nullable_columns:
         df = df.dropna(subset=none_nullable_columns_names)
 
+    # Resolve unique data in each columns
     unique_columns = list(
-        filter(lambda x: x['unique'],
-               visible_columns
-               )
+        filter(
+            lambda x: x['unique'],
+            visible_columns
+        )
     )
     unique_columns_names = list(
         map(
@@ -126,6 +135,7 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
             inplace=True
         )
 
+    # Resolve hidden/unhidden columns
     visible_columns = list(
         filter(
             lambda x: x['visible'],
@@ -142,6 +152,4 @@ def create_dataframe(clean_data: Any, column_options: list[dict[str, str | bool]
     if visible_column_names:
         df = df[visible_column_names]
 
-    return df
-    return df
     return df

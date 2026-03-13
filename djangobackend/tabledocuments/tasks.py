@@ -29,30 +29,28 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
         logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
-    if from_file and document.file is not None:
-        pass
-    else:
-        document.column_options = column_options
-        document.column_names = list(
-            map(
-                lambda x: x['newName'] or x['name'], 
-                column_options
-            )
+    # if from_file and document.file is not None:
+    #     df = pandas.read_csv(document.file.path)
+
+    document.column_options = column_options
+    document.column_names = list(
+        map(
+            lambda x: x['newName'] or x['name'], 
+            column_options
         )
+    )
 
-        column_types = {}
-        for item in column_options:
-            column_name = item['newName'] or item['name']
-            column_types[column_name] = item['columnType']
+    column_types = {}
+    for item in column_options:
+        column_name = item['newName'] or item['name']
+        column_types[column_name] = item['columnType']
 
-        document.column_types = column_types
-        document.save()
+    document.column_types = column_types
+    document.save()
 
-        other_columns = ['sortability', 'searchability', 'editability']
-
-        logger.warning(
-            f"Successfully updated document options for document: {document.name}"
-        )
+    logger.warning(
+        f"Successfully updated document options for document: {document.name}"
+    )
 
 
 @shared_task
@@ -92,10 +90,11 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
 
         if isinstance(data, str):
             clean_data = list(csv.reader(data.splitlines(), delimiter=','))
+            
             first_item = clean_data[0][-1]
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
-
+            breakpoint()
             df = create_dataframe(clean_data[1:], column_options)
             csv_content = df.to_csv(**df_params)
 
