@@ -1,10 +1,19 @@
-from graphene import Field, ObjectType, String
+from graphene import Boolean, Field, ObjectType, String
 from graphql.type import GraphQLResolveInfo
 from graphene.types.generic import GenericScalar
 from graphene_django import DjangoObjectType
 from graphene_django.fields import DjangoListField
 
 from tabledocuments.models import TableDocument
+
+
+class ColumnOptionType(ObjectType):
+    name = String()
+    newName = String()
+    columnType = String()
+    unique = Boolean()
+    visible = Boolean()
+    nullable = Boolean()
 
 
 class TableDocumentsType(DjangoObjectType):
@@ -44,6 +53,11 @@ class TableDocumentsType(DjangoObjectType):
 class TableDocumentsQuery(ObjectType):
     all_documents = DjangoListField(TableDocumentsType, name = String(required=False))
     document_by_id = Field(TableDocumentsType, document_uuid = String(required=True))
+    get_column_option = Field(
+        ColumnOptionType, 
+        document_uuid=String(required=True), 
+        column_name=String(required=True)
+    )
 
     def resolve_all_documents(root, info: GraphQLResolveInfo, name: str = None):
         qs = TableDocument.objects.all()
@@ -53,3 +67,13 @@ class TableDocumentsQuery(ObjectType):
 
     def resolve_document_by_id(root, info, document_uuid: str):
         return TableDocument.objects.get(document_uuid=document_uuid)
+
+    def resolve_get_column_option(root, info, document_uuid: str, column_name: str):
+        document = TableDocument.objects.get(document_uuid=document_uuid)
+        column = list(filter(lambda x: x['name'] == column_name, document.column_options))
+
+        try:
+            return column[-0]
+        except:
+            return {}
+
