@@ -29,7 +29,7 @@
     </suspense>
 
     <!-- Modal -->
-    <nuxt-slideover v-model:open="showModal" class="min-w-6xs">
+    <lazy-nuxt-slideover v-model:open="showModal" hydrate-on-visible class="min-w-6xs">
       <template #header>
         <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
           Connect to
@@ -40,7 +40,7 @@
       <template #body>
         <component :is="integrationComponent" />
       </template>
-    </nuxt-slideover>
+    </lazy-nuxt-slideover>
   </base-section-wrapper>
 </template>
 

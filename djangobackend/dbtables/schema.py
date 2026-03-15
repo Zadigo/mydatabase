@@ -25,7 +25,6 @@ class DatabaseTableType(DjangoObjectType):
         return queryset.prefetch_related('documents').select_related('database_schema').all()
 
 
-
 class DatabaseTableQuery(graphene.ObjectType):
     all_database_tables = DjangoListField(DatabaseTableType)
     table_by_id = graphene.Field(DatabaseTableType, table_id=graphene.String(required=True))

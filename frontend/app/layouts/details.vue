@@ -1,8 +1,9 @@
 <template>
   <section id="site">
+    <!-- Navbar -->
     <base-navbar />
 
-
+    <!-- Sidebar -->
     <base-sidebar :items="items" />
 
     <!-- Websocket Alerts -->

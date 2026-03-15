@@ -35,7 +35,7 @@
     </div>
 
     <!-- Modals -->
-    <nuxt-modal v-model:open="showModal">
+    <lazy-nuxt-modal v-model:open="showModal" hydrate-on-visible>
       <template #title>
         <h2>Create Database</h2>
       </template>
@@ -70,7 +70,7 @@
           </nuxt-button>
         </div>
       </template>
-    </nuxt-modal>
+    </lazy-nuxt-modal>
   </section>
 </template> 
 

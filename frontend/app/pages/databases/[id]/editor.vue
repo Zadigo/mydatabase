@@ -34,10 +34,10 @@
     </nuxt-card>
 
     <!-- Modals -->
-    <editor-modals-edit-table />
-    <editor-modals-add-document />
-    <editor-modals-edit-document />
-    <editor-modals-create-table />
+    <lazy-editor-modals-edit-table hydrate-on-idle />
+    <lazy-editor-modals-add-document hydrate-on-idle />
+    <lazy-editor-modals-edit-document hydrate-on-idle />
+    <lazy-editor-modals-create-table hydrate-on-idle />
   </section>
 </template>
 
