@@ -40,7 +40,6 @@
   },
   "packageManager": "pnpm@10.16.1+sha512.0e155aa2629db8672b49e8475da6226aa4bdea85fdcdfdc15350874946d4f3c91faaf64cbdc4a5d1ab8002f473d5c3fcedcd197989cf0390f9badd3c04678706",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.6",
     "@iconify-json/lucide": "^1.2.97",
     "@nuxt/eslint": "1.15.2",
     "@nuxt/test-utils": "4.0.0",
@@ -51,6 +50,9 @@
     "@vueuse/nuxt": "14.2.1",
     "eslint": "^10.0.3",
     "happy-dom": "^20.8.4",
+    "oxfmt": "^0.40.0",
+    "oxlint": "^1.55.0",
+    "oxlint-tsgolint": "^0.17.0",
     "playwright-core": "^1.58.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
