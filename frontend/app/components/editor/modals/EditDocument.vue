@@ -6,7 +6,7 @@
 
     <template #body>
       <div v-if="availableDocuments.length > 0" class="space-y-2">
-        <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50">
+        <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50 dark:bg-info-950">
           <div class="flex justify-between items-center">
             <p class="font-bold">
               <icon name="i-solid-csv" /> Document
@@ -48,8 +48,8 @@
           </div>
 
           <!-- Relationship -->
-          <div class="p-1 bg-gray-100 my-5">
-            <div class="flex justify-center gap-3 items-center cursor-pointer rounded-md border border-gray-200 hover:bg-gray-100 p-2">
+          <div class="p-1 bg-gray-100 dark:bg-gray-900 my-5">
+            <div class="flex justify-center gap-3 items-center cursor-pointer rounded-md border border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 p-2">
               <icon name="i-lucide-key" />
               <nuxt-select v-model="primaryKey" :items="primaryKeyColumns" placeholder="Primary key" />
 

@@ -9,7 +9,7 @@ from tabledocuments.utils import WebsocketActions
 
 from djangobackend.consumer_mixins import BaseConsumerMixin
 
-
+# TODO: Rename to TableEditionConsumer
 class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     """WebSocket consumer used on the editor side in order
     to manage quick data manipulation and transactions on

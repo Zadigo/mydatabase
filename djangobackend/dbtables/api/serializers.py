@@ -147,10 +147,10 @@ class UploadFileSerializer(serializers.Serializer):
             raise ValidationError({'using_columns': field_errors})
 
         # At least one column should be visible
-        column_state = map(
+        column_state = list(map(
             lambda x: x['visible'],
             columns_serializer.validated_data
-        )
+        ))
         if not any(column_state):
             raise ValidationError('At least one column should be visible')
 

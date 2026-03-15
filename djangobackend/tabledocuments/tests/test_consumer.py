@@ -1,10 +1,12 @@
 from asgiref.sync import sync_to_async
-from tabledocuments.tests.mixins import ConsumerMixin
+from djangobackend.tests.mixins import ConsumerMixin
 from tabledocuments.tests.utils import DocumentFactory
 from tabledocuments.utils import WebsocketActions
 
 
 class TestDocumentEditionConsumer(ConsumerMixin):
+    websocket_path = r'^ws/documents$'
+    
     async def test_connection(self):
         document = await sync_to_async(DocumentFactory.create)()
 

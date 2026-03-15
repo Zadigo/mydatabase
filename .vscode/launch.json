@@ -9,6 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "envFile": "${workspaceFolder}/djangobackend/.env",
+            "python": "${workspaceFolder}/djangobackend/.venv/bin/python",
             "program": "${workspaceFolder}/djangobackend/manage.py",
             "args": [
                 "runserver"

@@ -1,8 +1,6 @@
 import { parse } from 'papaparse'
 import type { ParseResult } from 'papaparse'
-import type { Refeable, Nullable, Undefineable } from '~/types'
-
-type _File = Undefineable<File>
+import type { Refeable, Nullable, Undefineable, Empty } from '~/types'
 
 type SingleRow<T> = Record<keyof T, string | number | null>
 
@@ -26,9 +24,10 @@ type FileExtension = 'json' | 'csv' | 'txt' | (string & {})
 /**
  * Composable used for reading a csv or json file
  * being uploaded by the user
+ * @deprecated Use Python ASGI websocket to read and analyze the file on the server side instead, for better performance and security. This composable is kept for reference but should not be used in production.
  */
 export function useFileReader<T = { name: string }>() {
-  const file = ref<_File>()
+  const file = ref<Empty<File>>()
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024
 
@@ -224,9 +223,9 @@ export function useFileReader<T = { name: string }>() {
   const processedData = ref<Undefineable<unknown>>()
   const dataPreview = ref<string>()
 
-  async function process(selectedFile?: Refeable<Undefineable<_File>>) {
+  async function process(selectedFile?: MaybeRefOrGetter<Empty<File>>) {
     isProcessing.value = true
-    file.value = unref(selectedFile)
+    file.value = toValue(selectedFile)
 
     try {
       if (isDefined(file)) {

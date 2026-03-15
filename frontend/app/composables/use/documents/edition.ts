@@ -1,6 +1,5 @@
 import type { Database, TableDocument, VueUseWsReturnType } from '~/types'
 import type { NewDocument } from '.'
-import { useWebsocketMessage } from '../ws_messages'
 
 /**
  * Composable used for editing a document
@@ -41,6 +40,7 @@ export const useEditDocument = createGlobalState(() => {
 
 /**
  * Composable used for creating a new document
+ * @param wsObject The websocket object used to send messages to the server when the document is created. If not provided, the composable will not send any websocket messages. 
  */
 export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnType) => {
   const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle()

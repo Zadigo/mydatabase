@@ -1,7 +1,7 @@
 from channels.testing import WebsocketCommunicator
 from unittest import IsolatedAsyncioTestCase
 from django.urls import re_path
-from tabledocuments import consumers
+from dbtables import consumers
 from djangobackend.asgi import URLRouter
 
 
@@ -10,8 +10,8 @@ class ConsumerMixin(IsolatedAsyncioTestCase):
         self.app = URLRouter(
             [
                 re_path(
-                    r'^ws/documents$',
-                    consumers.DocumentEditionConsumer.as_asgi(),
+                    r'^ws/tables/(?P<table_id>\d+)$',
+                    consumers.TableCreationConsumer.as_asgi(),
                 )
             ]
         )
@@ -19,7 +19,7 @@ class ConsumerMixin(IsolatedAsyncioTestCase):
     async def create_connection(self):
         instance = WebsocketCommunicator(
             self.app,
-            r'^ws/documents$'
+            'ws/tables/1'
         )
         state, _ = await instance.connect()
 

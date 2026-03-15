@@ -17,12 +17,13 @@ django_asgi_application = get_asgi_application()
 # https://channels.readthedocs.io/en/stable/deploying.html#configuring-the-asgi-application
 
 from tabledocuments.routing import urlpatterns as tabledocuments_urlpatterns  # noqa
+from dbtables.routing import urlpatterns as dbtables_urlpatterns  # noqa
 
 application = ProtocolTypeRouter({
     'http': django_asgi_application,
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
-            URLRouter(tabledocuments_urlpatterns)
+            URLRouter(tabledocuments_urlpatterns + dbtables_urlpatterns)
             # JWTTokenAuthMiddleware(
             #     URLRouter(tabledocuments_urlpatterns)
             # )

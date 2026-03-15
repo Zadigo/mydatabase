@@ -1,6 +1,4 @@
-export {
-  useDatabaseCreation
-} from './use'
+export * from './use'
 
 /**
  * Get the WebSocket production domain URL
