@@ -14,7 +14,9 @@
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "oxlint --type-aware",
+    "fix": "oxlint --fix"
   },
   "dependencies": {
     "@nuxt/image": "2.0.0",
