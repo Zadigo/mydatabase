@@ -1,6 +1,7 @@
 from djangobackend.consumer_mixins import BaseConsumerMixin
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from dbtables.utils import TableWebSocketActions
+from dbtables.utils import TableWebSocketActions, ValidateWebsocketMessage
+from dbtables.models import DatabaseTable
 
 class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     """WebSocket consumer used on the table creation page in order
@@ -11,21 +12,21 @@ class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
         await self.accept()
 
-        # table_id = self.scope['url_route']['kwargs']['table_id']
-        # await self.channel_layer.group_add(table_id, self.channel_name)
+        table_id = self.scope['url_route']['kwargs']['table_id']
+        await self.channel_layer.group_add(table_id, self.channel_name)
+        await self.send_success('WebSocket connection established successfully')
 
     async def receive_json(self, content, **kwargs):
-        pass
         # Here you would handle incoming messages from the client,
         # such as adding a new column, updating a cell value, etc.
-        # validated_data = ValidateWebsocketMessage(**content)
+        validated_data = ValidateWebsocketMessage(**content)
 
-        # table_id = self.scope['url_route']['kwargs']['table_id']
-        # try:
-        #     table = await DatabaseTable.objects.aget(id=table_id)
-        # except DatabaseTable.DoesNotExist:
-        #     await self.send_error('Table not found')
-        #     return
+        table_id = self.scope['url_route']['kwargs']['table_id']
+        try:
+            table = await DatabaseTable.objects.aget(id=table_id)
+        except DatabaseTable.DoesNotExist:
+            await self.send_error('Table not found')
+            return
         
         # if validated_data.action == TableWebSocketActions.CHECKOUT_URL.value:
         #     document = await self.document_edition.load_json_document_by_url(content['url'])
@@ -51,7 +52,6 @@ class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
             pass
 
     async def disconnect(self, close_code):
-        pass
         # Handle any cleanup when the WebSocket connection is closed if necessary
-        # table_id = self.scope['url_route']['kwargs']['table_id']
-        # await self.channel_layer.group_discard(table_id, self.channel_name)
+        table_id = self.scope['url_route']['kwargs']['table_id']
+        await self.channel_layer.group_discard(table_id, self.channel_name)

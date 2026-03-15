@@ -3,6 +3,8 @@ from unittest import IsolatedAsyncioTestCase
 from django.urls import re_path
 from dbtables import consumers
 from djangobackend.asgi import URLRouter
+from dbtables.models import DatabaseTable
+from dbtables.tests.utils import DatabaseTableFactory
 
 
 class ConsumerMixin(IsolatedAsyncioTestCase):
@@ -15,11 +17,12 @@ class ConsumerMixin(IsolatedAsyncioTestCase):
                 )
             ]
         )
+        self.table: DatabaseTable = DatabaseTableFactory.create()
 
     async def create_connection(self):
         instance = WebsocketCommunicator(
             self.app,
-            'ws/tables/1'
+            f'ws/tables/{self.table.pk}'
         )
         state, _ = await instance.connect()
 
