@@ -41,7 +41,16 @@ export interface ColumnTypeOptions {
   /**
    * Whether the column is visible in the table or not
    * @default true
+   * @deprecated This field is deprecated and should not be used. Use the `UserPreferredColumnTypeOptions` interface instead, which includes the `visible` property for user preferences.
    */
+  visible: boolean
+}
+
+export interface UserPreferredColumnTypeOptions extends ColumnTypeOptions {
+  /**
+  * Whether the column is visible in the table or not
+  * @default true
+  */
   visible: boolean
 }
 
@@ -50,5 +59,5 @@ export interface FileCheckoutResponse {
   numberOfRows: number
   numberOfColumns: number
   columns: string[]
-  columnTypes: ColumnTypeOptions[]
+  columnTypes: UserPreferredColumnTypeOptions[]
 }

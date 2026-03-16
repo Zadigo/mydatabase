@@ -2,8 +2,6 @@
   <section id="editor">
     <nuxt-card>
       <template #header>
-        selectedTable {{ selectedTable }}
-
         <div v-if="selectedTable" class="flex justify-between items-center">
           <h2 class="text-lg font-semibold">
             {{ selectedTable.name }}

@@ -1,7 +1,7 @@
 <template>
   <section id="database-schema" class="bg-slate-50">
     <div id="tables-wrapper" ref="containerEl" class="tables-wrapper w-full h-screen z-50 relative">
-      <database-tables-draggable v-for="table in availableTables" :key="table.id" :table="table" :container="containerEl" />
+      <database-tables-draggable v-for="table in availableTables" :key="table.id" :table="table" :container-el="containerEl" />
     </div>
   </section>
 </template>

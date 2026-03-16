@@ -1,5 +1,5 @@
 <template>
-  <div id="table" ref="tableEl" class="bg-white shadow-sm w-50 rounde-md rounded-md border-slate-100 z-40" :style="style" style="position: fixed">
+  <div id="table" ref="tableEl" class="fixed bg-white shadow-sm w-50 rounde-md rounded-md border-slate-100 z-40" :style="style">
     <div class="bg-slate-300 p-2 rounded-t-md font-bold flex items-center justify-between">
       <nuxt-button variant="ghost" color="neutral" icon="i-lucide-table" :disabled="true">
         {{ table.name }}
@@ -9,13 +9,15 @@
     </div>
 
     <ul class="cursor-move overflow-y-scroll h-70">
-      <li v-for="typeOption in tableDocument?.column_types || []" :key="typeOption.name" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
+      <li v-for="name in tableDocument?.column_names || []" :key="name" class="p-2 not-last:border-b border-slate-100 text-sm space-y-2 flex justify-between items-center">
         <div class="space-x-2">
-          <span>{{ typeOption.name }}</span>
+          <span>
+            {{ name }}
+          </span>
         </div>
 
         <div class="text-slate-500">
-          <icon :name="getTypeIcon(typeOption.columnType)" class="text-md" />
+          <icon :name="getTypeIcon('String')" class="text-md" />
         </div>
       </li>
     </ul>
@@ -26,23 +28,17 @@
 import { useColumnTypeOptions, useTableActualDocument } from '~/composables/use/documents'
 import type { Table } from '~/types'
 
-const props = defineProps<{ table: Table }>()
+const props = defineProps<{ table: Table, containerEl: HTMLElement | null }>()
 
 /**
  * Dragging
  */
 
-const containerEl = ref<HTMLElement | null>(null)
 const tableEl = useTemplateRef('tableEl')
 
 const { style } = useDraggable(tableEl, {
   initialValue: { x: 800, y: 200 },
-  containerElement: containerEl,
-  preventDefault: true
-})
-
-onMounted(() => {
-  containerEl.value = document.querySelector('#tables-wrapper')
+  containerElement: props.containerEl
 })
 
 /**

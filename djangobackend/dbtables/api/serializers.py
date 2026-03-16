@@ -130,15 +130,15 @@ class UploadFileSerializer(serializers.Serializer):
             if entry_key == '':
                 entry_key = None
 
-        column_options = validated_data.pop('using_columns')
+        user_column_type_options = validated_data.pop('using_columns')
 
-        columns_serializer = _ValidateColumnTypes(
-            data=column_options,
+        column_type_serializer = _ValidateColumnTypes(
+            data=user_column_type_options,
             many=True
         )
 
         try:
-            columns_serializer.is_valid(raise_exception=True)
+            column_type_serializer.is_valid(raise_exception=True)
         except ValidationError as e:
             field_errors = {}
             for error in e.detail:
@@ -147,10 +147,9 @@ class UploadFileSerializer(serializers.Serializer):
             raise ValidationError({'using_columns': field_errors})
 
         # At least one column should be visible
-        column_state = list(map(
-            lambda x: x['visible'],
-            columns_serializer.validated_data
-        ))
+        column_type_json = column_type_serializer.validated_data
+        column_state = list(map(lambda x: x['visible'], column_type_json))
+
         if not any(column_state):
             raise ValidationError('At least one column should be visible')
 
@@ -175,7 +174,7 @@ class UploadFileSerializer(serializers.Serializer):
                     args=[
                         file_content,
                         document.pk,
-                        columns_serializer.validated_data
+                        column_type_json
                     ],
                     countdown=5
                 )
@@ -186,7 +185,7 @@ class UploadFileSerializer(serializers.Serializer):
                         file_content,
                         document.pk,
                         entry_key,
-                        columns_serializer.validated_data
+                        column_type_json
                     ],
                     countdown=5
                 )

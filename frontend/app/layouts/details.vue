@@ -1,5 +1,5 @@
 <template>
-  <section id="site">
+  <section id="site" class="relative">
     <!-- Navbar -->
     <base-navbar />
 
@@ -15,13 +15,16 @@
     </div>
 
     <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
-
       <!-- Aside -->
       <base-aside v-if="hasAside" />
 
       <!-- Content -->
       <slot />
     </main>
+
+    <dev-only>
+      <dev-container />
+    </dev-only>
   </section>
 </template>
 

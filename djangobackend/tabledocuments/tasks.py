@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from gspread.utils import rowcol_to_a1
 from django.utils.crypto import get_random_string
-from tabledocuments.logic.utils import create_column_type_options
+from tabledocuments.logic.utils import clean_user_column_type_options, create_column_type_options, create_column_options
 from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import create_dataframe
@@ -21,7 +21,7 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def update_document_options(document_uuid: str, column_options: list[dict[str, str | bool]] = [], from_file: bool = False):
+def update_document_options(document_uuid: str, column_type_options: list[dict[str, str | bool]] = [], from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
     the column names, etc."""
@@ -37,22 +37,25 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
     # column options provided as arguments when the task is triggered from Nuxt
     if from_file and document.file is not None:
         df = pandas.read_csv(document.file.path)
-        column_options = create_column_type_options(df.columns.tolist())
+        column_type_options = create_column_type_options(df.columns.tolist())
 
-    document.column_options = column_options
+    document.column_type_options = clean_user_column_type_options(column_type_options)
     document.column_names = list(
         map(
             lambda x: x['newName'] or x['name'], 
-            column_options
+            document.column_type_options
         )
     )
 
     column_types = {}
-    for item in column_options:
+    for item in document.column_type_options:
         column_name = item['newName'] or item['name']
         column_types[column_name] = item['columnType']
 
     document.column_types = column_types
+
+    column_options = create_column_options(document.column_names)
+    document.column_options = column_options
     document.save()
 
     logger.warning(
@@ -61,7 +64,7 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
 
 
 @shared_task
-def create_csv_file_from_data(data: Any, document_id: str | int, column_options: list[dict[str, Any]] = []):
+def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] = []):
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -90,7 +93,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_options:
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
 
-            df = create_dataframe(clean_data[1:], column_options)
+            df = create_dataframe(clean_data[1:], column_type_options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
@@ -107,14 +110,14 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_options:
         update_document_options.apply_async(
             args=[
                 str(document.document_uuid),
-                column_options
+                column_type_options
             ],
             countdown=10
         )
 
 
 @shared_task
-def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = []):
+def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: list[dict[str, Any]] = []):
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -156,7 +159,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
                 return
 
         if isinstance(data, list):
-            df = create_dataframe(data, column_options)
+            df = create_dataframe(data, column_type_options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
@@ -173,19 +176,19 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
         update_document_options.apply_async(
             args=[
                 str(document.document_uuid),
-                column_options
+                column_type_options
             ],
             countdown=10
         )
 
 
 @shared_task
-def create_feather_file_from_data(data: Any, document_id: str | int, column_options: list[dict[str, Any]] = []):
+def create_feather_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] = []):
     pass
 
 
 @shared_task
-def create_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = [], file_type: str = 'csv'):
+def create_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: list[dict[str, Any]] = [], file_type: str = 'csv'):
     """Creates a CSV file from the provided data which can be either
     a string (CSV content), a list of records (JSON content) or
     a dictionary containing the data under a specific entry key. The
@@ -196,14 +199,14 @@ def create_file_from_data(data: Any, document_id: str | int, entry_key: str | No
         data: The input data which can be a CSV string, a list of records, or a dictionary.
         document_id: The ID of the TableDocument instance to which the file will be saved.
         entry_key: If data is a dictionary, this key is used to extract the relevant data.
-        column_options: A list of dictionaries containing column options such as name and type.
+        column_type_options: A list of dictionaries containing column type options such as name and type.
         file_type: The type of file to create ('csv' or 'json').
     """
     if file_type == 'csv':
-        return create_csv_file_from_data.apply_async(args=[data, document_id, column_options], countdown=10)
+        return create_csv_file_from_data.apply_async(args=[data, document_id, column_type_options], countdown=10)
     
     if file_type == 'json':
-        return create_json_file_from_data.apply_async(args=[data, document_id, entry_key, column_options], countdown=10)
+        return create_json_file_from_data.apply_async(args=[data, document_id, entry_key, column_type_options], countdown=10)
 
 
 @shared_task

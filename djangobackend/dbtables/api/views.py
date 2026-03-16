@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from rest_framework.request import Request
 import pandas
-from tabledocuments.logic.utils import create_column_type_options
+from tabledocuments.logic.utils import user_preference_column_options
 
 class UpdateTable(RetrieveUpdateDestroyAPIView):
     """Endpoint used to update metadata for a 
@@ -53,7 +53,7 @@ class CheckoutDocument(GenericAPIView):
             'numberOfRows': df.shape[0],
             'numberOfColumns': df.shape[1],
             'columns': df.columns.tolist(),
-            'columnTypes': create_column_type_options(df.columns.tolist()),
+            'columnTypes': user_preference_column_options(df.columns.tolist()),
         }
 
         return Response(template, status=status.HTTP_200_OK)
