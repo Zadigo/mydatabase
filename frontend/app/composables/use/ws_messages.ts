@@ -11,7 +11,7 @@ interface DocumentData {
 
 export type BaseWsSendMessage =
   | { action: 'idle_connect' }
-  | { action: 'load_via_id', table_id: number, document: { id: number, name: string } }
+  | { action: 'load_via_id', table_id: number, document: { uuid: string, name: string } }
   | { action: 'load_via_url', url: string, entry_key?: Nullable<string> }
   | { action: 'load_document_data', document_uuid: Undefineable<string> }
 

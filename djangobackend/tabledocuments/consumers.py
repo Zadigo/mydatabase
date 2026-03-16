@@ -39,7 +39,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
 
         if action == WebsocketActions.LOAD_VIA_ID.value:
             document_info: dict = content['document']
-            state, document = await self.document_edition.load_document_by_id(document_info['id'])
+            state, document = await self.document_edition.load_document_by_id(document_info['uuid'])
 
             if document is not None and dataclasses.is_dataclass(document):
                 await self.document_transform.prepare(document)

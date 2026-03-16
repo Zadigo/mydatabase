@@ -57,7 +57,7 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
           action: 'load_via_id',
           table_id: selectedTable.value.id,
           document: {
-            id: selectedDocument.value.id,
+            uuid: selectedDocument.value.document_uuid,
             name: selectedDocument.value.name
           }
         })

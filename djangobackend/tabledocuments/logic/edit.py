@@ -9,7 +9,6 @@ import pytz
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
-from django.db.models import Q
 from django.utils.crypto import get_random_string
 from requests.models import Response
 from tabledocuments.models import TableDocument
@@ -133,10 +132,7 @@ class DocumentEdition:
 
         @database_sync_to_async
         def get_document() -> tuple[bool, pandas.DataFrame | None]:
-            document = TableDocument.objects.get(
-                Q(id=id) |
-                Q(document_uuid=id)
-            )
+            document = TableDocument.objects.get(document_uuid=id)
 
             if document.file is None:
                 self.errors.append(

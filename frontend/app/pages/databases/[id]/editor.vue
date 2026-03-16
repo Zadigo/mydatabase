@@ -22,13 +22,13 @@
       </template>
 
       <!-- Component -->
-      <component :is="displayComponent" />
-      <!-- <template v-else>
+      <component :is="displayComponent" v-if="!isLoading" />
+      <template v-else>
         <div class="space-y-2">
           <nuxt-skeleton class="w-full h-10" />
           <nuxt-skeleton class="w-6/12 h-10" />
         </div>
-      </template> -->
+      </template>
     </nuxt-card>
 
     <!-- Modals -->
@@ -75,16 +75,20 @@ useEditorPageRefresh(selectedTable)
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 wsObject.open()
 
+const [isLoading, toggleIsLoading] = useToggle(true)
 const { stringify } = useWebsocketMessage()
 
-useTimeoutFn(() => {
-  wsObject.send(
-    stringify({
-      action: 'load_document_data',
-      document_uuid: selectedTableDocument.value?.document_uuid
-    })
-  )
-}, 5000)
+watchDebounced(selectedTableDocument, (newValue) => {
+  if (isDefined(newValue)) {
+    toggleIsLoading(false)
+    wsObject.send(
+      stringify({
+        action: 'load_document_data',
+        document_uuid: newValue.document_uuid
+      })
+    )
+  }
+}, { debounce: 1000, immediate: true })
 
 /**
  * Provides
