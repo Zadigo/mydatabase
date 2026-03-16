@@ -34,9 +34,3 @@ const endpoints = [
   }
 ]
 </script>
-
-<style scoped>
-[id$="aside-link"].router-link-exact-active {
-  background-color: var(--color-gray-200);
-}
-</style>

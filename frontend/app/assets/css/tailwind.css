@@ -32,3 +32,11 @@
   --sidebar-secondary-width: 200px;
   --navbar-min-height: 50px;
 }
+
+:not(.dark) [id$="aside-link"].router-link-exact-active {
+  background-color: var(--color-slate-200);
+}
+
+.dark [id$="aside-link"].router-link-exact-active {
+  background-color: var(--color-slate-800);
+}

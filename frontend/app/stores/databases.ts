@@ -30,10 +30,13 @@ export const useDatabasesStore = defineStore('databases', () => {
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)
   const hasTables = computed(() => availableTables.value.length > 0)
 
+  console.log('prodDomain', useRuntimeConfig().public.prodDomain)
+
   async function fetch() {
     const data = await $fetch<Database[]>('/v1/databases', {
       method: 'GET',
-      baseURL: useRuntimeConfig().public.prodDomain
+      baseURL: useRuntimeConfig().public.prodDomain,
+      
     })
 
     if (data) {

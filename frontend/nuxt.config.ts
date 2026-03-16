@@ -27,11 +27,12 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { ssr: true },
+    '/': { prerender: true },
     '/databases/**': { ssr: false },
+    '/presentations': { prerender: true },
     '/settings/**': { ssr: false },
     '/integrations': { ssr: false },
-    '/login': { ssr: false }
+    '/login': { prerender: true }
   },
 
   ui: {

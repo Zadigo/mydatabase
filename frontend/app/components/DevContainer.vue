@@ -1,5 +1,5 @@
 <template>
-  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto max-w-100 w-auto backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
+  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto max-h-100 max-w-100 w-auto backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
     <nuxt-button variant="soft" color="neutral" @click="() => { reduceElements = !reduceElements }">
       Reduce
     </nuxt-button>
@@ -28,14 +28,29 @@
       <pre class="h-50 w-full overflow-scroll rounded-3xl bg-gray-50/50">
         {{ tableDocuments }}
       </pre>
+
+      <p class="font-bold mt-5">
+        Current database
+      </p>
+
+      <pre class="h-50 w-full overflow-scroll rounded-3xl bg-gray-50/50">
+        {{ currentDatabase }}
+      </pre>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 const devContainerEl = useTemplateRef('devContainerEl')
+
+const { currentDatabase } = storeToRefs(useDatabasesStore())
+
 const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())
 const { style } = useDraggable(devContainerEl, { initialValue: { x: 40, y: 0 }})
 
-const reduceElements = ref(false)
+const reduceElements = ref(true)
+
+onClickOutside(devContainerEl, () => {
+  reduceElements.value = true
+})
 </script>

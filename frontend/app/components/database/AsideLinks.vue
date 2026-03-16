@@ -4,7 +4,7 @@
       <p class="font-semibold mb-3">Management</p>
 
       <li v-for="item in endpoints" :key="item.name" class="w-full">
-        <nuxt-link id="database-aside-link" :to="`/databases/${currentDatabase.id}/${item.endpoint}`" class="block py-1 ps-3 text-sm rounded-md dark:bg-slate-800">
+        <nuxt-link id="database-aside-link" :to="`/databases/${currentDatabase.id}/${item.endpoint}`" class="block py-1 ps-3 text-sm rounded-md">
           {{ item.name }}
         </nuxt-link>
       </li>
@@ -43,9 +43,3 @@ const endpoints = [
   }
 ]
 </script>
-
-<style scoped>
-[id$="aside-link"].router-link-exact-active {
-  background-color: var(--color-gray-200);
-}
-</style>

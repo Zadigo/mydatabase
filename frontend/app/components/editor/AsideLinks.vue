@@ -50,9 +50,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCreateDocument, useEditDocument } from '~/composables/use/documents'
-import { useCreateTable } from '~/composables/use/tables'
-
 const dbStore = useDatabasesStore()
 const { availableTables } = storeToRefs(dbStore)
 
@@ -65,12 +62,12 @@ console.log('Editor.AsideLinks', tableData.value)
  */
 
 const queryParams = useUrlSearchParams() as { table: string }
+
 watch(selectedTableDocumentName, (value) => {
-  if (value) {
+  if (isDefined(value)) {
     queryParams.table = useToString(selectedTable.value?.id || '').value
   }
 })
-
 
 /**
  * Columns

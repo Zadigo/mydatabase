@@ -41,6 +41,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   // we need to automatically set the value on the
   // select input when the user selects that table
   watch(selectedTable, (table) => {
+    console.log('Selected table changed:', table)
     if (isDefined(table)) {
       if (table.active_document_datasource) {
         const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === table.active_document_datasource)
@@ -101,14 +102,17 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
     }
   }
 
-  watch(selectedTableDocument, async (doc) => {
+  // FIXME: Does not update on Django
+  watch(selectedTableDocument, (doc) => {
+    // When the user changes the datasource for the table, 
+    // we need to update it on Django
     if (isDefined(selectedTable) && isDefined(doc)) {
       const data = { ...selectedTable.value }
 
       data.active_document_datasource = doc.document_uuid
-      selectedTable.value = data
+      selectedTable.value = toValue(data)
       
-      await update()
+      update()
     }
   })
 
