@@ -8,9 +8,10 @@
 
     <!-- Websocket Alerts -->
     <!-- ms-[calc(var(--sidebar-width)+20rem)] -->
-    <div v-if="!isConnected" class="bg-error-500 w-full p-5 mt-(--navbar-min-height) text-slate-50 text-light">
-      Disconnected from server
-      <nuxt-button @click="() => { wsObject.open() }">
+    <div v-if="!isConnected" class="bg-info-500/30 shadow-2xl space-y-2 flex-col w-auto h-auto rounded-2xl backdrop-blur-3xl fixed bottom-5 right-5 p-5 text-slate-50 z-50">
+      <p>Disconnected from server</p>
+
+      <nuxt-button class="self-end" variant="subtle" color="warning" @click="() => { wsObject.open() }">
         Reconnect
       </nuxt-button>
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto w-100 backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
+  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto max-w-100 w-auto backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
     <nuxt-button variant="soft" color="neutral" @click="() => { reduceElements = !reduceElements }">
       Reduce
     </nuxt-button>

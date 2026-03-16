@@ -6,7 +6,7 @@
           <nuxt-input v-model="usernameField" label="Email" type="text" class="w-full" />
           <nuxt-input v-model="password" label="Password" type="password" class="w-full" />
 
-          <nuxt-button @click="() => { login(() => { navigateTo('/') }) }">
+          <nuxt-button @click="() => { login(async () => { await navigateTo('/') }) }">
             Login
           </nuxt-button>
         </nuxt-card>
@@ -19,6 +19,8 @@
 /**
  * Login
  */
+
+preloadRouteComponents('/') // Preload home page for faster navigation after login
 
 const { login, usernameField, password } = useLogin('email')
 </script>
