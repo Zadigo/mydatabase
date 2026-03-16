@@ -1,6 +1,6 @@
 export type DefaultColumnOption = 'visible' | 'editable' | 'sortable' | 'searchable'
 
-export type ColumnOptions = { name: string } & { [K in DefaultColumnOption]: boolean }
+export type ColumnOptions = { name: string, columnType: ColumnType } & { [K in DefaultColumnOption]: boolean }
 
 export const columnType = [
   'String',

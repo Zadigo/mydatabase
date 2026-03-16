@@ -36,14 +36,16 @@
               Column types
             </p>
 
-            <div v-for="(column, index) in tableDocument.column_types" :key="index" class="grid grid-cols-7 gap-1 content-center">
+            <div v-for="(column, index) in tableDocument.column_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.name" class="col-span-3" />
               <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
 
               <!-- Dropdown -->
-              <nuxt-dropdown-menu :items="constrainMenuItem">
-                <nuxt-button icon="i-lucide-ellipsis-vertical" class="col-auto" variant="soft" />
-              </nuxt-dropdown-menu>
+              <div>
+                <nuxt-dropdown-menu :items="constrainMenuItem">
+                  <nuxt-button icon="i-lucide-ellipsis-vertical" class="col-auto" variant="soft" />
+                </nuxt-dropdown-menu>
+              </div>
             </div>
           </div>
 
