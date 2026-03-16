@@ -1,6 +1,6 @@
 from djangobackend.consumer_mixins import BaseConsumerMixin
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from dbtables.utils import TableWebSocketActions, ValidateWebsocketMessage
+from dbtables.utils import ValidateWebsocketMessage
 from dbtables.models import DatabaseTable
 
 class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
@@ -27,29 +27,6 @@ class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         except DatabaseTable.DoesNotExist:
             await self.send_error('Table not found')
             return
-        
-        # if validated_data.action == TableWebSocketActions.CHECKOUT_URL.value:
-        #     document = await self.document_edition.load_json_document_by_url(content['url'])
-
-        #     if document is not None:
-        #         columns = document.content.columns.tolist()
-
-        #         await self.send_json({
-        #             'action': 'checkedout_url',
-        #             'columns': {
-        #                 'names': columns,
-        #                 'options': create_column_options(columns),
-        #                 'type_options': create_column_type_options(columns)
-        #             }
-        #         })
-        #     else:
-        #         await self.send_error(
-        #             f"Could not load document from URL: {','.join(self.document_edition.errors)}"
-        #         )
-
-        if validated_data.action == TableWebSocketActions.CHECKOUT_FILE.value:
-            # Handle file checkout logic here
-            pass
 
     async def disconnect(self, close_code):
         # Handle any cleanup when the WebSocket connection is closed if necessary

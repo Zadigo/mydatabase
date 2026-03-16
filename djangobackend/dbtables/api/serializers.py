@@ -8,7 +8,7 @@ from tabledocuments import tasks
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.choices import ColumnTypes
 from tabledocuments.models import TableDocument
-
+from rest_framework.request import Request
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
     documents = SimpleDocumentSerializer(many=True, read_only=True)
@@ -80,7 +80,7 @@ class UploadFileSerializer(serializers.Serializer):
         write_only=True
     )
 
-    def validate(self, data):
+    def validate(self, data: dict):
         name = data.get('name')
         file = data.get('file')
         url = data.get('url')
@@ -105,7 +105,7 @@ class UploadFileSerializer(serializers.Serializer):
             )
 
         # Check the size of the file which can be
-        # overwhelming if too big
+        # overwhelming if too big (> 50MB)
         if file is not None and file.size > 50 * 1024 * 1024:
             raise serializers.ValidationError(
                 'File size must be less than 50MB'
@@ -115,12 +115,11 @@ class UploadFileSerializer(serializers.Serializer):
         #     file_extension = file.name.split('.')[-1]
         #     random_name = f'{get_random_string(32)}.{file_extension}'
         #     data['name'] = random_name
-        # else:
         data['name'] = data.get('name')
         return data
 
     def create(self, validated_data):
-        request = self._context['request']
+        request: Request = self._context['request']
         table_id = request.parser_context['kwargs']['pk']
 
         entry_key = None
@@ -164,10 +163,15 @@ class UploadFileSerializer(serializers.Serializer):
 
         # When we are dealing with a file
         file = request.FILES.get('file', None)
-        if file:
+        if file is not None:
+            file_content = ''
+
+            for chunk in file.chunks():
+                file_content += chunk.decode('utf-8')
+
             tasks.create_csv_file_from_data.apply_async(
                 args=[
-                    file.read(),
+                    file_content,
                     document.pk,
                     entry_key,
                     columns_serializer.validated_data
@@ -177,7 +181,7 @@ class UploadFileSerializer(serializers.Serializer):
 
         # If we are dealing with an url, then we need to
         # create the csv document asynchronously
-        if document.url and document.file == None:
+        if document.url and document.file is None:
             tasks.get_document_from_url.apply_async(
                 args=[document.url],
                 link=[
@@ -192,7 +196,7 @@ class UploadFileSerializer(serializers.Serializer):
         # In the same manner, if we have a google sheet id
         # we need to fetch the data from the sheet and create
         # the csv file locally
-        if document.google_sheet_id and document.file == None:
+        if document.google_sheet_id and document.file is None:
             providers = table.database_schema.databaseprovider_set.all()
             if providers.exists():
                 try:

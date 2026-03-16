@@ -30,6 +30,15 @@ def validate_file(name):
     validator(name)
 
 
+def is_csv_file(name: str):
+    """Check if the file is a CSV file based on its extension"""
+    return name.endswith('.csv')
+
+def is_json_file(name: str):
+    """Check if the file is a JSON file based on its extension"""
+    return name.endswith('.json')
+
+
 def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_options: list[dict[str, str | bool]]):
     """Create a pandas dataframe from the cleaned data
     after applying the column options such as renaming,

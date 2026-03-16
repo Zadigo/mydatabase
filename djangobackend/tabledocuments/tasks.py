@@ -57,7 +57,7 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
 
 
 @shared_task
-def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = []):
+def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = [], file_type: str = 'csv'):
     """Creates a CSV file from the provided data which can be either
     a string (CSV content), a list of records (JSON content) or
     a dictionary containing the data under a specific entry key. The
@@ -69,6 +69,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
         document_id: The ID of the TableDocument instance to which the file will be saved.
         entry_key: If data is a dictionary, this key is used to extract the relevant data.
         column_options: A list of dictionaries containing column options such as name and type.
+        file_type: The type of file to create ('csv' or 'json').
     """
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
