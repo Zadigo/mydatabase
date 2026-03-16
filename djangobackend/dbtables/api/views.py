@@ -56,7 +56,7 @@ class CheckoutDocument(GenericAPIView):
             'columnTypes': user_preference_column_options(df.columns.tolist()),
         }
 
-        return Response(template, status=status.HTTP_200_OK)
+        return Response(template, status=status.HTTP_201_CREATED)
 
 
 class UploadNewDocument(CreateAPIView):

@@ -64,6 +64,17 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
   const tableEditionStore = useTableEditionStore()
   const { selectedTable } = storeToRefs(tableEditionStore)
 
+  function resetNewDocument() {
+    newDocument.value = {
+      name: '',
+      url: '',
+      google_sheet_id: '',
+      file: null,
+      entry_key: null,
+      using_columns: []
+    }
+  }
+
   function create() {
     const { data } = useAsyncData('createDocument', async () => {
       const formData = new FormData()
@@ -83,6 +94,12 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
           method: 'POST',
           baseURL: useRuntimeConfig().public.prodDomain,
           body: formData,
+          onResponse({ response }) {
+            if (response.status === 200) {
+              toggleShowAddDocumentModal()
+              resetNewDocument()
+            }
+          },
           onRequestError(error) {
             toast.add({
               title: 'Failed to add document',

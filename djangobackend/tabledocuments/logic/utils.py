@@ -38,7 +38,12 @@ def user_preference_column_options(columns: list[str]):
     set as preferences for the final table presentation. This is used
     when the user wants to save their preferences for a given document"""
     result = create_column_type_options(columns)
-    return [x.update(visible=True) for x in result]
+
+    options = []
+    for item in result:
+        item.update(visible=True)
+        options.append(item)
+    return options
 
 
 def clean_user_column_type_options(column_options: list[dict]):
