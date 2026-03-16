@@ -6,7 +6,7 @@
 
     <template #body>
       <div v-if="availableDocuments.length > 0" class="space-y-2">
-        <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50 dark:bg-info-950">
+        <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50 dark:bg-slate-800">
           <div class="flex justify-between items-center">
             <div class="font-bold flex items-center gap-2">
               <icon name="lucide:case-sensitive" />
@@ -38,14 +38,13 @@
               Column types
             </p>
 
-            <div v-for="(column, index) in tableDocument.column_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
+            <div v-for="(column, index) in tableDocument.column_type_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.name" class="col-span-3" />
               <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
               
-              <!-- Dropdown -->
               <div>
                 <nuxt-dropdown-menu :items="constrainMenuItem">
-                  <nuxt-button icon="i-lucide-ellipsis-vertical" class="col-auto" variant="soft" />
+                  <nuxt-button icon="i-lucide-ellipsis-vertical" class="col-auto" variant="soft" color="neutral" />
                 </nuxt-dropdown-menu>
               </div>
             </div>
@@ -79,7 +78,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEditDocument, useEditDocumentRelationship } from '~/composables/use/documents'
 import type { DropdownMenuItem } from '@nuxt/ui'
 
 /**

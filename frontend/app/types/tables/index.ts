@@ -1,5 +1,5 @@
 import type { _BaseDatabaseObject, Nullable } from '..'
-import type { ColumnOptions, ColumnTypeOptions } from './columns'
+import type { ColumnOptions, ColumnTypeOptions, ColumnTypes } from './columns'
 
 export type * from './columns'
 
@@ -11,7 +11,6 @@ export type DocumentData = Record<string, unknown>
  * is contained within that sheet
  */
 export interface TableDocument extends _BaseDatabaseObject {
-  id: number
   /**
    * The name of the document
    */
@@ -34,7 +33,12 @@ export interface TableDocument extends _BaseDatabaseObject {
    * The column type options used for this document
    * @default []
    */
-  column_types: ColumnTypeOptions[]
+  column_types: ColumnTypes[]
+  /**
+   * The column type options used for this document
+   * @default []
+   */
+  column_type_options: ColumnTypeOptions[]
 }
 
 export type TableComponent = 'data-table' | 'graph-table'

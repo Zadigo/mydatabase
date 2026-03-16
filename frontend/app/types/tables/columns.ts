@@ -14,6 +14,11 @@ export const columnType = [
 
 export type ColumnType = typeof columnType[number]
 
+export interface ColumnTypes {
+  name: string
+  columnType: ColumnType
+}
+
 export interface ColumnTypeOptions {
   /**
    * The column's name
