@@ -44,3 +44,11 @@ export interface ColumnTypeOptions {
    */
   visible: boolean
 }
+
+export interface FileCheckoutResponse {
+  sample: Record<string, unknown>[]
+  numberOfRows: number
+  numberOfColumns: number
+  columns: string[]
+  columnTypes: ColumnTypeOptions[]
+}

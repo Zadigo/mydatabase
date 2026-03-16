@@ -37,5 +37,16 @@
 <script setup lang="ts">
 import type { ColumnTypeOptions, Undefineable } from '~/types'
 
-const editedColumn = defineModel<Undefineable<ColumnTypeOptions>>('editedColumn', { required: true }) 
+const props = defineProps<{
+  columnType: Undefineable<ColumnTypeOptions>
+}>()
+
+const editedColumn = computed({
+  get() {
+    return props.columnType
+  },
+  set() {
+    // Do nothing, changes are emitted on blur to avoid excessive emissions while editing
+  }
+})
 </script>

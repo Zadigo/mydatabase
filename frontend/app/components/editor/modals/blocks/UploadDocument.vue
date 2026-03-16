@@ -17,14 +17,10 @@
             <p class="mb-3 text-sm font-light mt-3">If applicable, for a JSON object specify the entry key to extract the relevant data from</p>
             <nuxt-input v-model="newDocument.entry_key" variant="subtle" class="w-full" placeholder="Entry Key e.g. results, data" />
             
-            {{ processedData }}
+            {{ fileCheckoutResponse }}
 
             <!-- CSV/Json -->
             <nuxt-file-upload v-model="newDocument.file" label="CSV, JSON" description="Select a CSV or JSON file to upload" class="w-full min-h-48" accept=".csv,.json,.xlsx" />
-
-            <nuxt-button :loading="isProcessing" @click="process(newDocument.file)">
-              Test process
-            </nuxt-button>
           </div>
 
           <!-- Url -->
@@ -58,8 +54,13 @@ const dbStore = useDatabasesStore()
  * Creation
  */
 
-
 const { newDocument } = useCreateDocument()
+
+/**
+ * File reading
+ */
+
+const { fileCheckoutResponse } = useFileCheckoutStore()
 
 /**
  * Url prefetching
@@ -117,27 +118,4 @@ const items: TabsItem[] = [
     icon: 'i-lucide-table'
   }
 ]
-
-/**
- * File analysis
- */
-
-const emit = defineEmits<{ headers: [string[]] }>()
-
-// const tableStore = useTableEditionStore()
-// const { selectedTable } = storeToRefs(tableStore)
-// const { wsObject } = useTableWebocketManager(selectedTable, )
-
-
-const { isValid, process, dataSummary, processedData, isProcessing } = useFileReader()
-
-watchDebounced(processedData, (value) => {
-  if (isDefined(value)) {
-    console.log('processedData', value)
-    emit('headers', value.headers)
-  }
-}, {
-  immediate: false,
-  debounce: 800
-})
 </script>

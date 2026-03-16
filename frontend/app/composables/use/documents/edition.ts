@@ -1,5 +1,6 @@
-import type { Database, TableDocument, VueUseWsReturnType } from '~/types'
+import type { Database, FileCheckoutResponse, SimpleTable, TableDocument, Undefineable, VueUseWsReturnType } from '~/types'
 import type { NewDocument } from '.'
+import type { StepperItem } from '@nuxt/ui'
 
 /**
  * Composable used for editing a document
@@ -114,7 +115,23 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
     }
   }
 
+  const currentStep = ref<StepperItem['title']>('Upload file')
+
+  function updateStep(item: StepperItem) {
+    currentStep.value = item.title || ''  
+  }
+
+  const canSend = computed(() => isDefined(newDocument.value.file))
+
   return {
+    /**
+     * Whether the "Create Document" button can be clicked or not. Only when the user has reached the last step of the stepper, which is "Select columns"
+     */
+    canSend,
+    /**
+     * The current step of the stepper when creating a new document
+     */
+    currentStep,
     /**
      * The new document being created
      */
@@ -123,6 +140,10 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
      * Shows the modal to add a new document
      */
     showAddDocumentModal,
+    /**
+     * Updates the current step of the stepper when creating a new document
+     */
+    updateStep,
     /**
      * Creates the new document
      */
@@ -133,3 +154,53 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
     toggleShowAddDocumentModal
   }
 })
+
+const [ useFileCheckout, _useFileCheckoutStore ] = createInjectionState((selectedTable: WritableComputedRef<Undefineable<SimpleTable>>, newDocument: Ref<NewDocument>) => {
+  const fileCheckoutResponse = ref<FileCheckoutResponse | null>(null)
+  const columnTypes = computed(() => fileCheckoutResponse.value?.columnTypes || [])
+
+  watch(columnTypes, (newValue) => {
+    if (newValue) {
+      newDocument.value.using_columns = newValue
+    }
+  })
+
+  watchDebounced(() => newDocument.value.file, async (newValue) => {
+    console.log('Google')
+    if (isDefined(newValue)) {
+      const formData = new FormData()
+
+      formData.append('name', newDocument.value.name)
+      formData.append('file', newValue || '')
+
+      fileCheckoutResponse.value = await $fetch<FileCheckoutResponse>(`/v1/tables/${selectedTable.value?.id}/checkout`, {
+        method: 'POST',
+        baseURL: useRuntimeConfig().public.prodDomain,
+        body: formData,
+        // onRequestError(error) {
+        //   toast.add({
+        //     title: 'Failed to checkout document',
+        //     description: useToString(error).value,
+        //     icon: 'i-lucide-warning-circle'
+        //   })
+        // }
+      })
+    }
+  }, { debounce: 2000 })
+
+  return {
+    fileCheckoutResponse
+  }
+})
+
+export { useFileCheckout }
+
+export function useFileCheckoutStore() {
+  const store = _useFileCheckoutStore()
+  
+  if (!store) {
+    throw new Error('useFileCheckoutStore must be used within a component that calls useFileCheckout')
+  }
+
+  return store
+}

@@ -5,6 +5,11 @@ app_name = 'database_tables'
 
 urlpatterns = [
     re_path(
+        r'^(?P<pk>\d+)/checkout$',
+        views.CheckoutDocument.as_view(),
+        name='checkout_document'
+    ),
+    re_path(
         r'^(?P<pk>\d+)/upload$',
         views.UploadNewDocument.as_view(),
         name='upload_document'
