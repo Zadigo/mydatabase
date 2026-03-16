@@ -51,6 +51,8 @@ class RestartProject(GenericAPIView):
     the tables and documents associated with this database"""
 
     queryset = DatabaseSchema.objects.all()
+    lookup_url_kwarg = 'pk'
+    url_kwarg = 'pk'
     permission_classes = []
 
     def post(self, request, *args, **kwargs):

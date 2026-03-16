@@ -17,8 +17,18 @@
     </nuxt-card>
 
     <nuxt-card>
-      <nuxt-button>Restart your project</nuxt-button>
-      <nuxt-button>Pause your project</nuxt-button>
+      <div class="flex-col gap-2 space-y-2">
+        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Atque nemo rerum eum quae! Deleniti aspernatur velit ex at optio hic, totam inventore culpa officiis debitis. Ad provident quis consectetur fugiat.</p>
+        <div class="flex gap-2">
+          <nuxt-button @click="restartProject">
+            Restart your project
+          </nuxt-button>
+
+          <nuxt-button @click="pauseProject">
+            Pause your project
+          </nuxt-button>
+        </div>
+      </div>
     </nuxt-card>
 
     <nuxt-card>
@@ -51,6 +61,20 @@ const { execute } = useFetch(`/v1/databases/${id}/delete`, {
     }
   }
 })
+
+function restartProject() {
+  $fetch(`/v1/databases/${id}/restart`, {
+    method: 'POST',
+    baseURL: config.public.prodDomain,
+    onResponse(response) {
+      if (response.response.status === 204) {
+        navigateTo('/databases')
+      }
+    }
+  })
+}
+
+function pauseProject() {}
 
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
