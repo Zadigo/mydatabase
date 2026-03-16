@@ -166,7 +166,6 @@ const [ useFileCheckout, _useFileCheckoutStore ] = createInjectionState((selecte
   })
 
   watchDebounced(() => newDocument.value.file, async (newValue) => {
-    console.log('Google')
     if (isDefined(newValue)) {
       const formData = new FormData()
 
@@ -176,14 +175,7 @@ const [ useFileCheckout, _useFileCheckoutStore ] = createInjectionState((selecte
       fileCheckoutResponse.value = await $fetch<FileCheckoutResponse>(`/v1/tables/${selectedTable.value?.id}/checkout`, {
         method: 'POST',
         baseURL: useRuntimeConfig().public.prodDomain,
-        body: formData,
-        // onRequestError(error) {
-        //   toast.add({
-        //     title: 'Failed to checkout document',
-        //     description: useToString(error).value,
-        //     icon: 'i-lucide-warning-circle'
-        //   })
-        // }
+        body: formData
       })
     }
   }, { debounce: 2000 })

@@ -26,8 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { useCreateTable } from '~/composables/use/tables/creation'
-
 /**
  * Create table
  */

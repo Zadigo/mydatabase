@@ -27,9 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useColumnTypeOptions, useCreateDocument } from '~/composables/use/documents'
 import type { StepperItem } from '@nuxt/ui'
-import { useTableWebocketManager } from '~/composables/use/tables'
 
 const stepperEl = useTemplateRef('stepper')
 
@@ -65,17 +63,4 @@ const items: StepperItem[] = [
     icon: 'i-lucide-table'
   }
 ]
-
-/**
- * Document headers
- */
-
-const { getTypeOptions } = useColumnTypeOptions()
-
-function getDocumentHeaders(headers: string[]) {
-  console.log('getDocumentHeaders', headers)
-  const columns = getTypeOptions(headers)
-  console.log('getDocumentHeaders', columns)
-  newDocument.value.using_columns = columns
-}
 </script>

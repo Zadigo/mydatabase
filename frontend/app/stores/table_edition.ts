@@ -180,7 +180,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   }
 }, {
   persist: {
-    pick: ['selectedTableName', 'selectedTableDocumentName'],
+    pick: ['tableData', 'selectedTableName', 'selectedTableDocumentName'],
     storage: sessionStorage
   }
 })
