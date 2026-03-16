@@ -70,7 +70,12 @@ class DocumentEdition:
 
         # Triggers to run on the columns of the dataframe when the
         # read is complete (e.g. transform data operations etc.)
-        self.column_triggers: PostReadTrigger = {}
+        # self.column_triggers: PostReadTrigger = {}
+
+        self.column_names: list[str] = []
+        self.column_types: list[dict[str, str]] = []
+        self.column_type_options: list[dict[str, str | bool]] = []
+        self.column_options: list[dict[str, str | bool]] = []
 
     async def finalize(self, document_cache_key: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
         metadata['date'] = str(datetime.datetime.now(tz=pytz.UTC))
@@ -80,15 +85,17 @@ class DocumentEdition:
         # Before running document operations,
         # save it to the cache with a unique key
         document_cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(
-            name=get_random_string(length=10))
+            name=get_random_string(length=10)
+        )
 
         # Some documents might have invalid characters in their
         # column title. Deal with this here.
+        # TODO: Do this when the document is initially created
         for column in df.columns:
             df = df.rename(columns={column: re.sub(r'[^\w\s]', '', column)})
 
         # Cache the whole document to prevent reading
-        # the whole file all the time
+        # the file all the time
         cache.set(
             RAW_DOCUMENT_CACHE_KEY_SUFFIX.format(name=document_cache_key), df,
             timeout=(24 * 60 * 60)
@@ -97,18 +104,21 @@ class DocumentEdition:
         if self.columns:
             df = df[self.columns]
 
-        if self.column_triggers:
-            for column, trigger in self.column_triggers.items():
-                df = trigger(column, df)
+        # TODO: Only run triggers on the final table that
+        # is sent to the user. No need to run them on every
+        # transformation when editing the document
+        # if self.column_triggers:
+        #     for column, trigger in self.column_triggers.items():
+        #         df = trigger(column, df)
 
-            cache.set(
-                DOCUMENT_CACHE_KEY_TRANSFORMED_SUFFIX.format(
-                    name=document_cache_key),
-                df, timeout=(60 * 60)
-            )  # 1 hour
+        #     cache.set(
+        #         DOCUMENT_CACHE_KEY_TRANSFORMED_SUFFIX.format(
+        #             name=document_cache_key
+        #         ),
+        #         df, timeout=(60 * 60)
+        #     )  # 1 hour
 
         # Return only a partial view of the dataframe
-        # to the frontend
         partial: bool = options.get('partial', True)
         partial_limit: int = options.get('partial_limit', 20)
 
@@ -118,7 +128,8 @@ class DocumentEdition:
         return await self.finalize(document_cache_key=document_cache_key, df=df, metadata=metadata)
 
     async def load_document_by_id(self, id: int | str) -> tuple[bool, Document | None]:
-        """Loads the data in a document using the database"""
+        """Loads the data from an existing document in the database using its id or uuid. 
+        The content of the document is then transformed"""
 
         @database_sync_to_async
         def get_document() -> tuple[bool, pandas.DataFrame | None]:
@@ -132,6 +143,11 @@ class DocumentEdition:
                     'The document does not have a file associated with it'
                 )
                 return False, None
+            
+            self.column_names = document.column_names
+            self.column_options = document.column_options
+            self.column_type_options = document.column_type_options
+            self.column_types = document.column_types
 
             # This function reads the csv document on every call.
             # We need to pre-cache the document content before the
@@ -240,15 +256,12 @@ class DocumentTransform:
     """This is the main class that handles live document
     aka data transformation"""
 
-    def __init__(self, consumer: AsyncJsonWebsocketConsumer | None = None):
+    def __init__(self, editor: DocumentEdition, consumer: AsyncJsonWebsocketConsumer | None = None):
         self.consumer = consumer
+        self.editor = editor
 
         self.current_document: Optional[Document] = None
         self.initial_dataframe: Optional[pandas.DataFrame] = None
-
-        self.column_names: list[str] = []
-        self.column_type_options: list[dict[str, str | bool]] = []
-        self.column_options: list[dict[str, str | bool]] = []
 
     @property
     def can_transform(self):
@@ -265,7 +278,7 @@ class DocumentTransform:
             )
         return ''
 
-    async def load_document(self, document: Document):
+    async def prepare(self, document: Document):
         self.current_document = document
         # Since the Document dataclass only contains the partial data
         # contained in the whole dataset, we need to load the original
@@ -274,48 +287,6 @@ class DocumentTransform:
             name=self.current_document.document_cache_key
         )
         self.initial_dataframe = cache.get(cache_key, None)
-
-        self.column_names = document.content.columns.tolist()
-
-        # Column type options allows the user to modify the column
-        # type and so as uniqueness and nullity
-        self.column_type_options = list(
-            map(
-                lambda column: {
-                    'name': column,
-                    'columnType': 'String',
-                    'unique': False,
-                    'nullable': True
-                },
-                self.column_names
-            )
-        )
-
-        # Column options allows the user to spcify which columns
-        # are editable, visible etc to the end user
-        self.column_options = list(
-            map(
-                lambda column: {
-                    'name': column,
-                    'visible': True,
-                    'editable': True,
-                    'sortable': True,
-                    'searchable': True
-                },
-                self.column_names
-            )
-        )
-
-        # This builds the column types that will be
-        # modified by the user. By default, every
-        # column is considered as a string [String]
-        # self.column_types = list(
-        #     map(
-        #         lambda column: {
-        #             ''
-        #         }
-        #     )
-        # )
 
     async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] = [], select: list[str] = []):
         """Artificially create a foreign key between two documents. The end
@@ -326,12 +297,12 @@ class DocumentTransform:
         * `relationship_fields`: The fields to use for the relationship
         * `select`: The fields to select from the documents
         """
-        return NotImplemented
+        raise NotImplementedError
 
     async def merge_documents(self, *documents):
         """Merge multiple documents into one using the
         initial document as a base"""
-        return NotImplemented
+        raise NotImplementedError
 
     async def transform_data_types(self, datatypes: dict[str, str]):
         """Enables the document owner to indicate what type of

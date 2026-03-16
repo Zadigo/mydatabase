@@ -30,8 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { useTableWebocketManager } from '~/composables/use/tables'
-
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
 

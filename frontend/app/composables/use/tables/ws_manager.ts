@@ -37,6 +37,10 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
         if (data.action === 'error') {
           console.error('WebSocket error:', data.message)
         }
+
+        if (data.action === 'loaded_document_data') {
+          tableData.value = JSON.parse(data.data)
+        }
       } else {
         console.error('Failed to parse WebSocket message:', event.data)
       }

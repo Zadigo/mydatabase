@@ -16,7 +16,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
         self.document_edition = DocumentEdition(self)
-        self.document_transform = DocumentTransform()
+        self.document_transform = DocumentTransform(self.document_edition)
         self.database_id: Optional[int] = None
 
     async def connect(self):
@@ -38,23 +38,36 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
             return
 
         if action == WebsocketActions.LOAD_VIA_ID.value:
-            document = content['document']
-            document = await self.document_edition.load_document_by_id(document['id'])
+            document_info: dict = content['document']
+            state, document = await self.document_edition.load_document_by_id(document_info['id'])
 
-            if document and dataclasses.is_dataclass(document):
-                await self.document_transform.load_document(document)
+            if document is not None and dataclasses.is_dataclass(document):
+                await self.document_transform.prepare(document)
                 await self.send_json({
                     'action': 'loaded_via_id',
                     'document_data': self.document_transform.stringify,
                     'columns': {
-                        'names': self.document_transform.column_names,
-                        'options': self.document_transform.column_options,
-                        'type_options': self.document_transform.column_type_options
+                        'names': self.document_edition.column_names,
+                        'options': self.document_edition.column_options,
+                        'types': self.document_edition.column_types,
+                        'type_options': self.document_edition.column_type_options
                     }
                 })
             else:
                 await self.send_error(
                     f"Could not load document: {','.join(self.document_edition.errors)}"
                 )
+        elif action == WebsocketActions.LOAD_DOCUMENT_DATA.value:
+            document_uuid = content['document_uuid']
+
+            if document_uuid is None:
+                await self.send_error('No document uuid provided')
+                return
+
+            state, document = await self.document_edition.load_document_by_id(document_uuid)
+            await self.send_json({
+                'action': 'loaded_document_data',
+                'data': self.document_transform.stringify
+            })
         else:
             await self.send_error(f'Unknown action: {action}')

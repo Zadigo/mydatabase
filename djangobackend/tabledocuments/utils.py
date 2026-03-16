@@ -12,6 +12,7 @@ from tabledocuments.validation_models import ColumnTypes
 class WebsocketActions(enum.Enum):
     LOAD_VIA_ID = 'load_via_id'
     CHECKOUT_URL = 'checkout_url'
+    LOAD_DOCUMENT_DATA = 'load_document_data'
 
 
 def upload_file_to(instance, filename):

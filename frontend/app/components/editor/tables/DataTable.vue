@@ -13,14 +13,15 @@
 import type { TableColumn } from '@nuxt/ui'
 // import { h } from 'vue'
 import type { DocumentData } from '~/types'
-import type { ComputedRef } from 'vue'
 
 const items = inject<ComputedRef<DocumentData[]>>('tableData')
-console.log('DataTable', items)
 
 const tableColumnsStore = useTableColumnsStore()
 const { columnNames, columnOptions } = storeToRefs(tableColumnsStore)
 
+/**
+ * Columns
+ */
 
 const tableColumns = computed<TableColumn<DocumentData>[]>(() => {
   return columnNames.value.map(column => ({
@@ -29,6 +30,10 @@ const tableColumns = computed<TableColumn<DocumentData>[]>(() => {
     enableHiding: true
   }))
 })
+
+/**
+ * Visibility
+ */
 
 const columnVisibility = computed(() => {
   return columnOptions.value.reduce((acc, option) => {

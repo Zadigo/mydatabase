@@ -22,13 +22,13 @@
       </template>
 
       <!-- Component -->
-      <component :is="displayComponent" v-if="hasData" />
-      <template v-else>
+      <component :is="displayComponent" />
+      <!-- <template v-else>
         <div class="space-y-2">
           <nuxt-skeleton class="w-full h-10" />
           <nuxt-skeleton class="w-6/12 h-10" />
         </div>
-      </template>
+      </template> -->
     </nuxt-card>
 
     <!-- Modals -->
@@ -75,6 +75,17 @@ useEditorPageRefresh(selectedTable)
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 wsObject.open()
 
+const { stringify } = useWebsocketMessage()
+
+useTimeoutFn(() => {
+  wsObject.send(
+    stringify({
+      action: 'load_document_data',
+      document_uuid: selectedTableDocument.value?.document_uuid
+    })
+  )
+}, 5000)
+
 /**
  * Provides
  */
@@ -83,6 +94,8 @@ provide('hasData', hasData)
 provide('tableData', tableData)
 provide('hasDocuments', hasDocuments)
 provide('editableTableRef', editableTableRef)
+provide('selectedTable', selectedTable)
+provide('selectedTableDocument', selectedTableDocument)
 
 console.log('editableTableRef', editableTableRef.value)
 </script>

@@ -1,7 +1,7 @@
 import type { MaybeTable } from '~/types'
 
-export { useCreateTable } from './creation'
-export { useTableWebocketManager } from './ws_manager'
+export * from './creation'
+export * from './ws_manager'
 
 /**
  * Composable that handles how the data is re-integrated

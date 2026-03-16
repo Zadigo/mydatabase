@@ -20,13 +20,21 @@
       <pre class="h-50 w-full overflow-scroll rounded-3xl bg-gray-50/50">
         {{ selectedTableDocument }}
       </pre>
+
+      <p class="font-bold mt-5">
+        Table documents
+      </p>
+
+      <pre class="h-50 w-full overflow-scroll rounded-3xl bg-gray-50/50">
+        {{ tableDocuments }}
+      </pre>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 const devContainerEl = useTemplateRef('devContainerEl')
-const { selectedTable, selectedTableDocument } = storeToRefs(useTableEditionStore())
+const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())
 const { style } = useDraggable(devContainerEl, { initialValue: { x: 40, y: 0 }})
 
 const reduceElements = ref(false)

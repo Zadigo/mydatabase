@@ -39,7 +39,7 @@
             </p>
 
             <div v-for="(column, index) in tableDocument.column_type_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
-              <nuxt-input v-model="column.name" class="col-span-3" />
+              <nuxt-input v-model="column.newName" class="col-span-3" />
               <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
               
               <div>

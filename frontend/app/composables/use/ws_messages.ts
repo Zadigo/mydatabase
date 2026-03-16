@@ -1,4 +1,4 @@
-import type { Arrayable, ColumnOptions, ColumnTypeOptions, Empty, Nullable } from '~/types'
+import type { Arrayable, ColumnOptions, ColumnTypeOptions, Empty, Nullable, Undefineable } from '~/types'
 
 interface DocumentData {
   document_data: string
@@ -13,6 +13,7 @@ export type BaseWsSendMessage =
   | { action: 'idle_connect' }
   | { action: 'load_via_id', table_id: number, document: { id: number, name: string } }
   | { action: 'load_via_url', url: string, entry_key?: Nullable<string> }
+  | { action: 'load_document_data', document_uuid: Undefineable<string> }
 
 export type BaseReceiveWsAction =
   | { action: 'connected' } & DocumentData
@@ -21,6 +22,7 @@ export type BaseReceiveWsAction =
   | { action: 'checkedout_url' | 'checkedout_file' } & Omit<DocumentData, 'document_data'>
   | { action: 'processing_url' }
   | { action: 'error' | 'success', message: string }
+  | { action: 'loaded_document_data', data: string }
 
 /**
  * WebSocket message utilities
