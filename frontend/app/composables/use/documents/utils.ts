@@ -1,15 +1,15 @@
-import type { ColumnType, PlainOrRef, SimpleTable, TableDocument } from '~/types'
+import type { ColumnType, SimpleTable, TableDocument } from '~/types'
 import type { NewDocument } from '.'
 
 /**
- * Get the actual document from a table based on the `active_document_datasource`
- * field of the table
+ * Find the actual document from a table based on its 
+ * `active_document_datasource` field
  * @param table The table to get the actual document from
  */
-export function useTableActualDocument<T extends PlainOrRef<SimpleTable, SimpleTable>>(table: T) {
-  const actualTable = ref<T>(table)
-  const availableDocuments = computed(() => isDefined(actualTable) ? actualTable.value?.documents : [])
-  return useArrayFind<TableDocument>(availableDocuments, (doc) => actualTable.value?.active_document_datasource === doc.document_uuid)
+export function useTableActualDocument<T extends MaybeRef<SimpleTable>>(table: T) {
+  const actualTable = toValue(table)
+  const availableDocuments = computed(() => actualTable.documents || [])
+  return useArrayFind<TableDocument>(availableDocuments, (doc) => actualTable.active_document_datasource === doc.document_uuid)
 }
 
 /**
