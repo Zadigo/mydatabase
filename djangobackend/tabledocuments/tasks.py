@@ -324,22 +324,25 @@ def get_document_from_url(url: str, headers: dict[str, str] = {}):
     document = async_to_sync(instance.load_json_document_by_url)(url, headers=headers)
     logger.warning(f"Successfully retrieved document from {url}")
 
-    if document is not None:
-        str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
+    if document is None:
+        logger.error(f"Failed to retrieve document from {url}: {', '.join(instance.errors)}")
+        return
 
-        name = get_random_string(8)
-        content_file = ContentFile(str_data, name=f'{name}.csv')
+    str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
 
-        instance = TableDocument.objects.create(name=name)
-        instance.file = content_file
-        instance.url = url
-        instance.save()
+    name = get_random_string(8)
+    content_file = ContentFile(str_data, name=f'{name}.csv')
 
-        update_document_options.apply_async(
-            args=[
-                str(instance.document_uuid),
-                create_column_options(document.content.columns.tolist())
-            ], 
-            countdown=10
-        )
-        logger.warning(f"Successfully create file: {name}")
+    instance = TableDocument.objects.create(name=name)
+    instance.file = content_file
+    instance.url = url
+    instance.save()
+
+    update_document_options.apply_async(
+        args=[
+            str(instance.document_uuid),
+            create_column_options(document.content.columns.tolist())
+        ], 
+        countdown=10
+    )
+    logger.warning(f"Successfully create file: {name}")

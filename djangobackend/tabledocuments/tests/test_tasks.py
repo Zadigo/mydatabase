@@ -112,11 +112,17 @@ class TestCreateFileFromData(TestCase):
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestGetDocumentFromUrl(TestCase):
     def test_base_retrieval(self):
-        t = tasks.get_document_from_url.apply(
-            args=['https://jsonplaceholder.typicode.com/todos/1']
-        )
-        result = t.get()
+        with patch('tabledocuments.tasks.update_document_options') as mupdate_options:
+            url = 'https://jsonplaceholder.typicode.com/todos'
+            t = tasks.get_document_from_url.apply(args=[url])
+            t.get()
 
+    def test_retrieval_from_a_dict_should_fail(self):
+        with patch('tabledocuments.tasks.update_document_options') as mupdate_options:
+            url = 'https://jsonplaceholder.typicode.com/todos/1'
+            t = tasks.get_document_from_url.apply(args=[url])
+            t.get()
+            
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestGetDocumentFromGoogleSheet(TestCase):

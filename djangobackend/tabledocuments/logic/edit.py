@@ -232,6 +232,7 @@ class DocumentEdition:
                     )
                 else:
                     return await self.clean(df, {'url': url})
+        
         return None
 
 
