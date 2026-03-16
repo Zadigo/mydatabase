@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.core.files.base import ContentFile
 from gspread.utils import rowcol_to_a1
 from django.utils.crypto import get_random_string
-from tabledocuments.logic.utils import create_column_options
+from tabledocuments.logic.utils import create_column_type_options
 from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import create_dataframe
@@ -23,7 +23,7 @@ logger = get_task_logger(__name__)
 @shared_task
 def update_document_options(document_uuid: str, column_options: list[dict[str, str | bool]] = [], from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
-    elements such as the columns, the document encoding references,
+    elements such as the columns, the document# encoding references,
     the column names, etc."""
     try:
         document = TableDocument.objects.get(document_uuid=document_uuid)
@@ -31,9 +31,13 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
         logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
+    # If the task is triggered from the admin interface, then we need to
+    # load the document from the file to update the column options
+    # based on the content of the file. Otherwise, we can directly use the
+    # column options provided as arguments when the task is triggered from Nuxt
     if from_file and document.file is not None:
         df = pandas.read_csv(document.file.path)
-        column_options = create_column_options(df.columns.tolist())
+        column_options = create_column_type_options(df.columns.tolist())
 
     document.column_options = column_options
     document.column_names = list(

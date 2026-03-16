@@ -18,11 +18,11 @@ class TableDocumentsAdmin(admin.ModelAdmin):
         for document in queryset:
             if document.file is not None:
                 update_document_options.apply_async(
-                    args=[
-                        str(document.document_uuid), 
-                        document.column_options
-                    ],
-                    countdown=10
+                    kwargs={
+                        'document_uuid': str(document.document_uuid), 
+                        'from_file': True
+                    },
+                    countdown=3
                 )
 
         add_message(
