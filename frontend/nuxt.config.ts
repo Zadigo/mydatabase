@@ -15,7 +15,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/test-utils/module',
-    'pinia-plugin-persistedstate/nuxt'
+    'pinia-plugin-persistedstate/nuxt',
+    'nuxt-authentication'
   ],
 
   runtimeConfig: {
@@ -45,5 +46,9 @@ export default defineNuxtConfig({
     plugins: [
       tailwind()
     ]
+  },
+
+  nuxtAuthentication: {
+    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN || 'http://127.0.0.1:8000'
   }
 })

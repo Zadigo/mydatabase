@@ -5,3 +5,10 @@
     </nuxt-layout>
   </nuxt-app>
 </template>
+
+<script setup lang="ts">
+/**
+ * Authentication
+ */
+useNuxtAuthentication()
+</script>
