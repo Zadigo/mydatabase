@@ -30,10 +30,8 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
 
       if (isDefined(data)) {
         if (data.action === 'loaded_via_id' && data.document_data) {
-          if (data.document_data) {
-            console.log('Parsed data', JSON.parse(data.document_data))
-            tableData.value = JSON.parse(data.document_data)
-          }
+          console.log('Parsed data', JSON.parse(data.document_data))
+          tableData.value = JSON.parse(data.document_data)
         }
 
         if (data.action === 'error') {
