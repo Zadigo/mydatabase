@@ -9,6 +9,7 @@ from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.choices import ColumnTypes
 from tabledocuments.models import TableDocument
 from rest_framework.request import Request
+from tabledocuments.utils import is_csv_file, is_json_file
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
     documents = SimpleDocumentSerializer(many=True, read_only=True)
@@ -169,15 +170,26 @@ class UploadFileSerializer(serializers.Serializer):
             for chunk in file.chunks():
                 file_content += chunk.decode('utf-8')
 
-            tasks.create_csv_file_from_data.apply_async(
-                args=[
-                    file_content,
-                    document.pk,
-                    entry_key,
-                    columns_serializer.validated_data
-                ],
-                countdown=5
-            )
+            if is_csv_file(file.name):
+                tasks.create_csv_file_from_data.apply_async(
+                    args=[
+                        file_content,
+                        document.pk,
+                        columns_serializer.validated_data
+                    ],
+                    countdown=5
+                )
+
+            if is_json_file(file.name):
+                tasks.create_json_file_from_data.apply_async(
+                    args=[
+                        file_content,
+                        document.pk,
+                        entry_key,
+                        columns_serializer.validated_data
+                    ],
+                    countdown=5
+                )
 
         # If we are dealing with an url, then we need to
         # create the csv document asynchronously
@@ -205,6 +217,7 @@ class UploadFileSerializer(serializers.Serializer):
                 except:
                     raise ValidationError(
                         'No provider with Google Sheet connection found')
+                
                 tasks.get_document_from_google_sheet.apply_async(
                     args=[
                         google_provider.google_service_account_credentials,

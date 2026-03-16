@@ -57,20 +57,7 @@ def update_document_options(document_uuid: str, column_options: list[dict[str, s
 
 
 @shared_task
-def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = [], file_type: str = 'csv'):
-    """Creates a CSV file from the provided data which can be either
-    a string (CSV content), a list of records (JSON content) or
-    a dictionary containing the data under a specific entry key. The
-    created CSV file is then saved to the TableDocument instance
-    identified by document_id.
-    
-    Args:
-        data: The input data which can be a CSV string, a list of records, or a dictionary.
-        document_id: The ID of the TableDocument instance to which the file will be saved.
-        entry_key: If data is a dictionary, this key is used to extract the relevant data.
-        column_options: A list of dictionaries containing column options such as name and type.
-        file_type: The type of file to create ('csv' or 'json').
-    """
+def create_csv_file_from_data(data: Any, document_id: str | int, column_options: list[dict[str, Any]] = []):
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -111,6 +98,37 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 f"document from csv string: {document.name}"
             )
 
+        # Once the document is created, we need to populate
+        # column_options, column_types and column_names
+        update_document_options.apply_async(
+            args=[
+                str(document.document_uuid),
+                column_options
+            ],
+            countdown=10
+        )
+
+
+@shared_task
+def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = []):
+    if data is None or data == '':
+        logger.warning(f'No data provided? Received {data}')
+        return
+    
+    df_params = {
+        'index': True,
+        'header': True,
+        'index_label': 'record_id',
+        'encoding': 'utf-8',
+        'doublequote': True
+    }
+
+    try:
+        document = TableDocument.objects.get(id=document_id)
+    except TableDocument.DoesNotExist:
+        logger.error(f"Document with ID {document_id} does not exist.")
+        return
+    else:
         if isinstance(data, dict):
             if entry_key is None:
                 string_data = json.dumps(data)
@@ -134,30 +152,54 @@ def create_csv_file_from_data(data: Any, document_id: str | int, entry_key: str 
                 return
 
         if isinstance(data, list):
-            # file = df.to_feather(index=True, index_label='record_id')
-            # document.file.save(f'{document.name}.feather', file)
-
             df = create_dataframe(data, column_options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
             document.file.save(f'{document.name}.csv', content)
-
             document.save()
+
             logger.warning(
                 "Successfully created Feather "
                 f"document from list/json: {document.name}"
             )
 
-    # Once the document is created, we need to populate
-    # column_options, column_types and column_names
-    update_document_options.apply_async(
-        args=[
-            str(document.document_uuid),
-            column_options
-        ],
-        countdown=10
-    )
+        # Once the document is created, we need to populate
+        # column_options, column_types and column_names
+        update_document_options.apply_async(
+            args=[
+                str(document.document_uuid),
+                column_options
+            ],
+            countdown=10
+        )
+
+
+@shared_task
+def create_feather_file_from_data(data: Any, document_id: str | int, column_options: list[dict[str, Any]] = []):
+    pass
+
+
+@shared_task
+def create_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: list[dict[str, Any]] = [], file_type: str = 'csv'):
+    """Creates a CSV file from the provided data which can be either
+    a string (CSV content), a list of records (JSON content) or
+    a dictionary containing the data under a specific entry key. The
+    created CSV file is then saved to the TableDocument instance
+    identified by document_id.
+    
+    Args:
+        data: The input data which can be a CSV string, a list of records, or a dictionary.
+        document_id: The ID of the TableDocument instance to which the file will be saved.
+        entry_key: If data is a dictionary, this key is used to extract the relevant data.
+        column_options: A list of dictionaries containing column options such as name and type.
+        file_type: The type of file to create ('csv' or 'json').
+    """
+    if file_type == 'csv':
+        return create_csv_file_from_data.apply_async(args=[data, document_id, column_options], countdown=10)
+    
+    if file_type == 'json':
+        return create_json_file_from_data.apply_async(args=[data, document_id, entry_key, column_options], countdown=10)
 
 
 @shared_task
