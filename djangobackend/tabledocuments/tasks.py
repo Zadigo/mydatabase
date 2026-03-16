@@ -306,7 +306,7 @@ def append_to_dataframe(document_uuid: str, data_to_append: bytes | str):
         encoding='utf-8',
         doublequote=True
     )
-    content = ContentFile(csv_content)
+    content = ContentFile(csv_content, name=document.file.name)
 
     # 5. Sync the saved data with the database
     # providers if required
