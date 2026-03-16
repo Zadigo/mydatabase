@@ -7,7 +7,8 @@
     <base-sidebar :items="items" />
 
     <!-- Websocket Alerts -->
-    <div v-if="!isConnected" class="bg-error-500 w-full p-5 mt-(--navbar-min-height) ms-[calc(var(--sidebar-width)+20rem)] text-slate-50 text-light">
+    <!-- ms-[calc(var(--sidebar-width)+20rem)] -->
+    <div v-if="!isConnected" class="bg-error-500 w-full p-5 mt-(--navbar-min-height) text-slate-50 text-light">
       Disconnected from server
       <nuxt-button @click="() => { wsObject.open() }">
         Reconnect
@@ -34,10 +35,17 @@ import { useTableWebocketManager } from '~/composables/use/tables'
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
 
+/**
+ * Aside logic
+ */
+
 const route = useRoute()
+
 const hasAside = computed(() => {
   return route.meta.label && (
-    route.meta.label.startsWith('Database:') || route.meta.label.startsWith('Editor:') || route.meta.label.startsWith('Settings:')
+    route.meta.label.startsWith('Database:') || 
+    route.meta.label.startsWith('Editor:') || 
+    route.meta.label.startsWith('Settings:')
   )
 })
 
@@ -90,5 +98,6 @@ onUnmounted(() => {
 
 const tableEditionStore = useTableEditionStore()
 const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+
 const { wsObject, isConnected } = useTableWebocketManager(selectedTable, selectedTableDocument)
 </script>

@@ -17,34 +17,23 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 
+  const dbStore = useDatabasesStore()
+  const { currentDatabase } = storeToRefs(dbStore)
+
   const tableEditionStore = useTableEditionStore()
   const { tableData } = storeToRefs(tableEditionStore)
 
-  const wsObject = useWebSocket<BaseReceiveWsAction>(`${config.public.wsProdDomain}/ws/documents`, {
+  const wsObject = useWebSocket<BaseReceiveWsAction>(`${config.public.wsProdDomain}/ws/databases/${currentDatabase.value?.id}/documents`, {
     immediate: false,
-    onConnected(_ws) {},
     onMessage(ws, event: MessageEvent<string>) {
       const data = parse(event.data)
 
-      if (data) {
+      if (isDefined(data)) {
         if (data.action === 'loaded_via_id' && data.document_data) {
           if (data.document_data) {
             console.log('Parsed data', JSON.parse(data.document_data))
             tableData.value = JSON.parse(data.document_data)
           }
-        }
-
-        if (data.action === 'processing_url') {
-          // Handle processing URL case
-        }
-
-        if (data.action === 'checkedout_url') {
-          // Handle checked out URL case
-          console.log('Checked out URL data', data)
-        }
-
-        if (data.action === 'checkedout_file') {
-          // Handle checked out file case
         }
 
         if (data.action === 'error') {
@@ -53,37 +42,35 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
       } else {
         console.error('Failed to parse WebSocket message:', event.data)
       }
+    },
+    onError(ws, event) {
+      console.error('WebSocket error:', event)
     }
   })
 
   function loadDataViaId() {
     if (isDefined(selectedTable) && isDefined(selectedDocument)) {
-      wsObject.send(stringify({
-        action: 'load_via_id',
-        table_id: selectedTable.value.id,
-        document: {
-          id: selectedDocument.value.id,
-          name: selectedDocument.value.name
-        }
-      }))
+      wsObject.send(
+        stringify({
+          action: 'load_via_id',
+          table_id: selectedTable.value.id,
+          document: {
+            id: selectedDocument.value.id,
+            name: selectedDocument.value.name
+          }
+        })
+      )
     }
   }
 
   const isConnected = computed(() => wsObject.status.value === 'OPEN')  
 
-  onMounted(() => {
-    // wsObject.open()
-    loadDataViaId()
-  })
-
-  onUnmounted(() => {
-    if (isConnected.value) wsObject.close()
-  })
+  onMounted(() => { loadDataViaId() })
+  onUnmounted(() => { if (isConnected.value) wsObject.close() })
 
   /**
    * Every time the selected document changes, 
-   * send a WebSocket message to load inner
-   * data contained within it
+   * send a WebSocket message to load the inner data
    */
   watchDebounced(selectedDocument, () => {
     loadDataViaId()

@@ -5,6 +5,7 @@ export {}
 type BaseRouteLabel = 'Home page'
   | 'Project overview'
   | 'Integrations'
+  | 'Database: Overview'
   | 'Database: Schema'
   | 'Database: Functions'
   | 'Database: Connections' 

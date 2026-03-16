@@ -1,10 +1,7 @@
 import dataclasses
-from typing import Any
-
+from typing import Any, Optional
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from tabledocuments.logic.edit import DocumentEdition, DocumentTransform
-from tabledocuments.logic.utils import (create_column_options,
-                                        create_column_type_options)
 from tabledocuments.utils import WebsocketActions
 
 from djangobackend.consumer_mixins import BaseConsumerMixin
@@ -20,13 +17,18 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
 
         self.document_edition = DocumentEdition(self)
         self.document_transform = DocumentTransform()
+        self.database_id: Optional[int] = None
 
     async def connect(self):
         await self.accept()
         await self.send_json({'action': 'connected'})
 
+        self.database_id = self.scope['url_route']['kwargs']['database_id']
+        await self.channel_layer.group_add(f'database_{self.database_id}', self.channel_name)
+
     async def disconnect(self, close_code):
         await self.close(code=close_code)
+        await self.channel_layer.group_discard(f'database_{self.database_id}', self.channel_name)
 
     async def receive_json(self, content: dict[str, Any], **kwargs):
         try:
@@ -53,24 +55,6 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
             else:
                 await self.send_error(
                     f"Could not load document: {','.join(self.document_edition.errors)}"
-                )
-        elif action == WebsocketActions.CHECKOUT_URL.value:
-            document = await self.document_edition.load_json_document_by_url(content['url'])
-
-            if document is not None:
-                columns = document.content.columns.tolist()
-
-                await self.send_json({
-                    'action': 'checkedout_url',
-                    'columns': {
-                        'names': columns,
-                        'options': create_column_options(columns),
-                        'type_options': create_column_type_options(columns)
-                    }
-                })
-            else:
-                await self.send_error(
-                    f"Could not load document from URL: {','.join(self.document_edition.errors)}"
                 )
         else:
             await self.send_error(f'Unknown action: {action}')

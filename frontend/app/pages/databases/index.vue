@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-  label: 'Databases',
+  label: 'Database: Overview',
   layout: 'dashboard'
 })
 
