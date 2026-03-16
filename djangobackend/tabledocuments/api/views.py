@@ -22,7 +22,10 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
 
         serializer = UpdateDocumentSerializer(
-            instance=instance, data=request.data, partial=partial)
+            instance=instance, 
+            data=request.data, 
+            partial=partial
+        )
         serializer.is_valid(raise_exception=True)
 
         self.perform_update(serializer)

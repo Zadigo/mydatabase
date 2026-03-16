@@ -8,19 +8,21 @@
       <div v-if="availableDocuments.length > 0" class="space-y-2">
         <div v-for="tableDocument in availableDocuments" :key="tableDocument.id" class="p-5 rounded-md bg-info-50 dark:bg-info-950">
           <div class="flex justify-between items-center">
-            <p class="font-bold">
-              <icon name="i-solid-csv" /> Document
-            </p>
+            <div class="font-bold flex items-center gap-2">
+              <icon name="lucide:case-sensitive" />
+              <span>Document</span>
+            </div>
 
-            <nuxt-button-group>
-              <nuxt-button color="neutral" variant="subtle" @click="() => { remove(tableDocument) }">
+            <div class="flex items-center gap-1">
+              <nuxt-button class="h-8" color="neutral" variant="subtle" @click="() => { remove(tableDocument) }">
                 <icon name="i-lucide-trash" />
               </nuxt-button>
 
-              <nuxt-dropdown-menu :items="dropdownItems">
-                <nuxt-button color="neutral" variant="outline" icon="i-lucide-chevron-down" />
+              <!-- Versioning Options -->
+              <nuxt-dropdown-menu :disabled="true" :items="dropdownItems">
+                <nuxt-button class="h-8" color="neutral" variant="subtle" icon="i-lucide-chevron-down" />
               </nuxt-dropdown-menu>
-            </nuxt-button-group>
+            </div>
           </div>
 
           <!-- Table Name -->
@@ -39,7 +41,7 @@
             <div v-for="(column, index) in tableDocument.column_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.name" class="col-span-3" />
               <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
-
+              
               <!-- Dropdown -->
               <div>
                 <nuxt-dropdown-menu :items="constrainMenuItem">
@@ -50,7 +52,7 @@
           </div>
 
           <!-- Relationship -->
-          <div class="p-1 bg-gray-100 dark:bg-gray-900 my-5">
+          <!-- <div class="p-1 bg-gray-100 dark:bg-gray-900 my-5">
             <div class="flex justify-center gap-3 items-center cursor-pointer rounded-md border border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 p-2">
               <icon name="i-lucide-key" />
               <nuxt-select v-model="primaryKey" :items="primaryKeyColumns" placeholder="Primary key" />
@@ -63,7 +65,7 @@
 
               <nuxt-button icon="i-lucide-save" variant="soft" color="success" @click="() => { create() }" />
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 

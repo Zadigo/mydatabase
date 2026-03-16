@@ -4,11 +4,13 @@
       <!-- Header -->
       <header class="col-span-12">
         <nuxt-card class="mb-2">
-          <nuxt-input v-model="search" placeholder="Search databases" />
-
-          <nuxt-button @click="() => { toggleCreationModal() }">
-            Create Database
-          </nuxt-button>
+          <div class="flex gap-2">
+            <nuxt-input v-model="search" placeholder="Search databases" />
+  
+            <nuxt-button @click="() => { toggleCreationModal() }">
+              Create Database
+            </nuxt-button>
+          </div>
         </nuxt-card>
       </header>
 
@@ -19,9 +21,10 @@
             <template #header>
               <h2>{{ database.name }}</h2>
             </template>
-  
-            <nuxt-badge label="Active" class="me-2" />
-            <nuxt-badge :label="`${database.tables.length} tables`" />
+            
+            <!-- State -->
+            <nuxt-badge :color="database.active ? 'success' : 'error'" :label="database.active ? 'Active' : 'Inactive'" class="me-2" />
+            <nuxt-badge :label="`${database.tables.length} tables`" color="info" />
           </nuxt-card>
         </nuxt-link>
       </template>
@@ -49,6 +52,7 @@
 
           <!-- Name -->
           <nuxt-input v-model="newDatabase.name" class="w-full" placeholder="Name" />
+
           <!-- Description -->
           <nuxt-input v-model="newDatabase.description" :disabled="true" class="w-full" placeholder="Description" />
 
@@ -81,13 +85,13 @@ definePageMeta({
 })
 
 const databasesStore = useDatabasesStore()
-  const { search, searched } = storeToRefs(databasesStore)
+const { search, searched } = storeToRefs(databasesStore)
 
 databasesStore.fetch()
 
 const { showModal, newDatabase, create, toggleCreationModal } = useDatabaseCreation()
 
-// Since the data are persisted, we should reset
+// Since data is persisted, we should reset
 // them to undefined when the user makes it back
 // on this page. Other solution, persist some of
 // the metadata in firebase

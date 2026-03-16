@@ -1,4 +1,4 @@
-import type { Database, Nullable, TableDocument } from '~/types'
+import type { Database, Nullable } from '~/types'
 
 /**
  * Store for managing databases and their tables.

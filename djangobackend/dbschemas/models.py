@@ -7,8 +7,8 @@ from django.utils.http import urlsafe_base64_encode
 
 
 class DatabaseSchema(models.Model):
-    """Represents a database which is collection
-    of tables which themselves contain documents"""
+    """Represents a database which is a collection
+    of tables that contain a set of documents"""
 
     name = models.CharField(
         max_length=255,
@@ -34,6 +34,12 @@ class DatabaseSchema(models.Model):
         max_length=255,
         blank=True,
         null=True
+    )
+    active = models.BooleanField(
+        default=True
+    )
+    paused = models.BooleanField(
+        default=False
     )
     updated_at = models.DateTimeField(
         auto_now_add=True

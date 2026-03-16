@@ -41,7 +41,6 @@
 
 <script setup lang="ts">
 import { EditorTablesDataTable } from '#components'
-import { useEditorPageRefresh, useTableWebocketManager } from '~/composables/use/tables'
 import type { TableComponent } from '~/types'
 
 definePageMeta({
