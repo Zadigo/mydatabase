@@ -1,4 +1,3 @@
-import type { Nullable } from '.'
 import type { baseDatabaseFunctions} from '~/utils'
 
 export type DatabaseFunctions = typeof baseDatabaseFunctions[number]
@@ -23,7 +22,7 @@ export interface FunctionSignals {
 
 export interface FunctionBody {
 	name: string
-	table: Nullable<number>
+	table: string
 	columns: string[]
 	returns: FunctionReturnBody
 	chain_to: string[]

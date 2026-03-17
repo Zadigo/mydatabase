@@ -53,7 +53,12 @@ import type { Component } from 'vue'
 
 definePageMeta({
   label: 'Database: Connections',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'database'
+    }
+  }
 })
 
 const search = ref<string>('')

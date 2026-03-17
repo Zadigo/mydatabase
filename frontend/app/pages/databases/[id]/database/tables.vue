@@ -28,7 +28,12 @@ import type { SimpleTable } from '~/types'
 
 definePageMeta({
   label: 'Database: Tables',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'database'
+    }
+  }
 })
 
 /**

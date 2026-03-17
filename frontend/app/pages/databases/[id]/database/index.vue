@@ -13,7 +13,12 @@
 
 definePageMeta({
   label: 'Database: Schema',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'database'
+    }
+  }
 })
 
 const dbStore = useDatabasesStore()

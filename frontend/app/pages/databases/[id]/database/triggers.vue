@@ -76,7 +76,12 @@
 
 definePageMeta({
   label: 'Database: Triggers',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'database'
+    }
+  }
 })
 
 const triggerName = ref<string>('')

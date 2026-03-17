@@ -44,7 +44,12 @@ import { useEditDatabase } from '~/composables/use/databases'
 
 definePageMeta({
   label: 'Settings: Home',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'settings'
+    }
+  }
 })
 
 const { id } = useRoute().params as { id: string }

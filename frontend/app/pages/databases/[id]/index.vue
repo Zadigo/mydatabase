@@ -11,6 +11,11 @@
 <script setup lang="ts">
 definePageMeta({
   label: 'Project overview',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'none'
+    }
+  }
 })
 </script>

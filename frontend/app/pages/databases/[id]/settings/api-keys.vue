@@ -37,7 +37,12 @@
 <script setup lang="ts">
 definePageMeta({
   label: 'Settings: Api Keys',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'settings'
+    }
+  }
 })
 
 const publishableKey = ref('cs_1234')

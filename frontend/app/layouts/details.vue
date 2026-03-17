@@ -18,7 +18,7 @@
 
     <main class="not-has-[#base-aside]:ps-[calc(var(--sidebar-width)+1rem)] has-[#base-aside]:ps-[calc(var(--sidebar-width)+255px+1rem)] pe-5 mt-[calc(var(--navbar-min-height)+2rem)] mb-10 relative">
       <!-- Aside -->
-      <base-aside v-if="hasAside" />
+      <base-aside v-if="hasAside" :aside-name="asideName" />
 
       <!-- Content -->
       <slot />
@@ -33,6 +33,10 @@
 <script setup lang="ts">
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
+
+defineProps<{
+  asideName: 'editor' | 'database' | 'settings' | 'none'
+}>()
 
 /**
  * Aside logic

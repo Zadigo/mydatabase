@@ -30,17 +30,17 @@ export const useDatabaseFunctions = createSharedComposable(() => {
     dbFunctions.value.push({
       function: {
         name: '',
-        table: null,
+        table: '',
         columns: [],
         returns: {
           type: 'void',
-          value: null
+          value: ''
         },
         chain_to: [],
         signals: {
           failure: {
             do: 'Skip',
-            default_value: null
+            default_value: ''
           }
         }
       }

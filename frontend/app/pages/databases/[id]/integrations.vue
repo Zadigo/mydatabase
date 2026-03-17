@@ -23,7 +23,12 @@
 <script setup lang="ts">
 definePageMeta({
   label: 'Integrations',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'none'
+    }
+  }
 })
 
 const baseIntegrations = [

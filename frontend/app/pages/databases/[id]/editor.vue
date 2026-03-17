@@ -45,7 +45,12 @@ import type { TableComponent } from '~/types'
 
 definePageMeta({
   label: 'Editor: Table',
-  layout: 'details'
+  layout: {
+    name: 'details',
+    props: {
+      asideName: 'editor'
+    }
+  }
 })
 
 /**
