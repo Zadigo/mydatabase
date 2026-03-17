@@ -7,7 +7,6 @@
     <base-sidebar :items="items" />
 
     <!-- Websocket Alerts -->
-    <!-- ms-[calc(var(--sidebar-width)+20rem)] -->
     <div v-if="!isConnected" class="bg-info-500/30 shadow-2xl space-y-2 flex-col w-auto h-auto rounded-2xl backdrop-blur-3xl fixed bottom-5 right-5 p-5 text-slate-50 z-50">
       <p>Disconnected from server</p>
 
@@ -34,7 +33,18 @@
 const dbStore = useDatabasesStore()
 const { currentDatabase } = storeToRefs(dbStore)
 
-defineProps<{
+type AsideLinks = {
+  name: string
+  to: string
+  icon: string
+  isAlpha: boolean
+}
+
+type AsideSeparator = {
+  separator: true
+}
+
+const props = defineProps<{
   asideName: 'editor' | 'database' | 'settings' | 'none'
 }>()
 
@@ -42,20 +52,12 @@ defineProps<{
  * Aside logic
  */
 
-const route = useRoute()
-
-const hasAside = computed(() => {
-  return route.meta.label && (
-    route.meta.label.startsWith('Database:') || 
-    route.meta.label.startsWith('Editor:') || 
-    route.meta.label.startsWith('Settings:')
-  )
-})
+const hasAside = computed(() => props.asideName !== 'none')
 
 const { id } = useRoute().params as { id: string }
 dbStore.routeId = Number(id)
 
-const items = [
+const items: (AsideLinks | AsideSeparator)[] = [
   {
     name: 'Overview',
     to: `/databases/${currentDatabase.value?.id}`,
