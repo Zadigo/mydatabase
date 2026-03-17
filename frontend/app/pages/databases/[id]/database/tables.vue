@@ -13,6 +13,7 @@
           <div v-for="column in selectDocument(table)?.column_types || []" :key="column.name" class="py-2 px-5 border border-slate-100 flex items-center gap-2">
             <icon :name="getTypeIcon(column.columnType)" class="text-2xl" /> {{ column.name }}
           </div>
+          NO DATASOURCE SELECTED
         </nuxt-card>
       </div>
       <div v-else>
@@ -23,7 +24,6 @@
 </template>
 
 <script setup lang="ts">
-import { useColumnTypeOptions, useTableActualDocument } from '~/composables/use/documents'
 import type { SimpleTable } from '~/types'
 
 definePageMeta({

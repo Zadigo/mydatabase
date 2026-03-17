@@ -1,5 +1,5 @@
 <template>
-  <section id="database-triggers" class="w-5xl mx-auto">
+  <section id="database-triggers" class="mx-auto">
     <!-- Header -->
     <base-page-card-header v-model="search" placeholder="Search triggers" title="Database triggers" />
 

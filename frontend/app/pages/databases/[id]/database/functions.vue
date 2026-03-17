@@ -1,5 +1,5 @@
 <template>
-  <section id="database-functions" class="w-5xl mx-auto">
+  <section id="database-functions" class="mx-auto">
     <!-- Header -->
     <base-page-card-header v-model="search" placeholder="Search functions" title="Database functions" @create="create" />
 
@@ -12,10 +12,6 @@
 <script setup lang="ts">
 import { useDatabaseFunctions } from '~/composables/use/databases/functions'
 
-/**
- * TODO: Page is in Bêta mode and needs work
- */
-
 definePageMeta({
   label: 'Database: Functions',
   layout: 'details'
@@ -26,5 +22,5 @@ definePageMeta({
  * Creation
  */
 
-const { dbFunctions, search, searched, create } = useDatabaseFunctions()
+const { search, searched, create } = useDatabaseFunctions()
 </script>

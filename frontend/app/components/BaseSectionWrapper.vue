@@ -1,5 +1,5 @@
 <template>
-  <section class="w-5xl mx-auto">
+  <section class="mx-auto">
     <header class="mb-5">
       <slot name="header" />
     </header>
