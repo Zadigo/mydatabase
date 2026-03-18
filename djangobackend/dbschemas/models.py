@@ -4,12 +4,17 @@ from django.dispatch import receiver
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 from django.utils.http import urlsafe_base64_encode
-
+from django.contrib.auth import get_user_model
 
 class DatabaseSchema(models.Model):
     """Represents a database which is a collection
     of tables that contain a set of documents"""
-
+    
+    # user = models.ForeignKey(
+    #     get_user_model(),
+    #     models.CASCADE,
+    #     help_text='The user that owns this database schema'
+    # )
     name = models.CharField(
         max_length=255,
         blank=False,
