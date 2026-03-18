@@ -18,7 +18,7 @@
         <slot name="actionButton">
           <nuxt-button @click="emit('create')">
             <icon name="i-lucide-plus" />
-            Create function
+            {{ actionName }}
           </nuxt-button>
         </slot>
       </div>
@@ -27,7 +27,8 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ title: string, modelValue: string, placeholder: string }>()
-const emit = defineEmits<{ 'update:modelValue': [string], create: [] }>()
-const search = useVModel(props, 'modelValue', emit)
+const { title, placeholder, actionName = 'Create function' } = defineProps<{ title: string, placeholder: string, actionName?: string }>()
+const emit = defineEmits<{ create: [] }>()
+
+const search = defineModel({ type: String, default: '', required: false })
 </script>

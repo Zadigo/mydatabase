@@ -3,6 +3,7 @@ import type { SimpleTable } from './databases'
 export type * from './tables'
 export type * from './databases'
 export type * from './functions'
+export type * from './triggers'
 
 export type Nullable<T> = T | null
 

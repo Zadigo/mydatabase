@@ -4,24 +4,6 @@ import type { Nullable, Undefineable } from '~/types'
 
 /**
  * Function used to manage and create database functions
- * 
- * ```yaml
- * function:
-    name: "Some name"
-    table: "Some table"
-    columns:
-      - firstname
-      - lastname
-    returns:
-      type: null
-      value: null
-    chain_to:
-        - some_function
-    signals:
-      failure:
-        do: function_name
-        default_value: some value
- * ```
  */
 export const useDatabaseFunctions = createSharedComposable(() => {
   const dbFunctions = ref<DatabaseFunction[]>([])
@@ -68,29 +50,8 @@ export function useDatabaseFunction(dbFunctions: Ref<DatabaseFunction[]>, databa
 
 }
 
-export function useCreateDatabaseFunction() {
-  const newFunction = ref<DatabaseFunction>({
-    name: 'Lower',
-    table: null,
-    columns: [],
-    returns: {
-      value: null,
-      type: 'void'
-    },
-    chain_to: [],
-    on_fail: {
-      do: 'Skip',
-      default_value: null
-    }
-  })
-
-  return {
-    newFunction
-  }
-}
-
 /**
- * 
+ * Composable used to edit a database function, it manages the state of the edited function and the tables and columns selection
  * @param currentDatabase The current database to which the function belongs to, used to get the tables and columns
  * @param databaseFunction The function to edit, can be a ref or a normal object
  */

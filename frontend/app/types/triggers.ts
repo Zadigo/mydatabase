@@ -1,19 +1,21 @@
-export const databaseTriggerEvent = ['insert', 'update', 'delete'] as const
-
 export type DatabaseTriggerEvent = (typeof databaseTriggerEvent)[number]
 
-interface TriggerMetadata {
-	database: string
+interface Condition {
+	database: number
 }
 
 interface TriggerBody {
+	event: DatabaseTriggerEvent
+	when: {
+		before: boolean
+		after: boolean
+	}
 	name: string
-	metadata: TriggerMetadata
-	when: 'before' | 'after'
-  event: DatabaseTriggerEvent
-	functions: string[]
+	orientation: 'row' | 'column'
+	function: string
 }
 
 export interface DatabaseTrigger {
-	trigger: TriggerBody
+	on: Condition
+	trigger: TriggerBody[]
 }
