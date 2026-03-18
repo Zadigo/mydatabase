@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from dbschemas.models import DatabaseSchema
 from django.shortcuts import get_object_or_404
 from dbtables.models import DatabaseTable
+from endpoints.validators import QueryValidator
 from tabledocuments.logic.edit import DocumentEdition
 from endpoints.api.serializers import PublicApiEndpointSerializer
 from endpoints.models import ApiEndpoint, PublicApiEndpoint, SecretApiEndpoint
@@ -119,7 +120,16 @@ class PublicApiEndpointRouter(ApiEndpointRouterMixin[PublicApiEndpoint], Generic
         endpoint = self._pre_request_check(request, 'GET')
         document = self._dispatch_request(request, self.kwargs.get('database'), self.kwargs.get('table'))
 
-        data = document.content.to_json(orient='records')
+        df = document.content.copy()
+
+        query = request.query_params.dict()
+        if query:
+            validated_query = QueryValidator(**query)
+
+            if validated_query.select is not None:
+                df = df[validated_query.select.split(',')]
+
+        data = df.to_json(orient='records')
 
         template = {
             'data': data,

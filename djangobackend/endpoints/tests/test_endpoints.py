@@ -43,6 +43,27 @@ class TestPublicApiEndpointRouter(TestCase):
         self.assertIn('database', response.json())
         self.assertIn('table', response.json())
 
+    def test_get_valid_request_with_select_query(self):
+        path = reverse(
+            'endpoints:table_level_api_endpoint', 
+            args=[
+                self.table.database_schema.id, 
+                self.table.id, 
+                self.endpoint.endpoint_uuid
+            ]
+        )
+        response = self.client.get(
+            path, 
+            headers={
+                'Authorization': f'Bearer {self.endpoint.bearer_token}'
+            }, 
+            data={
+                'select': 'name'
+            }
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        print(response.json())
+
     def test_get_request_without_bearer_token(self):
         path = reverse(
             'endpoints:table_level_api_endpoint', 
