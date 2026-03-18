@@ -18,7 +18,7 @@ class DatabaseTableQuery(graphene.ObjectType):
         name=graphene.String(required=False),
         schema_name=graphene.String(required=False),
         document_name=graphene.String(required=False),
-        # has_file=graphene.Boolean(default=None),
+        has_file=graphene.Boolean(required=False),
         active=graphene.Boolean(required=False)
     )
 
@@ -44,9 +44,9 @@ class DatabaseTableQuery(graphene.ObjectType):
         if document_name is not None:
             qs = qs.filter(documents__name__icontains=document_name)
 
-        # has_file = kwargs.get('has_file')
-        # if has_file is not None:
-        #     qs = qs.filter(documents__isnull=has_file)
+        has_file = kwargs.get('has_file')
+        if has_file is not None:
+            qs = qs.filter(documents__isnull=has_file)
     
         active = kwargs.get('active', True)
         print(kwargs)

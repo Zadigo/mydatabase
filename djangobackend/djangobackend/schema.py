@@ -2,16 +2,15 @@ import graphene
 
 from dbschemas.graphql import mutations as dbschemas_mutations
 from dbschemas.graphql import schema as dbschemas_schema
-from dbtables.schema import DatabaseTableQuery
 from tabledocuments.graphql import schema as tabledocuments_schema
 from tabledocuments.graphql import mutations as tabledocuments_mutations
-
+from dbtables.graphql import schema as dbtables_schema
 
 class Query(
     dbschemas_schema.DatabaseProviderQuery, 
     dbschemas_schema.DatabaseSchemaQuery,
     tabledocuments_schema.TableDocumentsQuery,
-    DatabaseTableQuery,
+    dbtables_schema.DatabaseTableQuery,
     graphene.ObjectType
 ):
     pass
