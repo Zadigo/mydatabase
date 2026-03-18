@@ -1,10 +1,9 @@
 from graphene import Field, Mutation, String
-from graphene_django.rest_framework.mutation import SerializerMutation
 from graphql.type import GraphQLResolveInfo
 from graphene.types.generic import GenericScalar
 
 from tabledocuments.models import TableDocument
-from tabledocuments.schema import TableDocumentsType
+from tabledocuments.graphql.utils import TableDocumentsType
 
 
 

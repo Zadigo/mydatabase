@@ -2,7 +2,8 @@ import graphene
 from graphene_django.fields import DjangoListField
 from graphql import GraphQLResolveInfo
 from dbschemas.models import DatabaseProvider, DatabaseSchema
-from dbschemas.schema import DatabaseProviderType, DatabaseSchemaType
+from dbschemas.graphql.utils import DatabaseProviderType, DatabaseSchemaType
+
 
 class DatabaseSchemaQuery(graphene.ObjectType):
     all_dbschemas = DjangoListField(DatabaseSchemaType, name=graphene.String(required=False))
@@ -16,6 +17,10 @@ class DatabaseSchemaQuery(graphene.ObjectType):
     
     def resolve_db_schema_by_id(root, info: GraphQLResolveInfo, schema_id: int):
         return DatabaseSchema.objects.get(id=schema_id)
+    
+    def resolve_db_schema(root, info: GraphQLResolveInfo, id: int):
+        database = DatabaseSchema.objects.get(id=id)
+        return {'column_options': database.column_options, 'column_type_options': database.column_type_options}
 
 
 class DatabaseProviderQuery(graphene.ObjectType):
