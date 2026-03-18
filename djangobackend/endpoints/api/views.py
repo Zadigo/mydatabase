@@ -1,30 +1,46 @@
-import datetime
-import json
-import pathlib
 
-import pandas
+from rest_framework.exceptions import ValidationError
+from asgiref.sync import async_to_sync
 from dbschemas.models import DatabaseSchema
-from dbtables.models import DatabaseTable
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from endpoints import tasks
+from dbtables.models import DatabaseTable
+from tabledocuments.logic.edit import DocumentEdition
 from endpoints.api.serializers import PublicApiEndpointSerializer
-from endpoints.models import PublicApiEndpoint, SecretApiEndpoint
+from endpoints.models import ApiEndpoint, PublicApiEndpoint, SecretApiEndpoint
 from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.generics import CreateAPIView, GenericAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
-from tabledocuments.models import TableDocument
-from tabledocuments.tasks import update_document_options
+from rest_framework.request import Request
+from django.db.models import QuerySet
+from django.core.cache import cache
+
+class ApiEndpointRouterMixin[T = ApiEndpoint]:
+    def get_queryset(self) -> QuerySet[T]:
+        qs = cache.get('api_endpoints')
+        if qs is not None:
+            prefetched = self.queryset.prefetch_related('database_schema')
+            qs = prefetched.all()
+            cache.set('api_endpoints', qs, timeout=60*60) # Cache for 1 hour
+        return qs
+
+    def get_object(self) -> T:
+        endpoint_uuid = self.kwargs.get(self.lookup_url_kwarg)
+        return get_object_or_404(self.queryset, **{self.lookup_field: endpoint_uuid})
+    
+    def parse_bearer_token(self, request: Request) -> str | None:
+        """Parses the bearer token from the Authorization header."""
+        auth_header = request.META.get('HTTP_AUTHORIZATION')
+        if not auth_header:
+            return None
+
+        parts = auth_header.split()
+        if len(parts) != 2 or parts[0].lower() != 'bearer':
+            return None
+
+        return parts[1]
 
 
-class ApiEndpointRouterMixin:
-    def get_object(self):
-        endpoint = self.kwargs.get('endpoint')
-        return get_object_or_404(self.queryset, endpoint=endpoint)
-
-
-class SecretApiEndpointRouter(GenericAPIView, ApiEndpointRouterMixin):
+class SecretApiEndpointRouter(ApiEndpointRouterMixin[SecretApiEndpoint], GenericAPIView):
     """This is the main router used for routing the external
     requests to the registered secret API endpoints. The user
     calls the endpoint with the method he wants to use just
@@ -33,23 +49,23 @@ class SecretApiEndpointRouter(GenericAPIView, ApiEndpointRouterMixin):
 
     queryset = SecretApiEndpoint.objects.all()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
         endpoint = self.get_object()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs):
         endpoint = self.get_object()
 
-    def put(self, request, *args, **kwargs):
+    def put(self, request: Request, *args, **kwargs):
         endpoint = self.get_object()
 
-    def patch(self, request, *args, **kwargs):
+    def patch(self, request: Request, *args, **kwargs):
         endpoint = self.get_object()
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request: Request, *args, **kwargs):
         endpoint = self.get_object()
 
 
-class PublicApiEndpointRouter(GenericAPIView, ApiEndpointRouterMixin):
+class PublicApiEndpointRouter(ApiEndpointRouterMixin[PublicApiEndpoint], GenericAPIView):
     """This is the main router used for routing the external
     requests to the registered public API endpoints. The user
     calls the endpoint with the method he wants to use just
@@ -57,153 +73,79 @@ class PublicApiEndpointRouter(GenericAPIView, ApiEndpointRouterMixin):
     to the relevant endpoint."""
 
     queryset = PublicApiEndpoint.objects.all()
-    lookup_field = 'endpoint'
-    lookup_url_kwarg = 'endpoint'
+    lookup_url_kwarg = 'endpoint_uuid'
+    lookup_field = 'endpoint_uuid'
 
-    def forbidden_response(self):
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
-    def fail_response(self, *messages):
-        return Response({'error': list(messages)}, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_database(self):
-        database = self.kwargs.get('database')
-        return get_object_or_404(DatabaseSchema, id=database)
-
-    def check_bearer_token(self, request):
-        token = request.META.get('HTTP_X_TABLE_TOKEN')
-        if not token:
-            return False
-
+    def _pre_request_check(self, request: Request, method: str) -> PublicApiEndpoint:
         endpoint = self.get_object()
+        token = self.parse_bearer_token(request)
 
-        if endpoint.bearer_token != token:
-            return False
-        return True
-
-    def pre_request_check(self, request) -> bool | tuple[PublicApiEndpoint, DatabaseTable | None]:
-        if not self.check_bearer_token(request):
-            return False
-
-        endpoint = self.get_object()
-
-        requires_table = self.kwargs.get('table') is not None
-        if requires_table:
-            table = get_object_or_404(
-                endpoint.database_schema.databasetable_set.all(),
-                id=self.kwargs.get('table')
+        if endpoint.bearer_token is not None:
+            if token is None or endpoint.bearer_token != token:
+                raise ValidationError("Invalid or missing bearer token.")
+            
+        if method.upper() not in endpoint.methods:
+            raise ValidationError(f"HTTP method {method} is not allowed for this endpoint.")
+        
+        return endpoint
+    
+    def _dispatch_request(self, request: Request, database: str, table: str):
+        """This method is responsible for dispatching the request to the relevant
+        database and table based on the endpoint configuration. It also handles
+        the authentication and authorization of the request."""
+        database = get_object_or_404(DatabaseSchema, id=database)
+        tables: QuerySet[DatabaseTable] = database.databasetable_set.all()
+        table: DatabaseTable = get_object_or_404(tables, id=table)
+        
+        try:
+            instance = DocumentEdition()
+            state, document = async_to_sync(instance.load_document_by_id)(table.active_document_datasource)
+        except Exception as e:
+            print(instance.errors)
+            raise ValidationError(
+                "An error occurred while loading the document datasource for the table.", 
+                code="document_load_error"
             )
-            return endpoint, table
-        return endpoint, None
 
-    def create_table_request(self, request, table: DatabaseTable | None):
-        """Creates a specific internal request for this endpoint
-        and triggers a hit """
+        if not state:
+            raise ValidationError(
+                "The table does not have an active document datasource.", 
+                code="no_active_document"
+            )
+        
+        return document
+
+    def get(self, request: Request, *args, **kwargs):
+        endpoint = self._pre_request_check(request, 'GET')
+        document = self._dispatch_request(request, self.kwargs.get('database'), self.kwargs.get('table'))
+
+        data = document.content.to_json(orient='records')
+
         template = {
-            'resource': None,
-            'database': None,
-            'timestamp': timezone.now(),
-            'count': 0,
-            'results': []
+            'data': data,
+            'resource': request.path,
+            'database': self.kwargs.get('database'),
+            'table': self.kwargs.get('table'),
         }
 
-        def table_view(*args, **kwargs):
-            if table is None:
-                return Response(template, status=status.HTTP_200_OK)
+        return Response(template, status=status.HTTP_200_OK)
+    
+    def post(self, request: Request, *args, **kwargs):
+        endpoint = self._pre_request_check(request, 'POST')
+        return Response(status=status.HTTP_200_OK)
+    
+    def put(self, request: Request, *args, **kwargs):
+        endpoint = self._pre_request_check(request, 'PUT')
+        return Response(status=status.HTTP_200_OK)
 
-            if not table.active_document_datasource:
-                return Response(template, status=status.HTTP_200_OK)
+    def patch(self, request: Request, *args, **kwargs):
+        endpoint = self._pre_request_check(request, 'PATCH')
+        return Response(status=status.HTTP_200_OK)
 
-            try:
-                document = table.documents.get(
-                    document_uuid=table.active_document_datasource)
-            except Exception:
-                return Response(template, status=status.HTTP_400_BAD_REQUEST)
-
-            df = pandas.read_csv(pathlib.Path(document.file.path))
-
-            tasks.create_hit.apply_async(
-                args=[
-                    self.get_object().endpoint,
-                    table.database_schema.name,
-                    table.name if table else None
-                ],
-                countdown=30
-            )
-            template['count'] = df.count()
-            template['resource'] = self.request.path
-            template['database'] = table.database_schema.id
-            template['results'] = json.loads(df.to_json(orient='records'))
-            return Response(template, status=status.HTTP_200_OK)
-
-        return table_view(request=request)
-
-    def get(self, request, *args, **kwargs):
-        """This endpoint handles cases where the user
-        wants to get data from a given resource."""
-        state = self.pre_request_check(request)
-        if not state:
-            return self.forbidden_response()
-
-        endpoint, table = state
-        return self.create_table_request(request, table)
-
-    def post(self, request, *args, **kwargs):
-        state = self.pre_request_check(request)
-        if not state:
-            return self.forbidden_response()
-
-        endpoint, table = state
-
-        try:
-            document: TableDocument = table.documents.get(
-                document_uuid=table.active_document_datasource)
-        except Exception:
-            return self.fail_response()
-
-        data = request.data
-        if isinstance(data, dict):
-            newdf = pandas.DataFrame([data])
-
-            errored_columns = []
-            for column in newdf.columns:
-                if column not in document.column_names:
-                    errored_columns.append(column)
-
-            if errored_columns:
-                return self.fail_response(
-                    f"Columns {', '.join(errored_columns)} do not exist in the table schema.",
-                    document.column_names
-                )
-
-            update_document_options.apply_async(
-                args=[
-                    str(document.document_uuid),
-                    newdf.to_csv(index=False, encoding='utf-8',
-                                 doublequote=True)
-                ],
-                countdown=40
-            )
-
-        print(request.data)
-
-        return self.create_table_request(request, table)
-
-    def put(self, request, *args, **kwargs):
-        state = self.pre_request_check(request)
-        if not state:
-            return self.forbidden_response()
-
-    def patch(self, request, *args, **kwargs):
-        state = self.pre_request_check(request)
-        if not state:
-            return self.forbidden_response()
-
-    def delete(self, request, *args, **kwargs):
-        state = self.pre_request_check(request)
-        if not state:
-            return self.forbidden_response()
-
+    def delete(self, request: Request, *args, **kwargs):
+        endpoint = self._pre_request_check(request, 'DELETE')
+        return Response(status=status.HTTP_200_OK)
+    
 
 class ListEndpoints(ListAPIView):
     queryset = PublicApiEndpoint.objects.all()

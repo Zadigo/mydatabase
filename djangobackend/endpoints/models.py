@@ -29,7 +29,8 @@ class ApiEndpoint(models.Model):
         max_length=200,
         unique=True,
         blank=True,
-        null=True
+        null=True,
+        help_text="A custom name for the endpoint that can be used in the url to access it."
     )
     created_at = models.DateTimeField(
         auto_now=True
@@ -43,6 +44,12 @@ class ApiEndpoint(models.Model):
 
 
 class PublicApiEndpoint(ApiEndpoint):
+    """This class represents the public API endpoints that are used to
+    interact with the databases. The user can create as many public API endpoints
+    as he wants and share them with external users. Each endpoint has a unique
+    public key that is used to authenticate the requests and a bearer token that
+    is used to authenticate the requests and a list of allowed http methods."""
+    
     public_key = models.CharField(
         max_length=100,
         blank=True,

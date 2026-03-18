@@ -7,17 +7,17 @@ urlpatterns = [
     re_path(
         r'^secret/(?P<endpoint>[^/]+)$',
         views.SecretApiEndpointRouter.as_view(),
-        name='secret-api-endpoint'
+        name='secret_api_endpoint'
     ),
     re_path(
-        r'^public/(?P<database>\d+)/table/(?P<table>\d+)/(?P<endpoint>[a-z\-]+)$',
+        r'^public/(?P<database>\d+)/table/(?P<table>\d+)/(?P<endpoint_uuid>[a-z0-9\-]+)$',
         views.PublicApiEndpointRouter.as_view(),
-        name='table-level-endpoint'
+        name='table_level_api_endpoint'
     ),
     re_path(
-        r'^public/(?P<database>\d+)/(?P<endpoint>[a-z\-]+)$',
+        r'^public/(?P<database>\d+)/(?P<endpoint_uuid>[a-z0-9\-]+)$',
         views.PublicApiEndpointRouter.as_view(),
-        name='database-level-endpoint'
+        name='database_level_api_endpoint'
     ),
     re_path(
         r'^(?P<database>\d+)/create$',
