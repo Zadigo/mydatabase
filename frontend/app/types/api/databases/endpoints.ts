@@ -1,13 +1,5 @@
-import type { _BaseDatabaseObject } from '..'
+import type { _BaseDatabaseObject } from '../..'
 import type { Table } from '../tables'
-
-/**
- * @private
- */
-// interface _DatabaseTable {
-// 	id: string
-// 	name: string
-// }
 
 /**
  * @private

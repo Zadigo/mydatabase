@@ -1,9 +1,6 @@
-import type { SimpleTable } from './databases'
+import type { SimpleTable } from './api/databases'
 
-export type * from './tables'
-export type * from './databases'
-export type * from './functions'
-export type * from './triggers'
+export type * from './api'
 
 export type Nullable<T> = T | null
 
@@ -20,18 +17,3 @@ export type MaybeTable = RefOrUndefined<SimpleTable>
 export type Refeable<T> = T | Ref<T>
 
 export type VueUseWsReturnType = ReturnType<typeof import('@vueuse/core').useWebSocket>
-
-/**
- * @private
- */
-export interface _BaseDatetimes {
-  updated_at: string
-  created_at: string
-}
-
-/**
- * @private
- */
-export interface _BaseDatabaseObject extends _BaseDatetimes {
-  id: number
-}

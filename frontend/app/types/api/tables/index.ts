@@ -1,4 +1,5 @@
-import type { _BaseDatabaseObject, Nullable } from '..'
+import type { Nullable } from '~/types'
+import type { _BaseDatabaseObject } from '..'
 import type { ColumnOptions, ColumnTypeOptions, ColumnTypes } from './columns'
 
 export type * from './columns'

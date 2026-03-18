@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ConnectionOptions } from '~/types/databases/connections';
+import type { ConnectionOptions } from '~/types'
 
 const connections: ConnectionOptions[] = [
   {

@@ -1,5 +1,5 @@
 import type { DatabaseFunction } from "~/types"
-import type { DatabaseTrigger } from "~/types/triggers"
+import type { DatabaseTrigger } from "~/types/api/triggers"
 
 /**
  * Function used to manage and create database triggers

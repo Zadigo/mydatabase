@@ -1,4 +1,4 @@
-import type { DatabaseEndpoint } from '~/types/databases/endpoints'
+import type { DatabaseEndpoint } from '~/types'
 
 export const endpointsFixture: DatabaseEndpoint[] = [
   {

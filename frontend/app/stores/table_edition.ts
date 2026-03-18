@@ -1,6 +1,6 @@
 import type { SelectMenuItem } from '@nuxt/ui'
 import type { DocumentData, SimpleTable } from '~/types'
-import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/tables/columns'
+import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/api/tables/columns'
 
 export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>
 

@@ -1,5 +1,5 @@
-import type { Database } from '~/types/databases'
-import type { DatabaseFunction } from '~/types/functions'
+import type { Database } from '~/types/api/databases'
+import type { DatabaseFunction } from '~/types/api/functions'
 import type { Nullable, Undefineable } from '~/types'
 
 /**

@@ -1,4 +1,4 @@
-import type { _BaseDatabaseObject, _BaseDatetimes } from '..'
+import type { _BaseDatabaseObject, _BaseDatetimes } from '../..'
 import type { Table } from '../tables'
 
 export type * from './endpoints'
