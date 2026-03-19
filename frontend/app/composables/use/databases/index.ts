@@ -114,13 +114,9 @@ export const useDatabaseEndpoints = createSharedComposable(() => {
 
   onMounted(async () => {
     if (isDefined(currentDatabase)) {
-      const data = await $fetch<DatabaseEndpoint[]>(`/v1/databases/${currentDatabase.value.id}/endpoints`, {
+      endpoints.value = await $fetch<DatabaseEndpoint[]>(`/v1/databases/${currentDatabase.value.id}/endpoints`, {
         baseURL: useRuntimeConfig().public.prodDomain
       })
-  
-      if (data) {
-        endpoints.value = data
-      }
     }
   })
 

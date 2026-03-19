@@ -13,7 +13,7 @@
     </header>
 
     <!-- Modals -->
-    <settings-project-modals-create-endpoint />
+    <lazy-settings-project-modals-create-endpoint hydrate-on-visible />
   </section>
 </template>
 

@@ -142,11 +142,13 @@ class PublicApiEndpointRouter(ApiEndpointRouterMixin[PublicApiEndpoint], Generic
     
     def post(self, request: Request, *args, **kwargs):
         endpoint = self._pre_request_check(request, 'POST')
-        return Response(status=status.HTTP_200_OK)
+        document = self._dispatch_request(request, self.kwargs.get('database'), self.kwargs.get('table'))
+
+        return Response(status=status.HTTP_201_CREATED)
     
     def put(self, request: Request, *args, **kwargs):
         endpoint = self._pre_request_check(request, 'PUT')
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request: Request, *args, **kwargs):
         endpoint = self._pre_request_check(request, 'PATCH')
@@ -154,7 +156,7 @@ class PublicApiEndpointRouter(ApiEndpointRouterMixin[PublicApiEndpoint], Generic
 
     def delete(self, request: Request, *args, **kwargs):
         endpoint = self._pre_request_check(request, 'DELETE')
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class ListEndpoints(ListAPIView):
