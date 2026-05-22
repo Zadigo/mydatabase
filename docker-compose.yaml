@@ -1,0 +1,20 @@
+services:
+  mydatabase:
+    build: ./djangobackend
+    container_name: app_mydatabase
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mydatabase.entrypoints=websecure
+      - traefik.http.routers.mydatabase.rule=Host(`database.mycommerce.fr`)
+      - traefik.http.routers.mydatabase.tls=true
+      - traefik.http.routers.mydatabase.tls.certresolver=production
+      - traefik.http.services.mydatabase-service.loadbalancer.server.port=8000
+    env_file:
+      - ./docker/environment/django.env
+      - ./docker/environment/global.env
+      - ./docker/environment/redis.env
+    volumes:
+      - ./mydatabase:/code
+      - ./mydatabase/media:/code/media:rw
+    networks:
+      - csvdatabase

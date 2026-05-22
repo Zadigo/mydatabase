@@ -1,0 +1,10 @@
+.env
+.env*
+media/
+.csv
+.md
+conftest.py
+.ipynb*
+fixtures/
+logs/
+media/
