@@ -49,7 +49,7 @@ class PublicApiEndpoint(ApiEndpoint):
     as he wants and share them with external users. Each endpoint has a unique
     public key that is used to authenticate the requests and a bearer token that
     is used to authenticate the requests and a list of allowed http methods."""
-    
+
     public_key = models.CharField(
         max_length=100,
         blank=True,
@@ -88,19 +88,19 @@ class SecretApiEndpoint(ApiEndpoint):
 
 
 @receiver(pre_save, sender=PublicApiEndpoint)
-def create_public_endpoint(instance, **kwargs):
+def create_public_endpoint(instance: PublicApiEndpoint, **kwargs):
     if not instance.public_key:
         instance.public_key = create_endpoint('public')
 
 
 @receiver(pre_save, sender=SecretApiEndpoint)
-def create_secret_endpoint(instance, **kwargs):
+def create_secret_endpoint(instance: SecretApiEndpoint, **kwargs):
     if not instance.secret_key:
         instance.secret_key = create_endpoint('secret')
 
 
 @receiver(pre_save, sender=PublicApiEndpoint)
-def create_bearer_token(instance, **kwargs):
+def create_bearer_token(instance: PublicApiEndpoint, **kwargs):
     """The bearer token is a random string of 32 characters
     that will be used to authenticate requests to the public API endpoint."""
     if not instance.bearer_token:
@@ -108,7 +108,7 @@ def create_bearer_token(instance, **kwargs):
 
 
 @receiver(post_save, sender=PublicApiEndpoint)
-def set_http_methods(instance, created, **kwargs):
+def set_http_methods(instance: PublicApiEndpoint, created: bool, **kwargs):
     """The http methods are used to define what kind of operations
     can be done on the endpoint. If no method is specified,
     we set all methods by default."""

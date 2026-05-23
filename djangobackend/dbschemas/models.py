@@ -6,10 +6,11 @@ from django.utils.text import slugify
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth import get_user_model
 
+
 class DatabaseSchema(models.Model):
     """Represents a database which is a collection
     of tables that contain a set of documents"""
-    
+
     # user = models.ForeignKey(
     #     get_user_model(),
     #     models.CASCADE,
@@ -85,7 +86,7 @@ class DatabaseProvider(models.Model):
     like Airtable, Google Sheets, etc. from which the user
     can import data.
     """
-    
+
     database_schema = models.ForeignKey(
         DatabaseSchema,
         models.CASCADE,
@@ -115,14 +116,14 @@ class DatabaseProvider(models.Model):
 
     def __str__(self):
         return 'Provider: ' + self.database_schema.name
-    
+
     @property
     def has_google_sheet_connection(self):
         return bool(self.google_sheet_credentials)
 
 
 @receiver(pre_save, sender=DatabaseSchema)
-def create_table_slug(instance, **kwargs):
+def create_table_slug(instance: DatabaseSchema, **kwargs):
     if instance.slug is None or instance.slug == '':
         instance.slug = slugify(instance.name) + '-' + get_random_string(6)
     else:
@@ -132,6 +133,7 @@ def create_table_slug(instance, **kwargs):
 
 
 @receiver(pre_save, sender=DatabaseProvider)
-def encode_base64_api_key(instance, **kwargs):
+def encode_base64_api_key(instance: DatabaseProvider, **kwargs):
     if instance.google_sheet_api_key:
-        instance.google_sheet_api_key = urlsafe_base64_encode(instance.google_sheet_api_key.encode('utf-8')).decode('utf-8')
+        instance.google_sheet_api_key = urlsafe_base64_encode(
+            instance.google_sheet_api_key.encode('utf-8')).decode('utf-8')

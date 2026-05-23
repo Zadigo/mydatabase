@@ -84,19 +84,19 @@ class TableDocument(models.Model):
 
     def __str__(self):
         return self.name or str(self.document_uuid)
-    
+
     # @cached_property
     # def mixed_options(self) -> list[dict[str, Any]]:
     #     """A property that returns a combination of the `column_types`
     #     and `column_options` into a single dictionnary object"""
     #     if len(self.column_types) == 0 and len(self.column_options) == 0:
     #         return []
-        
+
     #     options = []
     #     for option in self.column_options:
     #         column_type = list(
     #             filter(
-    #                 lambda x: x['name'] == option['name'], 
+    #                 lambda x: x['name'] == option['name'],
     #                 self.column_types
     #             )
     #         )
@@ -107,9 +107,8 @@ class TableDocument(models.Model):
     #     return options
 
 
-
 @receiver(post_delete, sender=TableDocument)
-def delete_document_file(sender, instance, **kwargs):
+def delete_document_file(instance: TableDocument, **kwargs):
     """Delete the file associated with the document when it is deleted."""
     if instance.file:
         path = pathlib.Path(instance.file.path)

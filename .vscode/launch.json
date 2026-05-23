@@ -15,7 +15,12 @@
                 "runserver"
             ],
             "django": true,
-            "justMyCode": true
+            "justMyCode": true,
+            "presentation": {
+                "hidden": false,
+                "group": "Django",
+                "order": 1
+            }
         },
         {
             "type": "msedge",

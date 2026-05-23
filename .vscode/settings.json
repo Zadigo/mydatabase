@@ -32,10 +32,9 @@
     "python.testing.unittestEnabled": false,
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.unittestArgs": [
-        "${workspaceFolder}/djangobackend",
         "-v",
         "-s",
-        ".",
+        "${workspaceFolder}/djangobackend",
         "-p",
         "test_*.py"
     ]

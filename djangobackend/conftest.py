@@ -21,23 +21,21 @@ def pytest_configure(config):
                 'django.contrib.sessions',
                 'django.contrib.messages',
                 'django.contrib.staticfiles',
-                'django_extensions',
                 'corsheaders',
+                'django_celery_beat',
                 'drf_spectacular',
                 'import_export',
-                'storages',
-                'django_ckeditor_5',
-                'django_celery_beat',
-                'rest_framework',
-                'rest_framework.authtoken',
+                'django_extensions',
+                'graphene_django',
                 'mcp_server',
                 'oauth2_provider',
                 'oauth_dcr',
-                'accounts',
-                'discounts',
-                'cart',
-                'orders',
-                'shipments'
+                'rest_framework',
+                'rest_framework.authtoken',
+                'tabledocuments',
+                'dbschemas',
+                'dbtables',
+                'endpoints'
             ],
             AUTH_USER_MODEL='auth.User',
             ROOT_URLCONF='djangobackend.urls',
@@ -47,12 +45,12 @@ def pytest_configure(config):
                 'DEFAULT_AUTHENTICATION_CLASSES': [
                     'rest_framework_simplejwt.authentication.JWTAuthentication',
                     'rest_framework.authentication.TokenAuthentication',
-                ]  
+                ]
             },
             SIMPLE_JWT={
                 'AUTH_HEADER_TYPES': ['Token']
             },
-            IMAGEKIT_CACHEFILE_NAMER='imagekit.cachefiles.namers.hash',
+            # IMAGEKIT_CACHEFILE_NAMER='imagekit.cachefiles.namers.hash',
             GRAPHENE={
                 'SCHEMA': 'djangobackend.schema.schema'
             },
