@@ -21,7 +21,6 @@ dependencies = [
     "django-redis>=6.0.0",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
-    "dotenv>=0.9.9",
     "drf-spectacular>=0.29.0",
     "graphene-django>=3.2.3",
     "gspread>=6.2.1",
@@ -34,7 +33,6 @@ dependencies = [
     "pyarrow>=23.0.1",
     "pydantic>=2.12.5",
     "pytz>=2026.1.post1",
-    "requests>=2.32.5",
     "twisted[http2,tls]>=25.5.0",
     "unidecode>=1.4.0",
     "zstd>=1.5.7.3",
@@ -44,6 +42,8 @@ dependencies = [
 dev = [
     "autopep8>=2.3.2",
     "coverage>=7.14.0",
+    "django-browser-reload>=1.21.0",
+    "django-watchfiles>=1.4.0",
     "factory-boy>=3.3.3",
     "pytest>=9.0.3",
     "pytest-aio>=2.1.7",
@@ -52,6 +52,7 @@ dev = [
     "pytest-django>=4.12.0",
     "pytest-env>=1.6.0",
     "pytest-playwright>=0.8.0",
+    "pytest-timeout>=2.4.0",
 ]
 
 [tool.pytest.ini_options]
