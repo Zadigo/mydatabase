@@ -1,7 +1,7 @@
 <template>
   <nuxt-app>
     <nuxt-layout>
-      <nuxt-page ref="google" />
+      <nuxt-page />
     </nuxt-layout>
   </nuxt-app>
 </template>
