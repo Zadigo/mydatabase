@@ -21,8 +21,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      prodDomain: process.env.NUXT_PUBLIC_PROD_DOMAIN || 'http://127.0.0.1:8000',
-      wsProdDomain: process.env.NUXT_PUBLIC_WS_PROD_DOMAIN  || 'ws://127.0.0.1:8000'
+      prodDomain: process.env.NUXT_PUBLIC_PROD_DOMAIN,
+      wsProdDomain: process.env.NUXT_PUBLIC_WS_PROD_DOMAIN
     }
   },
 
@@ -50,6 +50,6 @@ export default defineNuxtConfig({
   },
 
   nuxtAuthentication: {
-    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN || 'http://127.0.0.1:8000'
+    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
   }
 })
