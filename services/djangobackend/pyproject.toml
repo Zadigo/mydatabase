@@ -53,6 +53,7 @@ dev = [
     "pytest-env>=1.6.0",
     "pytest-playwright>=0.8.0",
     "pytest-timeout>=2.4.0",
+    "ruff>=0.15.16",
 ]
 
 [tool.pytest.ini_options]
