@@ -21,6 +21,9 @@ export default defineConfig({
           tags: [
             {
               name: 'e2e',
+            },
+            {
+              name: 'unit',
             }
           ]
         }

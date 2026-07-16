@@ -1,0 +1,10 @@
+{
+  "name": "@mydatabase/project",
+  "private": true,
+  "scripts": {
+    "install:mainsite": "pnpm --filter mainsite install",
+    "dev": "pnpm --parallel --filter './frontends/*' dev",
+    "dev:mainsite": "pnpm --filter mainsite dev",
+    "test:mainsite": "pnpm --filter mainsite test:watch"
+  }
+}

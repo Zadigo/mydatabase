@@ -7,16 +7,15 @@ export default defineNuxtConfig({
   ssr: true,
 
   modules: [
-    '@nuxt/eslint',
+    '@vueuse/nuxt',
     '@nuxt/image',
     '@nuxt/scripts',
-    '@nuxt/test-utils',
     '@nuxt/ui',
     '@pinia/nuxt',
-    '@vueuse/nuxt',
     '@nuxt/test-utils/module',
     'pinia-plugin-persistedstate/nuxt',
-    'nuxt-authentication'
+    'nuxt-authentication',
+    '@nuxt/eslint',
   ],
 
   runtimeConfig: {

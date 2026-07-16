@@ -8,15 +8,17 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test": "vitest",
-    "test:watch": "vitest --watch --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest watch --coverage",
     "test:coverage": "vitest --coverage",
     "test:unit": "vitest --project unit",
     "test:nuxt": "vitest --project nuxt",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "lint": "oxlint --type-aware",
-    "fix": "oxlint --fix"
+    "cleanup": "nuxt cleanup && rm -rf .nuxt .output dist node_modules/.cache",
+    "lint": "oxlint lint .",
+    "lint:eslint": "eslint . --ext .ts,.vue",
+    "fix": "oxlint fix ."
   },
   "dependencies": {
     "@nuxt/ui": "4.10.0",
