@@ -46,7 +46,7 @@ export const useDatabaseFunctions = createSharedComposable(() => {
   }
 })
 
-export function useDatabaseFunction(dbFunctions: Ref<DatabaseFunction[]>, databaseFunction: Ref<DatabaseFunction>) {
+export function useDatabaseFunction(_dbFunctions: Ref<DatabaseFunction[]>, _databaseFunction: Ref<DatabaseFunction>) {
 
 }
 

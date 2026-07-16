@@ -49,16 +49,16 @@ export function useValidators<S extends MaybeRefOrGetter<Record<string, unknown>
     }
   }
 
-  function minValue(value: number) {
+  function minValue(_value: number) {
     return (value: S[keyof S]) => {
       if (typeof value === 'number') {
-        return value >= minValue
+        return value >= _value
       }
       return true
     }
   }
 
-  function maxValue(value: number) {
+  function maxValue(_value: number) {
     return (value: S[keyof S]) => {
       if (typeof value === 'number') {
         return value <= maxValue

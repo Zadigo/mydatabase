@@ -21,7 +21,7 @@
             <template #header>
               <h2>{{ database.name }}</h2>
             </template>
-            
+
             <!-- State -->
             <nuxt-badge :color="database.active ? 'success' : 'error'" :label="database.active ? 'Active' : 'Inactive'" class="me-2" />
             <nuxt-badge :label="`${database.tables.length} tables`" color="info" />
@@ -76,7 +76,7 @@
       </template>
     </lazy-nuxt-modal>
   </section>
-</template> 
+</template>
 
 <script setup lang="ts">
 definePageMeta({

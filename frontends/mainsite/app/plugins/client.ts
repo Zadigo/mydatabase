@@ -4,7 +4,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   const client = $fetch.create({
     baseURL: useRuntimeConfig().public.prodDomain,
-    onRequest({ request, options, error }) {
+    onRequest({ options }) {
       options.headers.set('Content-Type', 'application/json')
 
       if (access.value) {
