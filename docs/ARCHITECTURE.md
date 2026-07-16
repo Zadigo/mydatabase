@@ -1,4 +1,4 @@
-# Fullstack E-commerce Application Architecture
+# My Database Application Architecture
 
 ## Requirements & Assumptions 🟠
 
@@ -68,23 +68,18 @@ Describes the overall structure of the system, including the main components and
 
 ```mermaid
 flowchart
-    A[Nuxt] --> B(Backend)
-    A --> Q(Firebase)
-    B --> C{Shop}
-    B --> K{Orders}
-    B --> N{Shipping}
-    K --> S(Database)
 
-    C --> F[Cache]
-    C --> E(Database) --> M(Amazon S3)
-    C --> L(Inventory)
-  
-    B --> |Payment| G{Gateway}
-  
-    G --> H[Stripe, Klarna, etc.]
+A[Nuxt] --> B(Django)
+B --> C[(PostgreSQL)]
+B --> F((Celery))
+F --> G[(RabbitMQ)]
 
-    N --> O(3rd party logistics providers)
-    N --> R(Database)
+subgraph storage
+B --> D[(Redis)]
+end
+
+A --> |Endpoints server|H(Golang)
+H --> D
 ```
 
 ## System Workflow 🔄
@@ -93,43 +88,47 @@ flowchart
 
 ```mermaid
 sequenceDiagram
-    User->>+Website: Browse products
-    Website->>+Shop: Fetch product data
-    Shop->>+Database: Query product information
-    Database-->>-Shop: Return product data
-    Shop-->>-Cache: Cache product data
-    Cache-->>Shop: Return cached product data
-    Shop->>Website: Display products
-    Website->>+User: View product details
+autonumber
 
-    User->>+Website: Add product to cart
-    Website->>+Shop: Update shopping cart
-    Shop->>+Database: Update cart information
-    Database-->>-Shop: Confirm cart update
-    Shop->>Website: Update cart display
-    Website->>+User: Proceed to checkout
+box Frontend
+actor U as Alice
+actor P as Pauline
+participant N@{type: "entity"} as Nuxt
+end
 
-    User->>+Website: Enter payment information
-    Website->>+Shop: Process payment
-    Shop->>+Payment Gateway: Send payment details
-  
-    critical Payment processing
-        Payment Gateway->>+Stripe/Klarna: Process payment
-        Stripe/Klarna-->>-Payment Gateway: Payment confirmation  
-    option Payment successful
-        Payment Gateway->>-Orders: Create Order
-    option Shipping
-        Orders->>+Shipping: Arrange shipping
-        Shipping-->>-User: Shipping confirmation
-    end
-  
-    par Order Workflow
-        Stripe/Klarna-->>User: Payment processed
-        Payment Gateway-->>Shop: Confirm payment
-        Orders-->>Website: Update order status
-    end
+box Backend
+participant D@{type: "entity"} as Django
+participant G@{type: "entity"} as Golang
+end
 
-    Website->>User: Display confirmation
+box Storage
+participant R@{type: "entity"} as Redis
+participant S@{type: "database"} as S3
+participant PG@{type: "database"} as PostgreSQL
+end
+
+U->>N: Click Upload CSV
+N->>D: Upload CSV file
+D->>D: Process file
+
+par Store File
+D->>PG: Store details
+D<<-->>S: Store CSV file in S3
+D-->>R: Cache data
+end
+
+P->>N: View database
+N->>G: Request data
+G->>R: Fetch data
+R-->>G: Cached data
+G->>()N: Data
+
+par Edit File
+P<<->>N: Edit CSV file
+N<<->>G: Update cached data
+G-->>R: Update cache
+G->>S: Update CSV file in S3
+end
 ```
 
 ## Api Design 🛠️
@@ -142,15 +141,6 @@ sequenceDiagram
 | Endpoint          | Method | Description                            | Request Body                                                          | Response Body                             |
 | ----------------- | ------ | -------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------- |
 | /graphql          | POST   | Retrieve a list of products            | { query: string, variables: object }                                  | List of products with details             |
-| /graphql          | POST   | Retrieve details of a specific product | { query: string, variables: object }                                  | Product details                           |
-| /graphql          | POST   | Add a product to the shopping cart     | { query: string, variables: object }                                  | Updated shopping cart details             |
-| /graphql          | POST   | Process the checkout and payment       | { query: string, variables: object }                                  | Order confirmation and details            |
-| /graphql          | POST   | Retrieve a list of user orders         | { query: string, variables: object }                                  | List of user orders with details          |
-| /graphql          | POST   | Retrieve details of a specific order   | { query: string, variables: object }                                  | Order details                             |
-| /api/v1/signup    | POST   | Register a new user                    | { username: string, password: string, password_confirmation: string } | User registration confirmation            |
-| /auth/v1/token/   | POST   | Authenticate a user                    | { username: string, password: string }                                | Authentication token and user details     |
-| /v1/auth/refresh  | POST   | Refresh authentication token           | { refresh_token: string }                                             | New authentication token and user details |
-| /v1/token/verify/ | POST   | Verify authentication token            | { token: string }                                                     | Verification result                       |
 
 ## Data storage
 
@@ -207,16 +197,6 @@ erDiagram
 | Service            | Language/Framework | Description                           |
 | ------------------ | ------------------ | ------------------------------------- |
 | Cart               | Django             | Manages shopping cart functionalities |
-| Reviews            | Django             | Handles product reviews and ratings   |
-| Shop               | Django             | Manages product catalog and inventory |
-| Frontend           | Nuxt 4             | Renders the desktop user interface    |
-| Frontend Admin     | Nuxt 4             | User-friendly admin interface         |
-| Frontend Mobile    | Nuxt 4 + Ionic     | Mobile-friendly interface             |
-| Flutter            | Flutter            | Mobile-friendly interface             |
-| Purchase Gateway   | Golang             | Managing Stripe payments              |
-| Auth Load-Balancer | Golang             | User authentication and authorization |
-| Cart               | Django             | Cart management                       |
-| Subscribers        | Django             | Newsletters etc. management           |
 
 ## Technologies Used 🌳
 
