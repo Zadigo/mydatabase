@@ -15,7 +15,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'unit',
-          include: ['test/{e2e,unit}/*.{test,spec}.ts'],
+          include: ['tests/{e2e,unit}/**/*.{test,spec}.ts'],
           environment: 'node',
           testTimeout: 20000,
           tags: [
@@ -28,7 +28,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'nuxt',
-          include: ['test/nuxt/*.{test,spec}.ts'],
+          include: ['tests/nuxt/**/*.{test,spec}.ts'],
           environment: 'nuxt',
           testTimeout: 20000,
           tags: [
@@ -41,7 +41,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'integration',
-          include: [ 'test/integration/*.{test,spec}.ts' ],
+          include: [ 'tests/integration/**/*.{test,spec}.ts' ],
           environment: 'node',
           testTimeout: 20000,
           tags: [
