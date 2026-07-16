@@ -5,6 +5,5 @@ describe.only('useCreateDocument', () => {
   it('should initialize with default params', () => {
     const result = useCreateDocument()
     expect(result).toBeDefined()
-
   })
 })

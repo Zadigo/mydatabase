@@ -50,5 +50,14 @@ export default defineNuxtConfig({
 
   nuxtAuthentication: {
     domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
-  }
+  },
+
+  eslint: {
+    config: {
+      stylistic: {
+        commaDangle: 'never',
+        braceStyle: '1tbs'
+      }
+    }
+  },
 })

@@ -12,5 +12,12 @@
     "python.analysis.autoSearchPaths": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.oxc": "never"
-    }
+    },
+    "python-envs.pythonProjects": [
+        {
+            "path": "services/djangobackend",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
 }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { useEditDocument } from '../../../app/composables/use/documents/edition'
 import { isRef } from 'vue'
 
-describe.only('useEditDocument', () => {
+describe('useEditDocument', () => {
   it('should initialize with default params', () => {
     const result = useEditDocument()
     expect(result).toBeDefined()

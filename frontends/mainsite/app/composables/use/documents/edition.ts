@@ -177,7 +177,7 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
   }
 })
 
-const [ useFileCheckout, _useFileCheckoutStore ] = createInjectionState((selectedTable: WritableComputedRef<Undefineable<SimpleTable>>, newDocument: Ref<NewDocument>) => {
+const [useFileCheckout, _useFileCheckoutStore] = createInjectionState((selectedTable: WritableComputedRef<Undefineable<SimpleTable>>, newDocument: Ref<NewDocument>) => {
   const fileCheckoutResponse = ref<FileCheckoutResponse | null>(null)
   const columnTypes = computed(() => fileCheckoutResponse.value?.columnTypes || [])
 

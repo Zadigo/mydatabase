@@ -20,10 +20,10 @@ export default defineConfig({
           testTimeout: 20000,
           tags: [
             {
-              name: 'e2e',
+              name: 'e2e'
             },
             {
-              name: 'unit',
+              name: 'unit'
             }
           ]
         }
@@ -36,7 +36,7 @@ export default defineConfig({
           testTimeout: 20000,
           tags: [
             {
-              name: 'nuxt',
+              name: 'nuxt'
             }
           ]
         }
@@ -44,12 +44,12 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'integration',
-          include: [ 'tests/integration/**/*.{test,spec}.ts' ],
+          include: ['tests/integration/**/*.{test,spec}.ts'],
           environment: 'node',
           testTimeout: 20000,
           tags: [
             {
-              name: 'integration',
+              name: 'integration'
             }
           ]
         }
