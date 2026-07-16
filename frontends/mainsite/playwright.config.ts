@@ -9,6 +9,7 @@ export default defineConfig<ConfigOptions>({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  testMatch: '*todo-tests/*.spec.ts',
   use: {
     trace: 'on-first-retry',
     nuxt: {
