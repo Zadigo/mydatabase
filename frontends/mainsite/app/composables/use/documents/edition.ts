@@ -11,12 +11,13 @@ export const useEditDocument = createGlobalState(() => {
   const tableEditionStore = useTableEditionStore()
   const { tableDocuments } = storeToRefs(tableEditionStore)
 
-  watchDebounced(tableDocuments, async (newValue) => {
-    // Update Django with the new column types for each document
-    console.log('Updated table documents:', newValue)
-  }, { deep: true, debounce: 1000 })
+  // watchDebounced(tableDocuments, async (newValue) => {
+  //   // Update Django with the new column types for each document
+  //   console.log('Updated table documents:', newValue)
+  // }, { deep: true, debounce: 1000 })
 
   async function remove(tableDocument: TableDocument) {
+    // TODO: Move to server
     const { status } = await useFetch(`/v1/documents/${tableDocument.document_uuid}`, {
       baseURL: useRuntimeConfig().public.prodDomain,
       method: 'DELETE'
@@ -128,10 +129,10 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
     })
 
     if (data.value) {
-      const [createData, databaseUpdateData] = data.value
+      const [_createData, _databaseUpdateData] = data.value
 
-      console.log(createData)
-      console.log(databaseUpdateData)
+      // console.log(createData)
+      // console.log(databaseUpdateData)
 
       // dbStore.databases = databaseUpdateData
     }

@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditDocument } from '../../../app/composables/use/documents/edition'
 import { isRef } from 'vue'
+import { createPinia, setActivePinia } from 'pinia'
 
 describe('useEditDocument', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   it('should initialize with default params', () => {
     const result = useEditDocument()
     expect(result).toBeDefined()
