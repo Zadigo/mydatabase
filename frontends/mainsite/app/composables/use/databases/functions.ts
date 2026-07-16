@@ -59,7 +59,6 @@ export function useEditDatabaseFunction(dbFunctions: Ref<DatabaseFunction[]>, cu
   const editedFunction = ref(databaseFunction)
   const chainTo = ref<boolean>(false)
 
-
   const selectedTable = ref<Nullable<number>>(null)
 
   const tableEditionStore = useTableEditionStore()
@@ -67,7 +66,7 @@ export function useEditDatabaseFunction(dbFunctions: Ref<DatabaseFunction[]>, cu
   const columnNames = computed(() => selectedTableDocument?.value?.column_names || [])
 
   const otherFunctions = computed(() => {
-    const others = useArrayFilter(dbFunctions, (item) => item !== editedFunction.value)
+    const others = useArrayFilter(dbFunctions, item => item !== editedFunction.value)
     return others.value.map((func, idx) => `${idx}.${func.function.name}`)
   })
 
@@ -75,7 +74,7 @@ export function useEditDatabaseFunction(dbFunctions: Ref<DatabaseFunction[]>, cu
 
   watch(() => editedFunction.value.function.signals.failure.do, (newValue) => {
     if (newValue !== 'Default') {
-      editedFunction.value.function.signals.failure.default_value = ""
+      editedFunction.value.function.signals.failure.default_value = ''
     }
   })
 

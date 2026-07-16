@@ -20,7 +20,7 @@ export function useEditDocumentRelationship() {
   const foreignTableForeignKey = ref<string>()
 
   const primaryKeyColumns = computed(() => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [])
-  const foreignTable = useArrayFind(tableDocuments, (doc) => doc.document_uuid === foreignTableId.value)
+  const foreignTable = useArrayFind(tableDocuments, doc => doc.document_uuid === foreignTableId.value)
   const foreignTableColumns = computed(() => isDefined(foreignTable) ? foreignTable.value.column_names : [])
 
   return {
@@ -45,4 +45,3 @@ export function useEditDocumentRelationship() {
     create
   }
 }
-

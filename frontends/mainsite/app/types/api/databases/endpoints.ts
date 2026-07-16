@@ -5,13 +5,13 @@ import type { Table } from '../tables'
  * @private
  */
 interface _DatabaseSchema extends _BaseDatabaseObject {
-	name: string
-	tables: Table[]
+  name: string
+  tables: Table[]
 }
 
 export interface DatabaseEndpoint extends _BaseDatabaseObject {
-	methods: ('GET' | 'POST' | 'PUT' | 'DELETE')[]
-	endpoint: string
-	endpoint_uuid: string
+  methods: ('GET' | 'POST' | 'PUT' | 'DELETE')[]
+  endpoint: string
+  endpoint_uuid: string
   database_schema: _DatabaseSchema
 }

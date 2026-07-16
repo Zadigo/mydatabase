@@ -2,27 +2,27 @@
  * @private
  */
 interface Fields {
-	left: string
-	right: string
+  left: string
+  right: string
 }
 
 /**
  * @private
  */
 interface Metadata {
-	type: '1-1' | '1-many' | 'many-1' | 'many-many'
+  type: '1-1' | '1-many' | 'many-1' | 'many-many'
 }
 
 /**
  * @private
  */
 interface Table {
-	from: string
-	to: string
+  from: string
+  to: string
   fields: Fields
-	meta: Metadata
+  meta: Metadata
 }
 
 export interface TableRelationship {
-	table: Table
+  table: Table
 }

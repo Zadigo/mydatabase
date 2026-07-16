@@ -1,4 +1,4 @@
-import type { baseDatabaseFunctions} from '~/utils'
+import type { baseDatabaseFunctions } from '~/utils'
 
 export type DatabaseFunctions = typeof baseDatabaseFunctions[number]
 
@@ -7,12 +7,12 @@ export type FunctionReturnTypes = typeof functionReturnTypes[number]
 export type FunctionFailures = typeof functionFailures[number]
 
 interface FunctionReturnBody {
-	type: FunctionReturnTypes
+  type: FunctionReturnTypes
   value: string
 }
 
 interface FailureBody {
-	do: FunctionFailures;
+  do: FunctionFailures
   default_value: string
 }
 
@@ -21,14 +21,14 @@ export interface FunctionSignals {
 }
 
 export interface FunctionBody {
-	name: string
-	table: string
-	columns: string[]
-	returns: FunctionReturnBody
-	chain_to: string[]
-	signals: FunctionSignals
+  name: string
+  table: string
+  columns: string[]
+  returns: FunctionReturnBody
+  chain_to: string[]
+  signals: FunctionSignals
 }
 
 export type DatabaseFunction = {
-	function: FunctionBody
+  function: FunctionBody
 }

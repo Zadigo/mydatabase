@@ -21,12 +21,12 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
    */
 
   const selectedTableName = ref<string>()
-  const selectedTable = computed({ 
-    get: () => useArrayFind(currentDatabase.value?.tables || [], table => table.name === selectedTableName.value).value, 
+  const selectedTable = computed({
+    get: () => useArrayFind(currentDatabase.value?.tables || [], table => table.name === selectedTableName.value).value,
     set: (value) => {
       if (isDefined(value)) {
         const table = useArrayFind(currentDatabase.value?.tables || [], table => table.id === value.id)
-        
+
         if (isDefined(table)) {
           table.value.name = value.name
           table.value.description = value.description
@@ -34,9 +34,9 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
           selectedTableName.value = value.name
         }
       }
-    } 
+    }
   })
-  
+
   // When the TableDocument already has a datasource
   // we need to automatically set the value on the
   // select input when the user selects that table
@@ -45,7 +45,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
     if (isDefined(table)) {
       if (table.active_document_datasource) {
         const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === table.active_document_datasource)
-        
+
         if (tableDocument) {
           selectedTableDocumentName.value = tableDocument.name
         }
@@ -57,10 +57,10 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
    * Documents
    */
 
-  const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: (value) => value })
+  const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: value => value })
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
-  
-  const selectedTableDocument = useArrayFind(tableDocuments, (doc) => doc.name === selectedTableDocumentName.value)
+
+  const selectedTableDocument = useArrayFind(tableDocuments, doc => doc.name === selectedTableDocumentName.value)
   const selectedTableDocumentNames = computed(() => useArrayMap(isDefined(selectedTable) ? selectedTable.value.documents : [], doc => doc.name).value)
 
   /**
@@ -94,7 +94,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
         baseURL: useRuntimeConfig().public.prodDomain,
         body: editableTableRef.value
       })
-  
+
       if (data) {
         selectedTable.value = data
         toggleEditTableDrawer(false)
@@ -104,14 +104,14 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
 
   // FIXME: Does not update on Django
   watch(selectedTableDocument, (doc) => {
-    // When the user changes the datasource for the table, 
+    // When the user changes the datasource for the table,
     // we need to update it on Django
     if (isDefined(selectedTable) && isDefined(doc)) {
       const data = { ...selectedTable.value }
 
       data.active_document_datasource = doc.document_uuid
       selectedTable.value = toValue(data)
-      
+
       update()
     }
   })
@@ -122,7 +122,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
 
   const tableData = ref<DocumentData[]>([])
   const hasData = computed(() => tableData.value.length > 0)
-  
+
   return {
     /**
      * Show the modal to edit the table's information
@@ -228,8 +228,8 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
   const tableStore = useTableEditionStore()
   const { selectedTableDocument } = storeToRefs(tableStore)
 
-  const columnNames = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [], set: (value) => value })
-  const columnOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [], set: (value) => value })
+  const columnNames = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [], set: value => value })
+  const columnOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [], set: value => value })
 
   /**
    * Column options
@@ -249,7 +249,7 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     }
   }
 
-  const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: (value) => value })
+  const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: value => value })
 
   function changeTypeOption(column: ColumnTypeOptions, columnType: ColumnType) {
     column.columnType = columnType

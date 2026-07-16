@@ -1,7 +1,6 @@
 import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 import type { SimpleTable } from '~/types'
 
-
 /**
  * @todo Zod
  */

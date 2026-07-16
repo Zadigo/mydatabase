@@ -1,5 +1,5 @@
-import type { DatabaseFunction } from "~/types"
-import type { DatabaseTrigger } from "~/types/api/triggers"
+import type { DatabaseFunction } from '~/types'
+import type { DatabaseTrigger } from '~/types/api/triggers'
 
 /**
  * Function used to manage and create database triggers
@@ -12,7 +12,7 @@ export const useDatabaseTriggers = createGlobalState(() => {
     trigger: []
   })
 
-  const [ showFunctionsModal, toggerFunctionsModal ] = useToggle()
+  const [showFunctionsModal, toggerFunctionsModal] = useToggle()
 
   function create() {
     dbTriggers.value.trigger.push({

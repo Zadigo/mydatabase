@@ -27,8 +27,8 @@ export interface Database extends _BaseDatabaseObject {
    */
   active: boolean
   /**
-   * Whether the database is paused or not. A paused database 
-   * will not be used for queries, but will still be visible in 
+   * Whether the database is paused or not. A paused database
+   * will not be used for queries, but will still be visible in
    * the UI and can be resumed at any time.
    */
   paused: boolean
@@ -36,12 +36,12 @@ export interface Database extends _BaseDatabaseObject {
   database_triggers: null
   document_relationships: null
   /**
-   * A slug is a URL-friendly version of the database name, typically used 
+   * A slug is a URL-friendly version of the database name, typically used
    * for routing and identification purposes in the frontend application.
    */
   slug: string
   /**
-   * The timestamp of when the database was last updated, in ISO 8601 format. This field is used to 
+   * The timestamp of when the database was last updated, in ISO 8601 format. This field is used to
    * track changes to the database and can be useful for caching and synchronization purposes.
    */
   updated_at: string

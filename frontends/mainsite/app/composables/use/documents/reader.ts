@@ -6,13 +6,13 @@ type SingleRow<T> = Record<keyof T, string | number | null>
 
 interface ProcessedCsv<F> {
   headers: (keyof F)[]
-  data: SingleRow<F>[],
+  data: SingleRow<F>[]
   meta: {
     totalRows: number
     totalColumns: number
-    delimiter: string,
+    delimiter: string
     linebreak: string
-    aborted: false,
+    aborted: false
     truncated: false
   }
 }
@@ -44,15 +44,15 @@ export function useFileReader<T = { name: string }>() {
       if (file.value.size > MAX_FILE_SIZE) {
         throw new Error('File size exceeds 10MB limit')
       }
-  
+
       // Check file extension as fallback
       const extension = file.value.name.toLowerCase().split('.').pop() as FileExtension
       const mimeType = file.value.type as AllowedTypes
-  
+
       if (!ALLOWED_TYPES[mimeType] && !['json', 'csv'].includes(extension)) {
         throw new Error('Only JSON and CSV files are allowed')
       }
-  
+
       return true
     } else {
       return false
@@ -115,10 +115,10 @@ export function useFileReader<T = { name: string }>() {
       // For Nuxt, you might need to import it dynamically or use a plugin
 
       const parseResult = parse<C>(content, {
-        header: true,              // First row contains headers
-        skipEmptyLines: true,      // Skip empty lines
-        trimHeaders: true,         // Trim whitespace from headers
-        dynamicTyping: false,      // Keep all values as strings for safety
+        header: true, // First row contains headers
+        skipEmptyLines: true, // Skip empty lines
+        trimHeaders: true, // Trim whitespace from headers
+        dynamicTyping: false, // Keep all values as strings for safety
         transformHeader: (header) => {
           // Clean the headers
           return header.trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '_')
@@ -128,12 +128,12 @@ export function useFileReader<T = { name: string }>() {
           return typeof value === 'string' ? value.trim() : value
         },
         delimitersToGuess: [',', '\t', '|', ';'], // Try multiple delimiters
-        newline: '',               // Auto-detect line endings
+        newline: '', // Auto-detect line endings
         quoteChar: '"',
         escapeChar: '"',
-        fastMode: false,           // More thorough parsing
-        preview: 0,                // Parse all rows
-        worker: false              // Don't use web workers for simplicity
+        fastMode: false, // More thorough parsing
+        preview: 0, // Parse all rows
+        worker: false // Don't use web workers for simplicity
       })
 
       // Check for parsing errors

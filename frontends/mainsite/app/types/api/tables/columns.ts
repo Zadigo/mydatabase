@@ -32,7 +32,7 @@ export interface ColumnTypeOptions {
    * The data type for this column
    * @default "String"
    */
-  columnType: ColumnType,
+  columnType: ColumnType
   /**
    * Column values should be unique
    * @default false

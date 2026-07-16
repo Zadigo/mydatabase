@@ -5,7 +5,7 @@ import { useWebsocketMessage } from '..'
 /**
  * Composable to manage the WebSocket connection for live
  * table data editing
- * 
+ *
  * @description Using websocket for these operations is
  * faster and more efficient especially when dealing with big
  * datasets. Also, websockets allow for collaborative editing
@@ -65,13 +65,13 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
     }
   }
 
-  const isConnected = computed(() => wsObject.status.value === 'OPEN')  
+  const isConnected = computed(() => wsObject.status.value === 'OPEN')
 
   onMounted(() => { loadDataViaId() })
   onUnmounted(() => { if (isConnected.value) wsObject.close() })
 
   /**
-   * Every time the selected document changes, 
+   * Every time the selected document changes,
    * send a WebSocket message to load the inner data
    */
   watchDebounced(selectedDocument, () => {

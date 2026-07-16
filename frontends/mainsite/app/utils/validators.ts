@@ -3,8 +3,8 @@ interface Rule {
   field: string
   value?: MaybeRefOrGetter<unknown>
   validator?: (value: unknown) => boolean | Promise<boolean>
-  message?: string,
-  isValid?: boolean,
+  message?: string
+  isValid?: boolean
   flag?: 'neutral' | 'success' | 'error' | 'warning' | 'info'
 }
 
@@ -102,7 +102,7 @@ export function useValidators<S extends MaybeRefOrGetter<Record<string, unknown>
       return true
     }
   }
-  
+
   function integer() {
     return (value: S[keyof S]) => {
       if (typeof value === 'string' || typeof value === 'number') {
@@ -247,15 +247,15 @@ export function useValidators<S extends MaybeRefOrGetter<Record<string, unknown>
 
 export function useTesting<S extends MaybeRefOrGetter<Record<string, unknown>>>(schema: S, rules: Rule[]) {
   const _rules = ref(rules)
-  
+
   async function _validate() {
     const _schema = toValue(schema)
     for (const rule of _rules.value) {
       if (rule.validator) {
         if (rule.validator.constructor.name === 'AsyncFunction') {
-          rule.isValid = await rule.validator(_schema[ toValue(rule.field) ])
+          rule.isValid = await rule.validator(_schema[toValue(rule.field)])
         } else {
-          rule.isValid = rule.validator(_schema[ toValue(rule.field) ])
+          rule.isValid = rule.validator(_schema[toValue(rule.field)])
         }
 
         if (rule.isValid) {
@@ -263,7 +263,7 @@ export function useTesting<S extends MaybeRefOrGetter<Record<string, unknown>>>(
         } else {
           rule.flag = 'error'
         }
-      } 
+      }
     }
   }
 

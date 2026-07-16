@@ -46,7 +46,7 @@ export const useEditDocument = createGlobalState(() => {
 
 /**
  * Composable used for creating a new document
- * @param wsObject The websocket object used to send messages to the server when the document is created. If not provided, the composable will not send any websocket messages. 
+ * @param wsObject The websocket object used to send messages to the server when the document is created. If not provided, the composable will not send any websocket messages.
  */
 export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnType) => {
   const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle()
@@ -140,7 +140,7 @@ export const useCreateDocument = createGlobalState((wsObject?: VueUseWsReturnTyp
   const currentStep = ref<StepperItem['title']>('Upload file')
 
   function updateStep(item: StepperItem) {
-    currentStep.value = item.title || ''  
+    currentStep.value = item.title || ''
   }
 
   const canSend = computed(() => isDefined(newDocument.value.file))
@@ -211,7 +211,7 @@ export { useFileCheckout }
 
 export function useFileCheckoutStore() {
   const store = _useFileCheckoutStore()
-  
+
   if (!store) {
     throw new Error('useFileCheckoutStore must be used within a component that calls useFileCheckout')
   }

@@ -15,17 +15,17 @@ export const useDatabasesStore = defineStore('databases', () => {
    */
 
   const search = ref<string>('')
-  const searched = useArrayFilter<Database>(databases, (database) => database.name.toLowerCase().includes(search.value.toLowerCase()))
+  const searched = useArrayFilter<Database>(databases, database => database.name.toLowerCase().includes(search.value.toLowerCase()))
 
   /**
    * Current database
    */
 
   const routeId = ref<Nullable<number>>(null)
-  const currentDatabase = useArrayFind<Database>(databases, (database) => database.id === routeId.value)
-  
+  const currentDatabase = useArrayFind<Database>(databases, database => database.id === routeId.value)
+
   console.log('currentDatabase', currentDatabase)
-  
+
   const availableTables = computed(() => isDefined(currentDatabase) ? currentDatabase.value.tables : [])
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)
   const hasTables = computed(() => availableTables.value.length > 0)
@@ -35,8 +35,8 @@ export const useDatabasesStore = defineStore('databases', () => {
   async function fetch() {
     const data = await $fetch<Database[]>('/v1/databases', {
       method: 'GET',
-      baseURL: useRuntimeConfig().public.prodDomain,
-      
+      baseURL: useRuntimeConfig().public.prodDomain
+
     })
 
     if (data) {

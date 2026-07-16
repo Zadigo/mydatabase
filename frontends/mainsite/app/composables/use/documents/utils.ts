@@ -2,14 +2,14 @@ import type { ColumnType, SimpleTable, TableDocument } from '~/types'
 import type { NewDocument } from '.'
 
 /**
- * Find the actual document from a table based on its 
+ * Find the actual document from a table based on its
  * `active_document_datasource` field
  * @param table The table to get the actual document from
  */
 export function useTableActualDocument<T extends MaybeRef<SimpleTable>>(table: T) {
   const actualTable = toValue(table)
   const availableDocuments = computed(() => actualTable.documents || [])
-  return useArrayFind<TableDocument>(availableDocuments, (doc) => actualTable.active_document_datasource === doc.document_uuid)
+  return useArrayFind<TableDocument>(availableDocuments, doc => actualTable.active_document_datasource === doc.document_uuid)
 }
 
 /**
@@ -57,14 +57,14 @@ export function useColumnTypeOptions() {
   }
 
   function getTypeOptions(headers: string[]): NewDocument['using_columns'] {
-    return toReactive(headers.map((h) => ({
+    return toReactive(headers.map(h => ({
       name: h,
       new_name: h,
       columnType: 'String',
       unique: false,
       nullable: true,
       visible: true
-    })))  
+    })))
   }
 
   return {

@@ -35,7 +35,7 @@ export const databaseFixture: Database = {
             {
               name: 'title',
               columnType: 'String',
-              unique: false, 
+              unique: false,
               nullable: false
             },
             {

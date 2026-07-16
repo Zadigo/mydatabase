@@ -2,9 +2,6 @@ import tailwind from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-  ssr: true,
 
   modules: [
     '@vueuse/nuxt',
@@ -15,8 +12,18 @@ export default defineNuxtConfig({
     '@nuxt/test-utils/module',
     'pinia-plugin-persistedstate/nuxt',
     'nuxt-authentication',
-    '@nuxt/eslint',
+    '@nuxt/eslint'
   ],
+  ssr: true,
+  devtools: { enabled: true },
+
+  css: [
+    '~/assets/css/tailwind.css'
+  ],
+
+  ui: {
+    prefix: 'Nuxt'
+  },
 
   runtimeConfig: {
     public: {
@@ -33,23 +40,12 @@ export default defineNuxtConfig({
     '/integrations': { ssr: false },
     '/login': { prerender: true }
   },
-
-  ui: {
-    prefix: 'Nuxt'
-  },
-
-  css: [
-    '~/assets/css/tailwind.css'
-  ],
+  compatibilityDate: '2025-07-15',
 
   vite: {
     plugins: [
       tailwind()
     ]
-  },
-
-  nuxtAuthentication: {
-    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
   },
 
   eslint: {
@@ -60,4 +56,8 @@ export default defineNuxtConfig({
       }
     }
   },
+
+  nuxtAuthentication: {
+    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
+  }
 })

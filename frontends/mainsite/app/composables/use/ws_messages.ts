@@ -9,20 +9,20 @@ interface DocumentData {
   }
 }
 
-export type BaseWsSendMessage =
-  | { action: 'idle_connect' }
-  | { action: 'load_via_id', table_id: number, document: { uuid: string, name: string } }
-  | { action: 'load_via_url', url: string, entry_key?: Nullable<string> }
-  | { action: 'load_document_data', document_uuid: Undefineable<string> }
+export type BaseWsSendMessage
+  = | { action: 'idle_connect' }
+    | { action: 'load_via_id', table_id: number, document: { uuid: string, name: string } }
+    | { action: 'load_via_url', url: string, entry_key?: Nullable<string> }
+    | { action: 'load_document_data', document_uuid: Undefineable<string> }
 
-export type BaseReceiveWsAction =
-  | { action: 'connected' } & DocumentData
-  | { action: 'loaded_via_id' } & DocumentData
-  | { action: 'loaded_via_url' } & DocumentData
-  | { action: 'checkedout_url' | 'checkedout_file' } & Omit<DocumentData, 'document_data'>
-  | { action: 'processing_url' }
-  | { action: 'error' | 'success', message: string }
-  | { action: 'loaded_document_data', data: string }
+export type BaseReceiveWsAction
+  = | { action: 'connected' } & DocumentData
+    | { action: 'loaded_via_id' } & DocumentData
+    | { action: 'loaded_via_url' } & DocumentData
+    | { action: 'checkedout_url' | 'checkedout_file' } & Omit<DocumentData, 'document_data'>
+    | { action: 'processing_url' }
+    | { action: 'error' | 'success', message: string }
+    | { action: 'loaded_document_data', data: string }
 
 /**
  * WebSocket message utilities
@@ -44,7 +44,7 @@ export function useWebsocketMessage<S extends BaseWsSendMessage, R extends BaseR
 
   return {
     /**
-     * Helper function that allows us to 
+     * Helper function that allows us to
      * stringify a WebSocket message
      */
     stringify,

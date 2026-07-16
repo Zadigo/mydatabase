@@ -4,7 +4,6 @@ export type * from './relationships'
 export type * from './triggers'
 export type * from './tables'
 
-
 /**
  * @private
  */

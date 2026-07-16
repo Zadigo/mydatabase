@@ -1,4 +1,4 @@
-export default defineNuxtPlugin(async nuxtApp => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const access = useCookie('access')
   const refresh = useCookie('refresh')
 
@@ -14,7 +14,7 @@ export default defineNuxtPlugin(async nuxtApp => {
     async onResponseError({ response }) {
       if (response.status === 401) {
         access.value = null
-        
+
         if (refresh.value) {
           const { access: newAccess } = await refreshAccessToken(refresh.value)
           access.value = newAccess

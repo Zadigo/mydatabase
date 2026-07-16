@@ -1,21 +1,21 @@
 export type DatabaseTriggerEvent = (typeof databaseTriggerEvent)[number]
 
 interface Condition {
-	database: number
+  database: number
 }
 
 interface TriggerBody {
-	event: DatabaseTriggerEvent
-	when: {
-		before: boolean
-		after: boolean
-	}
-	name: string
-	orientation: 'row' | 'column'
-	function: string
+  event: DatabaseTriggerEvent
+  when: {
+    before: boolean
+    after: boolean
+  }
+  name: string
+  orientation: 'row' | 'column'
+  function: string
 }
 
 export interface DatabaseTrigger {
-	on: Condition
-	trigger: TriggerBody[]
+  on: Condition
+  trigger: TriggerBody[]
 }
