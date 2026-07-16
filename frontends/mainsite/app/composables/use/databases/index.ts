@@ -22,6 +22,7 @@ export function useDatabaseCreation() {
 
   const dbStore = useDatabasesStore()
 
+  // TODO: Move to api/server
   async function create() {
     const data = await $fetch<Database>('/v1/databases/create', {
       method: 'POST',
@@ -63,32 +64,39 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
 
   const newDatabaseName = ref<string>(database.value?.name || '')
 
-  const { data, status, execute } = useFetch<Database>(`/v1/databases/${database.value?.id}`, {
-    immediate: false,
-    baseURL: config.public.prodDomain,
-    body: {
-      name: newDatabaseName.value
-    }
-  })
+  const isUpdating = ref<boolean>(false)
+  const toggleIsUpdating = useToggle(isUpdating)
+  
+  let updated: Database | undefined = undefined
 
   watchDebounced(newDatabaseName, async () => {
-    await execute()
+    // await execute()
+    toggleIsUpdating(true)
 
-    if (isDefined(data)) {
-      database.value = data.value
+    updated = await $fetch<Database>(`/v1/databases/${database.value?.id}`, {
+      baseURL: config.public.prodDomain,
+      method: 'POST',
+      body: {
+        name: newDatabaseName.value
+      }
+    })
+
+    if (isDefined(updated)) {
+      database.value = updated
     }
+
+    toggleIsUpdating(false)
   }, {
     debounce: 1000,
     maxWait: 5000
   })
 
-  const isUpdating = computed(() => status.value === 'pending')
 
   return {
     /**
      * The updated database information
      */
-    updatedDatabase: data,
+    updatedDatabase: updated,
     /**
      * Ref that holds the new database name
      */

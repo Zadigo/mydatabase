@@ -19,7 +19,7 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
   queryParams.table = useToString(isDefined(_currentTable) ? _currentTable.value.id : '').value
 
   onMounted(() => {
-    console.log('params.table', queryParams.table)
+    // console.log('params.table', queryParams.table)
 
     // Load the table to view if specified in the "table" query
     if (queryParams.table) {
