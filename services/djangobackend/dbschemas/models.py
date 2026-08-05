@@ -2,9 +2,8 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.crypto import get_random_string
-from django.utils.text import slugify
 from django.utils.http import urlsafe_base64_encode
-from django.contrib.auth import get_user_model
+from django.utils.text import slugify
 
 
 class DatabaseSchema(models.Model):

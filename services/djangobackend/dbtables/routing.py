@@ -1,6 +1,6 @@
 from django.urls import re_path
-from dbtables import consumers
 
+from dbtables import consumers
 
 urlpatterns = [
     re_path(

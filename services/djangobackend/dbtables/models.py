@@ -1,10 +1,10 @@
-from re import S
-from dbtables import choices
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
+
+from dbtables import choices
 
 
 class DatabaseTable(models.Model):

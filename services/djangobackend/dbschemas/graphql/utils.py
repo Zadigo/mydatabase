@@ -1,8 +1,10 @@
 import graphene
+from django.db.models import QuerySet
 from graphene_django.types import DjangoObjectType
 from graphql import GraphQLResolveInfo
-from django.db.models import QuerySet
+
 from dbschemas.models import DatabaseProvider, DatabaseSchema
+
 
 class DatabaseSchemaType(DjangoObjectType):
     has_relationships = graphene.Boolean()

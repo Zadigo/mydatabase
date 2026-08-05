@@ -1,7 +1,9 @@
 import graphene
 from graphql import GraphQLResolveInfo
-from dbschemas.models import DatabaseSchema
+
 from dbschemas.graphql.schema import DatabaseSchemaType
+from dbschemas.models import DatabaseSchema
+
 
 class CreateDatabaseSchemaMutation(graphene.Mutation):
     class Arguments:

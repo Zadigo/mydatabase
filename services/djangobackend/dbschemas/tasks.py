@@ -5,11 +5,12 @@ import pandas
 import pytz
 from celery import shared_task
 from celery.utils.log import get_logger
-from dbschemas.models import DatabaseSchema
-from dbtables.models import DatabaseTable
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
+
+from dbschemas.models import DatabaseSchema
+from dbtables.models import DatabaseTable
 from tabledocuments.models import TableDocument
 
 logger = get_logger(__name__)
@@ -336,6 +337,6 @@ def prefetch_relationships(database_id: str):
 
             cache.set(item['name'], df.to_json(orient='records'), timeout=None)
             logger.info(
-                f"One-to-one relationship "
+                "One-to-one relationship "
                 "created between {table1.name} and {table2.name}."
             )

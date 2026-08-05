@@ -1,8 +1,9 @@
 import graphene
 from graphene_django.fields import DjangoListField
 from graphql import GraphQLResolveInfo
-from dbschemas.models import DatabaseProvider, DatabaseSchema
+
 from dbschemas.graphql.utils import DatabaseProviderType, DatabaseSchemaType
+from dbschemas.models import DatabaseProvider, DatabaseSchema
 
 
 class DatabaseSchemaQuery(graphene.ObjectType):

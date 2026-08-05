@@ -1,11 +1,11 @@
 import uuid
 
-from dbschemas.models import DatabaseSchema
+from django.db.models import Q
+from rest_framework import serializers
+
+from dbschemas.models import DatabaseProvider, DatabaseSchema
 from dbschemas.tasks import prefetch_relationships
 from dbtables.api.serializers import DatabaseTableSerializer
-from django.db.models import Q
-from dbschemas.models import DatabaseProvider
-from rest_framework import serializers
 
 
 class DatabaseSchemaSerializer(serializers.ModelSerializer):

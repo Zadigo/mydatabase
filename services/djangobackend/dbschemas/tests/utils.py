@@ -1,9 +1,9 @@
-from faker import Faker
 from factory.django import DjangoModelFactory
+from faker import Faker
+
 from dbschemas.models import DatabaseSchema
 
 faker = Faker()
-
 
 
 class DatabaseSchemaFactory(DjangoModelFactory):

@@ -1,8 +1,8 @@
-from django.test import TestCase
-from django.test import override_settings
-from dbschemas.models import DatabaseSchema
+from django.test import TestCase, override_settings
 
+from dbschemas.models import DatabaseSchema
 from dbschemas.tests.utils import DatabaseSchemaFactory
+
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestFuncs(TestCase):
