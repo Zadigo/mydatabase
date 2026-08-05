@@ -1,8 +1,10 @@
-from django.test import TestCase
 import pandas
-from tabledocuments.utils import create_dataframe
+from django.test import TestCase
+
 from tabledocuments.tests.utils import build_column_options
+from tabledocuments.utils import create_dataframe
 from tabledocuments.validation_models import ColumnOption, ColumnTypes
+
 
 class TestCreateDataframe(TestCase):
     def setUp(self):

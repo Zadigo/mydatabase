@@ -1,8 +1,7 @@
+from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 from faker import Faker as FakerClass
-from tabledocuments.models import TableDocument
-from django.core.files.base import ContentFile
-from django.core.files.base import ContentFile
+
 from tabledocuments.models import TableDocument
 from tabledocuments.validation_models import ColumnOption
 

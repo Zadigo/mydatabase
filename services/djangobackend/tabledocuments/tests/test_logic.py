@@ -7,8 +7,12 @@ from asgiref.sync import async_to_sync
 from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 from faker import Faker as FakerClass
-from tabledocuments.logic.edit import (DocumentEdition, DocumentTransform,
-                                       load_document_by_url)
+
+from tabledocuments.logic.edit import (
+    DocumentEdition,
+    DocumentTransform,
+    load_document_by_url,
+)
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.mixins import ConsumerMixin
 
@@ -99,7 +103,7 @@ class TestLogicDocumentTransform(ConsumerMixin):
         self.instance = DocumentTransform(consumer)
 
     async def test_load_document(self):
-        aync_to_sync(self.instance.load_document)()
+        async_to_sync(self.instance.load_document)()
 
 
 class TestLogicUtils(IsolatedAsyncioTestCase):

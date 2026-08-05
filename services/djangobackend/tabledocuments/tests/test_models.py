@@ -1,8 +1,9 @@
 from django.test import TestCase
 
 from tabledocuments.models import TableDocument
-from tabledocuments.tests.utils import create_file_based_instance, DocumentFactory
+from tabledocuments.tests.utils import DocumentFactory, create_file_based_instance
 from tabledocuments.validation_models import ColumnOption, ColumnTypeOption
+
 
 class TestTableDocument(TestCase):
     def test_model_creation(self):

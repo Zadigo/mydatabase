@@ -11,13 +11,12 @@ from channels.testing import WebsocketCommunicator
 from django.core.files.base import ContentFile
 from django.test import TransactionTestCase, override_settings
 from django.urls import re_path, reverse
-from tabledocuments import consumers
-from tabledocuments.logic.edit import (DocumentEdition,
-                                       load_document_by_url)
-from tabledocuments.models import TableDocument
-from tabledocuments.tasks import create_csv_file_from_data
 
 from djangobackend.utils import UnittestAuthenticationMixin
+from tabledocuments import consumers
+from tabledocuments.logic.edit import DocumentEdition, load_document_by_url
+from tabledocuments.models import TableDocument
+from tabledocuments.tasks import create_csv_file_from_data
 
 
 class TestRequestUtils(IsolatedAsyncioTestCase):

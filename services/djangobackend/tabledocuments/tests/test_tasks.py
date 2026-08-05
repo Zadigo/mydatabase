@@ -2,11 +2,15 @@ from unittest.mock import patch
 
 from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
+
 from tabledocuments import tasks
 from tabledocuments.models import TableDocument
-from tabledocuments.tests.utils import DocumentFactory, build_column_options, create_file_based_instance
+from tabledocuments.tests.utils import (
+    DocumentFactory,
+    build_column_options,
+    create_file_based_instance,
+)
 from tabledocuments.validation_models import ColumnOption
-
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
