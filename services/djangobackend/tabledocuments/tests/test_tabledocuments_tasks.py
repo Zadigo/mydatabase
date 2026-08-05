@@ -13,7 +13,6 @@ from tabledocuments.tests.utils import (
 from tabledocuments.validation_models import ColumnOption
 
 
-@patch('tabledocuments.tasks.update_document_options')
 class TestCaseMixin(TestCase):
     def setUp(self):
         self.instance: TableDocument = DocumentFactory.create()
@@ -21,7 +20,7 @@ class TestCaseMixin(TestCase):
     @classmethod
     def tearDownClass(cls):
         for instance in TableDocument.objects.all():
-            if instance.file:
+            if instance.file is not None:
                 instance.file.delete()
 
 
@@ -87,17 +86,18 @@ class TestCreateFromCsvFile(TestCase):
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestCreateJsonFileFromData(TestCaseMixin):
     def test_create_with_none(self):
-        for value in [None, '', b'']:
-            with self.subTest(value=f'Running with value: {value}'):
-                result = tasks.create_json_file_from_data.apply(kwargs={
-                    'data': value,
-                    'document_id': self.instance.id,
-                    'column_type_options': []
-                })
-                result.get()
+         with patch('tabledocuments.tasks.update_document_options'):
+            for value in [None, '', b'']:
+                with self.subTest(value=f'Running with value: {value}'):
+                    result = tasks.create_json_file_from_data.apply(kwargs={
+                        'data': value,
+                        'document_id': self.instance.id,
+                        'column_type_options': []
+                    })
+                    result.get()
 
     def test_create_from_dict(self):
-        with patch('tabledocuments.tasks.update_document_options') as mupdate_options:
+        with patch('tabledocuments.tasks.update_document_options'):
             result = tasks.create_json_file_from_data.apply(kwargs={
                 'data': {'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
                 'document_id': self.instance.id,
@@ -110,37 +110,31 @@ class TestCreateJsonFileFromData(TestCaseMixin):
             self.assertIsNotNone(self.instance.file)
 
     def test_create_from_dict_without_entry_key(self):
-        instance: TableDocument = DocumentFactory.create()
+        with patch('tabledocuments.tasks.update_document_options'):
+            self.instance: TableDocument = DocumentFactory.create()
 
-        result = tasks.create_json_file_from_data.apply(kwargs={
-            'data': {'firstname': 'Jane', 'lastname': 'Doe'},
-            'document_id': instance.id,
-            'column_type_options': build_column_options('firstname', 'lastname')
-        })
-        
-        result.get()
+            result = tasks.create_json_file_from_data.apply(kwargs={
+                'data': {'firstname': 'Jane', 'lastname': 'Doe'},
+                'document_id': self.instance.id,
+                'column_type_options': build_column_options('firstname', 'lastname')
+            })
+            
+            result.get()
 
-        instance.refresh_from_db()
-        self.assertIsNotNone(instance.file)
+            self.instance.refresh_from_db()
+            self.assertIsNotNone(self.instance.file)
 
     def test_create_from_list(self):
-        instance: TableDocument = DocumentFactory.create()
-
-        with patch('tabledocuments.tasks.update_document_options') as mupdate_options:
+        with patch('tabledocuments.tasks.update_document_options'):
             result = tasks.create_json_file_from_data.apply(kwargs={
                 'data': [{'firstname': 'Jane', 'lastname': 'Doe'}],
-                'document_id': instance.id,
+                'document_id': self.instance.id,
                 'column_type_options': build_column_options('firstname', 'lastname')
             })
             result.get()
 
-            instance.refresh_from_db()
-            self.assertIsNotNone(instance.file)
-            
-
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-class TestCreateFeatherFileFromData(TestCase):
-    pass
+            self.instance.refresh_from_db()
+            self.assertIsNotNone(self.instance.file)
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)

@@ -10,10 +10,15 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
-from gspread.utils import rowcol_to_a1
 from django.utils.crypto import get_random_string
-from tabledocuments.logic.utils import clean_user_column_type_options, create_column_type_options, create_column_options
+from gspread.utils import rowcol_to_a1
+
 from tabledocuments.logic.edit import DocumentEdition
+from tabledocuments.logic.utils import (
+    clean_user_column_type_options,
+    create_column_options,
+    create_column_type_options,
+)
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import create_dataframe
 
