@@ -4,13 +4,13 @@
       <!-- Header -->
       <header class="col-span-12">
         <nuxt-card class="mb-2">
-          <div class="flex gap-2">
+          <form class="flex gap-2">
             <nuxt-input v-model="search" placeholder="Search databases" />
   
             <nuxt-button @click="() => { toggleCreationModal() }">
               Create Database
             </nuxt-button>
-          </div>
+          </form>
         </nuxt-card>
       </header>
 

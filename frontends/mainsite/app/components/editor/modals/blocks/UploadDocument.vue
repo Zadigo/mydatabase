@@ -68,7 +68,7 @@ const { fileCheckoutResponse } = useFileCheckoutStore()
 
 const { stringify } = useWebsocketMessage()
 watch(() => newDocument.value, (newDoc) => {
-  console.log(newDoc)
+  // console.log(newDoc)
   if (isDefined(wsObject) && newDoc.url !== '') {
     wsObject.send(stringify({ action: 'load_via_url', url: newDoc.url, entry_key: newDoc.entry_key || undefined }))
     
@@ -76,7 +76,7 @@ watch(() => newDocument.value, (newDoc) => {
       const data = parse(wsObject.data)
       if (data?.action === 'checkedout_url') {
         newDocument.value.using_columns = data.columns.type_options
-        console.log('AddDocument.vue - newDocument', wsObject.data.value)
+        // console.log('AddDocument.vue - newDocument', wsObject.data.value)
       }
     }
   }

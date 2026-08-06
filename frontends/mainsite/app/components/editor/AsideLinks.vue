@@ -55,7 +55,7 @@ const { availableTables } = storeToRefs(dbStore)
 
 const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 
-console.log('Editor.AsideLinks', tableData.value)
+// console.log('Editor.AsideLinks', tableData.value)
 
 /**
  * Url query parameters

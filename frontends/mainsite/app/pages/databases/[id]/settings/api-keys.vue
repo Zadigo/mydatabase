@@ -9,13 +9,13 @@
         Publishable key
       </h3>
 
-      <nuxt-button-group>
-        <nuxt-input v-model="publishableKey" :disabled="true" color="neutral" variant="outline" />
+      <nuxt-input v-model="publishableKey" :disabled="true" color="neutral" variant="outline" />
 
-        <nuxt-tooltip text="Copy to clipboard">
-          <nuxt-button color="neutral" variant="subtle" icon="i-lucide-clipboard" @click="() => { copyPublishableKey() }" />
-        </nuxt-tooltip>
-      </nuxt-button-group>
+      <nuxt-button color="neutral" variant="subtle" icon="i-lucide-clipboard" @click="() => { copyPublishableKey() }" />
+      <!-- <nuxt-tooltip text="Copy to clipboard">
+      </nuxt-tooltip> -->
+      <!-- <nuxt-button-group>
+      </nuxt-button-group> -->
     </nuxt-card>
 
     <nuxt-card>
@@ -23,13 +23,12 @@
         Secret key
       </h3>
 
-      <nuxt-button-group>
-        <nuxt-input v-model="secretKey" :disabled="true" color="neutral" variant="outline" />
-
-        <nuxt-tooltip text="Copy to clipboard">
-          <nuxt-button color="neutral" variant="subtle" icon="i-lucide-clipboard" @click="() => { copySecretKey() }" />
-        </nuxt-tooltip>
-      </nuxt-button-group>
+      <nuxt-input v-model="secretKey" :disabled="true" color="neutral" variant="outline" />
+      <nuxt-button color="neutral" variant="subtle" icon="i-lucide-clipboard" @click="() => { copySecretKey() }" />
+      <!-- <nuxt-tooltip text="Copy to clipboard">
+      </nuxt-tooltip> -->
+      <!-- <nuxt-button-group>
+      </nuxt-button-group> -->
     </nuxt-card>
   </section>
 </template>
