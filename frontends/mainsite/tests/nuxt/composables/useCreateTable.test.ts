@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { useCreateTable } from '../../../app/composables/use/tables'
+import { useCreateTable } from '~/composables/use/tables'
 
 describe('useCreateTable', () => {
   it('should initialize with default params', () => {

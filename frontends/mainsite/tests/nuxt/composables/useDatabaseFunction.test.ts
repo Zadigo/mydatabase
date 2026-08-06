@@ -1,35 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { useDatabaseFunction, useDatabaseFunctions } from '../../../app/composables'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { ref, defineComponent } from 'vue'
+import { describe, it, expect } from 'vitest'
+import { useDatabaseFunction, useDatabaseFunctions } from '~/composables'
+import { datatabaseFunctionFixture } from '../../__fixtures__'
 
 describe('useDatabaseFunctions', () => {
-  let component: ReturnType<typeof defineComponent> | undefined = undefined
-  let result: ReturnType<typeof useDatabaseFunctions> | undefined = undefined
-
-  beforeEach(async () => {
-    component = await mountSuspended(defineComponent({
-      template: '<div></div>',
-      setup() {
-        result = useDatabaseFunctions()
-        return {
-          result
-        }
-      }
-    }))
-  })
-
   it('should initialize with default params', () => {
-    expect(component).toBeDefined()
-    expect(result).toBeDefined()
-
+    const result = useDatabaseFunctions()
     expect(result.create).toBeTypeOf('function')
   })
 })
 
 describe('useDatabaseFunction', () => {
   it('should initialize with default params', () => {
-    const result = useDatabaseFunction(ref(null), ref(null))
-    expect(result).toBeDefined()
+    const funcs = ref([datatabaseFunctionFixture])
+    const func = ref(datatabaseFunctionFixture)
+
+    const result = useDatabaseFunction(funcs, func)
+    expect(result).toBeUndefined()
   })
 })

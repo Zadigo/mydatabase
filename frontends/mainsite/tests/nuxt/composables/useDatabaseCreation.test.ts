@@ -1,23 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { NewDatabase, useDatabaseCreation } from '../../../app/composables'
-import { useDatabasesStore } from '../../../app/stores/databases'
+import { useDatabaseCreation } from '~/composables'
+import { useDatabasesStore } from '~/stores/databases'
 import { setActivePinia, createPinia, storeToRefs } from 'pinia'
-import type { NitroFetchOptions } from '#imports'
 import { useRuntimeConfig } from 'nuxt/app'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import type { $Fetch, NitroFetchRequest, NitroFetchOptions } from 'nitropack'
+
+import type { NewDatabase } from '~/composables'
 
 const newDatabase: NewDatabase = {
   name: 'Test Database',
-  description: 'Some easy description',
-  tables: [],
-  active: true,
-  paused: false,
-  database_functions: null,
-  database_triggers: null,
-  document_relationships: null,
-  slug: 'test-database',
-  updated_at: new Date().toISOString(),
-  created_at: new Date().toISOString()
+  description: 'Some easy description'
 }
+
+// tables: [],
+// active: true,
+// paused: false,
+// database_functions: null,
+// database_triggers: null,
+// document_relationships: null,
+// slug: 'test-database',
+// updated_at: new Date().toISOString(),
+// created_at: new Date().toISOString()
 
 vi.stubGlobal('useRuntimeConfig', () => ({
   public: {
@@ -25,14 +29,18 @@ vi.stubGlobal('useRuntimeConfig', () => ({
   }
 }))
 
-const fetchMock = vi.fn(async (url: string, options: NitroFetchOptions) => {
-  if (url === '/v1/databases/create' && options.method === 'POST') {
-    return newDatabase
-  }
-  throw new Error('Unknown endpoint or method')
+const { fetchMock } = vi.hoisted(() => {
+  const fetchMock = vi.fn<$Fetch>(async (_url: NitroFetchRequest, _options: NitroFetchOptions) => {
+    if (_url === '/v1/databases/create' && _options.method === 'POST') {
+      return newDatabase
+    }
+    throw new Error('Unknown endpoint or method')
+  })
+
+  return { fetchMock }
 })
 
-vi.stubGlobal('$fetch', fetchMock)
+mockNuxtImport('$fetch', () => fetchMock)
 
 describe('useDatabaseCreation', () => {
   beforeEach(() => {
@@ -60,7 +68,7 @@ describe('useDatabaseCreation', () => {
       name: 'Test Database',
       description: 'Some easy description'
     }
-
+    
     await result.create()
 
     expect(fetchMock).toHaveBeenCalledWith('/v1/databases/create', {

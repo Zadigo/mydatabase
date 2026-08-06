@@ -1,4 +1,4 @@
-import type { Database } from '../../app/types'
+import type { Database, DatabaseFunction } from '../../app/types'
 import { faker } from '@faker-js/faker'
 
 export const databaseFixture: Database = {
@@ -18,4 +18,23 @@ export const databaseFixture: Database = {
 export const databaseStaticFixture: Database = {
   ...databaseFixture,
   id: 1
+}
+
+export const datatabaseFunctionFixture: DatabaseFunction = {
+  function: {
+    name: 'Test Function',
+    table: 'test_table',
+    columns: [],
+    returns: {
+      type: 'void',
+      value: ''
+    },
+    chain_to: [],
+    signals: {
+      failure: {
+        do: 'Skip',
+        default_value: ''
+      }
+    }
+  }
 }

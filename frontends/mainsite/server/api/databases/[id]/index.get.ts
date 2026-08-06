@@ -2,19 +2,19 @@ import { Database } from '~/types'
 import { createErrorTemplate } from '~/utils'
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const body = await readBody<{ id: string, name: string }>(event)
-
   try {
-    return $fetch<Database>(`/v1/databases/${body.id}`, {
-      method: 'POST',
+    const config = useRuntimeConfig()
+    const body = await readBody<{ databaseId: string, name: string }>(event)
+
+    return await $fetch<Database>(`/v1/databases/${ body.databaseId }`, {
       baseURL: config.public.prodDomain,
+      method: 'POST',
       body: {
         name: body.name
       }
     })
   } catch (error) {
     const template = createErrorTemplate(error)
-    throw createError(template)
+    return createError(template)
   }
 })

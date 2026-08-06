@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { useDatabaseTriggers } from '../../../app/composables'
+import { useDatabaseTriggers } from '~/composables'
 
 describe('useDatabaseTriggers', () => {
   it('should initialize with default params', () => {

@@ -1,11 +1,16 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, it, expect, vi } from 'vitest'
 import LoginPage from '~/pages/login.vue'
-import { useLogin } from 'nuxt-authentication'
+import { faker } from '@faker-js/faker'
 
-vi.stubGlobal('$fetch', vi.fn())
+vi.stubGlobal('$fetch', vi.fn((url: string, options: any) => {
+  if (url === '/api/auth/login' && options.method === 'POST') {
+    return Promise.resolve({ success: true })
+  }
+  return Promise.reject(new Error('Unknown API endpoint'))
+}))
 
-describe.only('LoginPage', { tags: ['nuxt_page'] }, () => {
+describe('LoginPage', { tags: ['nuxt_page'] }, () => {
   it('should render page correctly', async () => {
     const component = await mountSuspended(LoginPage)
     
@@ -36,6 +41,15 @@ describe.only('LoginPage', { tags: ['nuxt_page'] }, () => {
     const component = await mountSuspended(LoginPage)
     const buttonEl = component.find('button#action-login')
 
+    const email = component.find('input[name="email"]')
+    const password = component.find('input[name="password"]')
+
+    await email.setValue(faker.internet.email())
+    await password.setValue(faker.internet.password())
+
     await buttonEl.trigger('click')
+    
+    // Check for navigation to have been triggered
+    expect(component.vm.$router.currentRoute.value.fullPath).toBe('/')
   })
 })
