@@ -3,7 +3,7 @@ import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
-    // setupFiles: [ './tests/setup.ts' ],
+    setupFiles: [ './tests/setup.ts' ],
     exclude: [
       'node_modules',
       '.nuxt',
