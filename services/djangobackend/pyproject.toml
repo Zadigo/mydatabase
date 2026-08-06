@@ -54,6 +54,7 @@ dev = [
     "pytest-django>=4.12.0",
     "pytest-env>=1.6.0",
     "pytest-playwright>=0.7.2",
+    "pytest-rabbitmq>=4.0.0",
     "pytest-reportlog>=1.0.0",
     "pytest-timeout>=2.4.0",
 ]

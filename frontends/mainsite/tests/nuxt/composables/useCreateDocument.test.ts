@@ -55,7 +55,7 @@ describe('useCreateDocument', () => {
     })
   })
 
-  it.only('should update newDocument when inputs change', async () => {
+  it('should update newDocument when inputs change', async () => {
     // await nextTick()
 
     result.newDocument.name = 'Test Document'
