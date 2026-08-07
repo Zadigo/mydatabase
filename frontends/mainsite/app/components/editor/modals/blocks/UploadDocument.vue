@@ -28,7 +28,9 @@
             <p class="mb-3 text-sm font-light">You can also provide a URL or a Google Sheet ID to import data from external sources.</p>
             <nuxt-input v-model="newDocument.url" :loading="true" class="w-full" placeholder="Url hosting the CSV or JSON file" />
 
-            <nuxt-button @click="testSend">Test prefetch</nuxt-button>
+            <nuxt-button @click="testSend">
+              Test prefetch
+            </nuxt-button>
           </div>
       
           <!-- Other -->
@@ -67,6 +69,7 @@ const { fileCheckoutResponse } = useFileCheckoutStore()
  */
 
 const { stringify } = useWebsocketMessage()
+
 watch(() => newDocument.value, (newDoc) => {
   // console.log(newDoc)
   if (isDefined(wsObject) && newDoc.url !== '') {
@@ -74,6 +77,7 @@ watch(() => newDocument.value, (newDoc) => {
     
     if(isDefined(wsObject.data)) {
       const data = parse(wsObject.data)
+      
       if (data?.action === 'checkedout_url') {
         newDocument.value.using_columns = data.columns.type_options
         // console.log('AddDocument.vue - newDocument', wsObject.data.value)

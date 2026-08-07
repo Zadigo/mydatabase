@@ -18,9 +18,17 @@
 
     <template #footer>
       <div class="ms-auto flex gap-2">
-        <nuxt-button variant="soft" color="neutral" @click="() => { toggleShowAddDocumentModal() }">Cancel</nuxt-button>
-        <nuxt-button v-if="canSend" :disabled="!dbStore.hasTables" @click="() => { create() }">Create</nuxt-button>
-        <nuxt-button v-else @click="() => { stepperEl?.next() }">Next</nuxt-button>
+        <nuxt-button variant="soft" color="neutral" @click="() => { toggleShowAddDocumentModal() }">
+          Cancel
+        </nuxt-button>
+
+        <nuxt-button v-if="canSend" :disabled="!dbStore.hasTables" @click="() => { create() }">
+          Create
+        </nuxt-button>
+        
+        <nuxt-button v-else @click="() => { stepperEl?.next() }">
+          Next
+        </nuxt-button>
       </div>
     </template>
   </nuxt-modal>
