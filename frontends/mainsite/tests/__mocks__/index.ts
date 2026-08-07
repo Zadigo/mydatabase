@@ -28,3 +28,26 @@ export function mockH3Event(event: Partial<H3Event> & Partial<Options>) {
   }
   return { ...e, ...event } as H3Event
 }
+
+// export type TestCase<P> = {
+//   title: string
+//   props?: P
+// }
+
+// export function defineTestCase<T>(title: string, testCaseProps?: T): TestCase<T> {
+//   return {
+//     title,
+//     props: testCaseProps
+//   }
+// }
+
+// export function defineTestCases<T>(cases: ReturnType<typeof defineTestCase<T>>[]): TestCase<T>[] {
+//   return cases.flatMap((testCase) => testCase)
+// }
+
+
+// defineTestCases(
+//   defineTestCase('should render correctly with default props', {
+//     something: 'value'
+//   })
+// )

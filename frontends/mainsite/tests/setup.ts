@@ -1,6 +1,11 @@
 import { vi } from 'vitest'
 import type { H3Event, EventHandlerRequest } from 'h3'
 
+export type TestCase<P> = {
+  title: string
+  props: P
+}
+
 type Handler = (event: H3Event<EventHandlerRequest>) => Promise<unknown>
 
 const h3 = vi.hoisted(() => {

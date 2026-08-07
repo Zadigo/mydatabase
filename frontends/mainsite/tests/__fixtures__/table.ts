@@ -1,4 +1,4 @@
-import type { SimpleTable, TableDocument } from '../../app/types'
+import type { ColumnTypeOptions, SimpleTable, TableDocument } from '../../app/types'
 import { faker } from '@faker-js/faker' 
 
 export const tableFixture: SimpleTable = {
@@ -23,4 +23,13 @@ export const tableDocumentFixture: TableDocument = {
   column_type_options: [],
   created_at: faker.date.past().toISOString(),
   updated_at: faker.date.recent().toISOString()
+}
+
+export const columnTypeOptionsFixture: ColumnTypeOptions = {
+  name: faker.lorem.word(),
+  newName: faker.lorem.word(),
+  columnType: 'String',
+  unique: faker.datatype.boolean(),
+  nullable: faker.datatype.boolean(),
+  visible: faker.datatype.boolean()
 }

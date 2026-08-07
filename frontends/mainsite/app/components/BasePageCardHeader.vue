@@ -12,8 +12,8 @@
     </div>
 
     <slot name="actions">
-      <div class="flex justify-between mt-3">
-        <nuxt-input v-model="search" :placeholder="placeholder" class="w-5/12" />
+      <form class="flex justify-between mt-3" @submit.prevent>
+        <nuxt-input v-model="search" :placeholder="placeholder" type="search" class="w-5/12" />
 
         <slot name="actionButton">
           <nuxt-button @click="emit('create')">
@@ -21,7 +21,7 @@
             {{ actionName }}
           </nuxt-button>
         </slot>
-      </div>
+      </form>
     </slot>
   </nuxt-card>
 </template>
