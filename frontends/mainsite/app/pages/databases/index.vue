@@ -16,7 +16,7 @@
 
       <!-- Databases -->
       <template v-if="searched.length > 0">
-        <nuxt-link v-for="database in searched" :key="database.id" :to="`/databases/${database.id}`" class="col-span-3">
+        <nuxt-link v-for="database in searched" :key="database.id" :id="createElementId('link', 'content', database.slug)" :to="`/databases/${database.id}`" class="col-span-3">
           <nuxt-card>
             <template #header>
               <h2>{{ database.name }}</h2>

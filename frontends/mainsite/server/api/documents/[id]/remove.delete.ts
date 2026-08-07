@@ -1,4 +1,4 @@
-import { createErrorTemplate } from '~/utils'
+import { createErrorTemplate } from '~/utils/errors'
 
 export default defineEventHandler(async (event) => {
   const tableDocument = await readBody<{ document_uuid: string }>(event)

@@ -1,6 +1,6 @@
 import type { Database } from  '~/types'
 import type { NewDatabase } from '~/composables/use/databases'
-import { createErrorTemplate } from '~/utils'
+import { createErrorTemplate } from '~/utils/errors'
 
 export default defineEventHandler(async (_event) => {
   const newDatabase = await readBody<NewDatabase>(_event)

@@ -1,13 +1,17 @@
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
-test('should show available databases created by the user', async ({ page }) => {
+test('should show available databases created by the user', { tag: '@userWorkflowPrimary' }, async ({ page }) => {
   await page.goto('/databases')
   
   const inputEl = page.getByRole('textbox', { name: 'Search databases' })
   await inputEl.waitFor({ state: 'visible' })
+
+  // Get the list of databases
+  const databaseEls = page.locator('a[id^="link-content-"]')
+  await expect(databaseEls.first()).toBeEnabled()
 })
 
-test('should be able to create a new database', async ({ page }) => {
+test('should be able to create a new database', { tag: '@userWorkflowPrimary' }, async ({ page }) => {
   await page.goto('/databases')
 
   const inputEl = page.getByRole('textbox', { name: 'Search databases' })
@@ -28,7 +32,7 @@ test('should be able to create a new database', async ({ page }) => {
   await page.getByRole('button', { name: 'Create New Database' }).click()
 })
 
-test('should be able to search the databases', async ({ page }) => {
+test('should be able to search the databases', { tag: '@userWorkflowSecondary' }, async ({ page }) => {
   await page.goto('/databases')
   
   const inputEl = page.getByRole('textbox', { name: 'Search databases' })
