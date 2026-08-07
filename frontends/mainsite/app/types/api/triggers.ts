@@ -1,4 +1,4 @@
-export type DatabaseTriggerEvent = (typeof databaseTriggerEvent)[number]
+export type DatabaseTriggerEvent = (typeof DATABASE_TRIGGER_EVENT)[number]
 
 interface Condition {
   database: number

@@ -37,11 +37,11 @@
         <nuxt-separator class="my-5" />
 
         <nuxt-form-field class="font-semibold mb-5" label="When" help="After or before the event">
-          <nuxt-select v-model="item.event" :items="Array.from(databaseTriggerEvent)" class="w-60" />
+          <nuxt-select v-model="item.event" :items="Array.from(DATABASE_TRIGGER_EVENT)" class="w-60" />
         </nuxt-form-field>
 
         <nuxt-form-field class="font-semibold" label="Orientation" help="Row or column level">
-          <nuxt-select v-model="item.orientation" :items="Array.from(databaseTriggerOrientation)" class="w-60" />
+          <nuxt-select v-model="item.orientation" :items="Array.from(DATABASE_TRIGGER_ORIENTATION)" class="w-60" />
         </nuxt-form-field>
 
         <nuxt-separator class="my-5" />

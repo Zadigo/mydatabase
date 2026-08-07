@@ -19,11 +19,11 @@
     <nuxt-separator class="my-5" />
 
     <p class="font-semibold text-sm mb-2">Trigger types</p>
-    <nuxt-select v-model="dbTriggers.on.event" :items="Array.from(databaseTriggerEvent)" class="w-60" placeholder="After or before the event" />
+    <nuxt-select v-model="dbTriggers.on.event" :items="Array.from(DATABASE_TRIGGER_EVENT)" class="w-60" placeholder="After or before the event" />
 
 
     <p class="font-semibold text-sm mb-2">Orientation</p>
-    <nuxt-select v-if="isDefined(editingTrigger)" v-model="editingTrigger.orientation" :items="Array.from(databaseTriggerOrientation)" class="w-60" placeholder="Select orientation" />
+    <nuxt-select v-if="isDefined(editingTrigger)" v-model="editingTrigger.orientation" :items="Array.from(DATABASE_TRIGGER_ORIENTATION)" class="w-60" placeholder="Select orientation" />
 
     <nuxt-separator class="my-5" />
 

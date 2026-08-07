@@ -1,10 +1,8 @@
-import type { baseDatabaseFunctions } from '~/utils'
+export type DatabaseFunctions = typeof BASE_DATABASE_FUNCTIONS[number]
 
-export type DatabaseFunctions = typeof baseDatabaseFunctions[number]
+export type FunctionReturnTypes = typeof FUNCTION_RETURN_TYPES[number]
 
-export type FunctionReturnTypes = typeof functionReturnTypes[number]
-
-export type FunctionFailures = typeof functionFailures[number]
+export type FunctionFailures = typeof FUNCTION_FAILURES[number]
 
 interface FunctionReturnBody {
   type: FunctionReturnTypes

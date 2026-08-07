@@ -12,6 +12,6 @@ export default defineEventHandler(async (event) => {
     })
   } catch (error) {
     const template = createErrorTemplate(error)
-    return createError(template)
+    throw createError(template)
   }
 })

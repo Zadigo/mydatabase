@@ -1,6 +1,6 @@
 import type { SelectItem } from '@nuxt/ui'
 
-export const baseDatabaseFunctions = [
+export const BASE_DATABASE_FUNCTIONS = [
   'Count',
   'Sum',
   'Avg',
@@ -27,7 +27,7 @@ export const baseDatabaseFunctions = [
   'SHA512'
 ] as const
 
-export const functionReturnTypes = [
+export const FUNCTION_RETURN_TYPES = [
   'void',
   'integer',
   'float',
@@ -41,7 +41,7 @@ export const functionReturnTypes = [
   'uuid'
 ] as const
 
-export const functionFailures = [
+export const FUNCTION_FAILURES = [
   'Record',
   'Default',
   'Skip'

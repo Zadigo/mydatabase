@@ -18,7 +18,7 @@
         <p class="text-sm font-semibold">Function return type</p>
         <div class="flex gap-2">
           <nuxt-input v-model.trim="editedFunction.function.returns.value" class="w-90" placeholder="Default return value" />
-          <nuxt-select v-model="editedFunction.function.returns.type" :items="Array.from(functionReturnTypes)" class="w-90" />
+          <nuxt-select v-model="editedFunction.function.returns.type" :items="Array.from(FUNCTION_RETURN_TYPES)" class="w-90" />
         </div>
       </div>
 
@@ -31,7 +31,7 @@
         What should your function do on fail?
       </p>
 
-      <nuxt-select v-model="editedFunction.function.signals.failure.do" :items="Array.from(functionFailures)" class="w-50" />
+      <nuxt-select v-model="editedFunction.function.signals.failure.do" :items="Array.from(FUNCTION_FAILURES)" class="w-50" />
       <nuxt-input v-model="editedFunction.function.signals.failure.default_value" :disabled="!shouldReturnDefault" placeholder="Default value" class="w-50" />
 
       <pre>

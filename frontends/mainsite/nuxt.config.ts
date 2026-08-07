@@ -59,5 +59,11 @@ export default defineNuxtConfig({
 
   nuxtAuthentication: {
     domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
+  },
+
+  imports: {
+    dirs: [
+      '~/constants'
+    ]
   }
 })
