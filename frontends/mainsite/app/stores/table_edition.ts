@@ -240,7 +240,7 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
 
     if (isDefined(selectedTableDocument)) {
       $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
-        method: 'patch',
+        method: 'PATCH',
         baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_options: columnOptions.value
@@ -266,7 +266,7 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
   function save() {
     if (isDefined(selectedTableDocument)) {
       $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
-        method: 'patch',
+        method: 'PATCH',
         baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_types: columnTypeOptions.value

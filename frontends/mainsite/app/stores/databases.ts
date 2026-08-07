@@ -33,15 +33,7 @@ export const useDatabasesStore = defineStore('databases', () => {
   console.log('prodDomain', useRuntimeConfig().public.prodDomain)
 
   async function fetch() {
-    const data = await $fetch<Database[]>('/v1/databases', {
-      method: 'GET',
-      baseURL: useRuntimeConfig().public.prodDomain
-
-    })
-
-    if (data) {
-      databases.value = data
-    }
+    return await $fetch<Database[]>('/api/databases', { method: 'GET' })
   }
 
   /**

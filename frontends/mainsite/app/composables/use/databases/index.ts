@@ -3,6 +3,9 @@ import type { DatabaseEndpoint } from '~/types/api/databases/endpoints'
 
 export * from './functions'
 export * from './triggers'
+export * from './endpoints'
+
+export type NewEndpoint = Pick<DatabaseEndpoint, 'endpoint'>
 
 export interface NewDatabase {
   name: string
@@ -107,52 +110,3 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
     isUpdating
   }
 }
-
-export type NewEndpoint = Pick<DatabaseEndpoint, 'endpoint'>
-
-/**
- * Composable used to fetch the endpoints for a database
- * @param database The database to fetch endpoints for
- */
-export const useDatabaseEndpoints = createSharedComposable(() => {
-  const dbStore = useDatabasesStore()
-  const { currentDatabase } = storeToRefs(dbStore)
-
-  const endpoints = ref<DatabaseEndpoint[]>([])
-
-  onMounted(async () => {
-    if (isDefined(currentDatabase)) {
-      endpoints.value = await $fetch<DatabaseEndpoint[]>(`/v1/databases/${currentDatabase.value.id}/endpoints`, {
-        baseURL: useRuntimeConfig().public.prodDomain
-      })
-    }
-  })
-
-  /**
-   * New endpoint
-   */
-
-  const [showModal, toggleShowModal] = useToggle()
-  const newEndpointName = ref<string>('')
-
-  async function create() {
-    if (isDefined(currentDatabase)) {
-      const data = await $fetch<DatabaseEndpoint[]>(`/v1/endpoints/${currentDatabase.value.id}/create`, {
-        method: 'POST',
-        baseURL: useRuntimeConfig().public.prodDomain,
-        body: { endpoint: newEndpointName.value }
-      })
-
-      endpoints.value = data
-      toggleShowModal()
-    }
-  }
-
-  return {
-    showModal,
-    newEndpointName,
-    endpoints,
-    toggleShowModal,
-    create
-  }
-})
