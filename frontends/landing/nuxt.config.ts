@@ -71,13 +71,14 @@ export default defineNuxtConfig({
   },
 
   i18n: {
-    baseUrl: process.env.NUXT_SITE_URL,
+    baseUrl: process.env.NUXT_PUBLIC_SITE_URL,
     langDir: './locales',
     defaultLocale: 'fr',
     vueI18n: './i18n.config.ts',
     customRoutes: 'config',
     pages: {
       '/auth/waitlist': { fr: '/auth/liste-d-attente', en: '/auth/waitlist' },
+      '/auth/signup': { fr: '/auth/inscription', en: '/auth/signup' },
     },
     locales: [
       {
