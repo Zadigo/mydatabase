@@ -12,6 +12,11 @@ export default defineAppConfig({
           }
         }
       }
+    },
+    input: {
+      variants: {
+        
+      }
     }
   }
 })

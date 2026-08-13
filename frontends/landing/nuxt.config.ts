@@ -103,6 +103,11 @@ export default defineNuxtConfig({
       mode: 'out-in'
     },
 
+    layoutTransition: {
+      name: 'layout',
+      mode: 'out-in'
+    },
+
     head: {
       titleTemplate: '%s %separator %siteName',
       templateParams: {

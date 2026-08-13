@@ -1,27 +1,38 @@
 <template>
-  <section id="intermediate" class="p-20 bg-blue-50">
+  <section id="intermediate" class="p-20 bg-blue-100">
     <div class="max-w-7xl mx-auto">
       <h2 class="text-4xl font-bold text-center mb-10">
-        Gérez des centaines de comptes en toute sécurité <br/> <span>sur un seul ordinateur</span>
+        Gérez des centaines de comptes en toute sécurité <br/> <span class="text-blue-300">sur un seul ordinateur</span>
       </h2>
   
       <div class="grid grid-cols-2 gap-4">
-        <div class="overflow-hidden rounded-xl">
-          <nuxt-img :src="faker.image.url({ height: 300, width: 300 })" height="300" width="300" class="w-full h-auto" alt="Avatar" />
-        </div>
+        <motion :preset="VueUseMotions.PopVisibleOnce" :delay="100">
+          <div class="overflow-hidden rounded-xl">
+            <nuxt-img :src="faker.image.url({ height: 800 })" class="w-full" alt="Avatar" />
+          </div>
+        </motion>
           
         <div tag="div" class="p-10 flex flex-col justify-center">
           <div v-for="(item, idx) in items" :key="idx" class="mb-10">
             <motion :preset="VueUseMotions.SlideVisibleOnceLeft">
-              <p class="text-lg font-semibold mb-2">
-                {{ item.title }}
-              </p>
-              <p>
-                {{ item.description }}
-              </p>
+              <div class="flex items-start gap-4">
+                <div class="rounded-full bg-white h-8 w-8 flex items-center justify-center">
+                  <icon name="i-lucide-link" />
+                </div>
+                
+                <div>
+                  <p class="text-lg font-semibold mb-2">
+                    {{ item.title }}
+                  </p>
+    
+                  <p>
+                    {{ item.description }}
+                  </p>
+                </div>
+              </div>
             </motion>
           </div>
-        </div :preset="VueUseMotions.SlideLeft">
+        </div>
       </div>
     </div>
   </section>

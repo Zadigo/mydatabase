@@ -60,8 +60,9 @@ if (import.meta.client) {
 const theme = computed(() => {
   return [
     'flex flex-col items-center w-full z-50',
+    'transition-all duration-300 ease-in-out',
     {
-      'fixed bg-blue-50 shadow-2xs': yRef.value > 100
+      'fixed top-0 left-0 bg-blue-50 shadow-2xs': yRef.value > 50
     }
   ]
 })

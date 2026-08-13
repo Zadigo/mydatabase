@@ -1,6 +1,6 @@
 <template>
   <section id="signup">
-    <u-card class="rounded-lg max-w-sm mx-auto bg-gray-50 border border-gray-200">
+    <u-card class="rounded-lg max-w-sm mx-auto bg-blue-50 border border-blue-200">
       <div class="py-4 flex justify-center">
         <nuxt-link to="/">
           <nuxt-img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyFavicon.svg" alt="icon" width="45" height="45" loading="lazy" />
@@ -12,34 +12,22 @@
       </h1>
 
       <form @submit.prevent>
-        <div class="mb-4">
-          <label for="email" class="mb-1 block text-sm text-gray-400">Nom</label>
-          <input type="email" id="email" placeholder="name@example.com" autocomplete="email" class="py-2 w-full rounded border border-gray-300 bg-slate-100 px-2 text-center text-gray-400 placeholder-[#7f8c8d] focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <div class="space-y-2 mb-10">
+          <u-input v-model="data.email" type="email" size="xl" variant="subtle" class="w-full" placeholder="Email" />
+          <u-input v-model="data.telephone" type="text" size="xl" variant="subtle" class="w-full" placeholder="Téléphone" />
+          <u-input v-model="data.firstname" type="text" size="xl" variant="subtle" class="w-full" placeholder="Nom" />
+          <u-input v-model="data.lastname" type="text" size="xl" variant="subtle" class="w-full" placeholder="Prénom" />
+          <u-input v-model="data.company" type="text" size="xl" variant="subtle" class="w-full" placeholder="Entreprise" />
         </div>
         
-        <div class="mb-4">
-          <label for="email" class="mb-1 block text-sm text-gray-400">Prénom</label>
-          <input type="email" id="email" placeholder="name@example.com" autocomplete="email" class="py-2 w-full rounded border border-gray-300 bg-slate-100 px-2 text-center text-gray-400 placeholder-[#7f8c8d] focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
-        </div>
-
-        <div class="mb-4">
-          <label for="email" class="mb-1 block text-sm text-gray-400">Entreprise</label>
-          <input type="email" id="email" placeholder="name@example.com" autocomplete="email" class="py-2 w-full rounded border border-gray-300 bg-slate-100 px-2 text-center text-gray-400 placeholder-[#7f8c8d] focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
-        </div>
-        
-        <div class="mb-4">
-          <label for="email" class="mb-1 block text-sm text-gray-400">Email</label>
-          <input type="email" id="email" placeholder="name@example.com" autocomplete="email" class="py-2 w-full rounded border border-gray-300 bg-slate-100 px-2 text-center text-gray-400 placeholder-[#7f8c8d] focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
-        </div>
-        
-        <u-button size="xl" block>
+        <u-button size="xl" block @click="create">
           Rejoindre
         </u-button>
       </form>
 
-      <p class="mt-8 text-center text-sm text-gray-400">
+      <p class="mt-8 text-center text-sm text-blue-400">
         By clicking on sign in, you agree to our
-        <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>.
+        <nuxt-link to="#" class="underline">Terms of Service</nuxt-link> and <nuxt-link to="#" class="underline">Privacy Policy</nuxt-link>.
       </p>
     </u-card>
   </section>
@@ -49,4 +37,19 @@
 definePageMeta({
   layout: 'authentication',
 })
+
+const data = ref<WaitllistData>({
+  firstname: '',
+  telephone: '',
+  lastname: '',
+  company: '',
+  email: ''
+})
+
+function create() {
+  $fetch('/api/waitlist', {
+    method: 'POST',
+    body: {}
+  })
+}
 </script>

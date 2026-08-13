@@ -3,7 +3,7 @@
     <!-- Navbar -->
     <lazy-hero-nav hydrate-on-idle />
     
-    <a href="https://prebuiltui.com" class="flex items-center gap-2 bg-blue-100 rounded-full p-1 pr-3 text-sm mt-23">
+    <!-- <a href="https://prebuiltui.com" class="flex items-center gap-2 bg-blue-100 rounded-full p-1 pr-3 text-sm mt-23">
       <span class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
         NEW
       </span>
@@ -14,9 +14,9 @@
           <path d="m1 1 4 3.5L1 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </p>
-    </a>
+    </a> -->
     
-    <h1 class="text-center text-blue-950 md:text-5xl/16 font-bold max-w-3xl leading-tight bg-clip-text my-2.5 px-4">
+    <h1 class="text-center text-blue-950 md:text-5xl/16 font-bold max-w-3xl leading-tight bg-clip-text my-2.5 px-4 mt-25">
       Reliable automation to boost your team’s efficiency
     </h1>
 
@@ -34,7 +34,7 @@
       </u-button>
     </div>
   
-    <div class="relative mt-12 w-full max-w-4xl px-4">
+    <div class="relative my-12 w-full max-w-4xl px-4">
       <div class="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-full h-full bg-blue-50 blur-[100px] opacity-70 z-0"></div>
       <motion :preset="VueUseMotions.Pop" :delay="0">
         <nuxt-img class="relative z-1 w-full object-cover object-top" src="https://assets.prebuiltui.com/components/hero-section/hero-dashImage2.png" alt="dashboard" />
