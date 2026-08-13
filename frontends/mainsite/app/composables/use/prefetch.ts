@@ -3,14 +3,12 @@ import type { Nullable } from '~/types'
 type FileTypes = 'csv' | 'json'
 
 type PrefetchOptions = {
-  url: string
   entryKey?: Nullable<string>
   fileType?: FileTypes
 }
 
 type WsMessage = Pick<PrefetchOptions, 'entryKey'> & {
   action: 'load_via_url' | (string & {})
-  url: string
 }
 
 type WsPrefetchOptions<R> = Pick<PrefetchOptions, 'entryKey' | 'fileType'> & {
@@ -18,24 +16,30 @@ type WsPrefetchOptions<R> = Pick<PrefetchOptions, 'entryKey' | 'fileType'> & {
   wsSendMessage: WsMessage
 }
 
-function usePreviewer<T>(entryKey?: Nullable<string>, fileType: FileTypes = 'json') {
-  const initialData = ref<T>()
+/**
+ * 
+ * @param entryKey 
+ * @param fileType 
+ */
+function usePreviewer<T extends Record<string, unknown> = Record<string, unknown>>(entryKey?: Nullable<string>, fileType: FileTypes = 'json') {
+  const initialData = ref<T | undefined>()
 
   const preview = computed(() => {
-    if (isDefined(initialData)) {
-      if (fileType == 'json' && isDefined(entryKey)) {
-        return initialData.value[entryKey]
+    // Check initialData.value instead of the ref object itself
+    if (initialData.value !== undefined) {
+      if (fileType === 'json' && entryKey) {
+        // Safe type assertion because we are extracting a sub-key from the object
+        return (initialData.value as Record<string, unknown>)[entryKey] as T
       } else {
         return initialData.value
       }
-    } else {
-      return undefined
     }
+    return undefined
   })
 
   return {
-    preview,
-    initialData
+    initialData,
+    preview
   }
 }
 
@@ -44,45 +48,42 @@ function usePreviewer<T>(entryKey?: Nullable<string>, fileType: FileTypes = 'jso
  * @param source
  * @param options
  */
-export function urlPrefetchViaHttp<T = Record<string, string>, S = string>(source: Ref<S>, options: PrefetchOptions) {
-  const { url, entryKey, fileType = 'json' } = options
-  const _initialData = ref<T>()
+export function urlPrefetchViaHttp<T extends Record<string, unknown> = Record<string, unknown>>(source: Ref<string | undefined>, options: PrefetchOptions) {
+  const { entryKey, fileType = 'json' } = options
+  const { initialData, preview } = usePreviewer<T>(entryKey, fileType)
 
   const headers: Record<string, string> = {
     'Accept': fileType === 'csv' ? 'text/csv' : 'application/json',
     'Content-Type': fileType === 'csv' ? 'text/csv' : 'application/json'
   }
 
-  const config = useRuntimeConfig()
-
   const { load } = useMemoize(async () => {
-    return await $fetch<T>(url, {
-      method: 'GET',
-      baseURL: config.public.prodDomain,
-      headers
-    })
-  })
+    const url = new URL(source.value || '')
 
-  watchDebounced(source, async () => {
     try {
-      _initialData.value = await load()
+      // Assert the $fetch type as T because runtime string URLs bypass Nitro's static route inference
+      const data = await $fetch<unknown>(url.pathname, {
+        method: 'GET',
+        baseURL: url.origin,
+        headers
+      })
+      console.log(data)
+      return data as T
     } catch (error) {
-      console.error(error)
-    }
-  })
-
-  const preview = computed(() => {
-    if (isDefined(_initialData)) {
-      if (fileType == 'json' && isDefined(entryKey)) {
-        return _initialData.value[entryKey]
-      } else {
-        return _initialData.value
-      }
-    } else {
+      console.error('Error fetching data:', error)
       return undefined
     }
   })
 
+  watchDebounced(source, async () => {
+    if (isDefined(source)) {
+      initialData.value = await load()
+    }
+  }, {
+    immediate: false,
+    debounce: 0
+  })
+  
   return preview
 }
 
@@ -91,9 +92,9 @@ export function urlPrefetchViaHttp<T = Record<string, string>, S = string>(sourc
  * @param source
  * @param options 
 - */
-export function urlPrefetchViaWebSocket<S extends string = string, T = unknown>(source: Ref<S>, options: WsPrefetchOptions<T>) {
+export function urlPrefetchViaWebSocket<T = Record<string, unknown>>(source:  Ref<string | undefined>, options: WsPrefetchOptions<T>) {
   const { ws, wsSendMessage } = options
-  const { preview, initialData } = usePreviewer(options.entryKey, options.fileType)
+  const { preview, initialData } = usePreviewer<T>(options.entryKey, options.fileType)
 
   watchDebounced(source, async () => {
     ws.send(JSON.stringify(wsSendMessage))
@@ -102,8 +103,3 @@ export function urlPrefetchViaWebSocket<S extends string = string, T = unknown>(
 
   return preview
 }
-
-
-urlPrefetchViaWebSocket('', {
-
-})
