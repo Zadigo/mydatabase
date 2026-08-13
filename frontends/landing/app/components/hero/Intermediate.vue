@@ -1,5 +1,5 @@
 <template>
-  <section id="intermediate" class="p-20">
+  <section id="intermediate" class="p-20 bg-blue-50">
     <div class="max-w-7xl mx-auto">
       <h2 class="text-4xl font-bold text-center mb-10">
         Gérez des centaines de comptes en toute sécurité <br/> <span>sur un seul ordinateur</span>
@@ -10,16 +10,18 @@
           <nuxt-img :src="faker.image.url({ height: 300, width: 300 })" height="300" width="300" class="w-full h-auto" alt="Avatar" />
         </div>
           
-        <div class="p-10 flex flex-col justify-center">
+        <div tag="div" class="p-10 flex flex-col justify-center">
           <div v-for="(item, idx) in items" :key="idx" class="mb-10">
-            <p class="text-lg font-semibold mb-2">
-              {{ item.title }}
-            </p>
-            <p>
-              {{ item.description }}
-            </p>
+            <motion :preset="VueUseMotions.SlideVisibleOnceLeft">
+              <p class="text-lg font-semibold mb-2">
+                {{ item.title }}
+              </p>
+              <p>
+                {{ item.description }}
+              </p>
+            </motion>
           </div>
-        </div>
+        </div :preset="VueUseMotions.SlideLeft">
       </div>
     </div>
   </section>

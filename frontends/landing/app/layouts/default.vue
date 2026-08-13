@@ -1,5 +1,5 @@
 <template>
-  <section id="site">
+  <section id="site" class="transition-all ease-in-out duration-300">
     <main>
       <slot />
     </main>

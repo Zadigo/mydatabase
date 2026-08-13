@@ -1,5 +1,5 @@
 <template>
-  <nav class="flex flex-col items-center w-full">
+  <nav :class="theme">
     <div class="flex items-center justify-between p-4 md:px-16 lg:px-24 xl:px-32 md:py-4 w-full">
       <nuxt-link to="/">
         <svg width="157" height="40" viewBox="0 0 157 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,9 +28,9 @@
           Sign in
         </nuxt-link> -->
 
-        <nuxt-link to="/auth/waitlist" class="text-white px-4 py-2 bg-indigo-600 active:scale-95 hover:bg-indigo-700 transition rounded-md cursor-pointer">
+        <u-button to="/auth/waitlist" size="xl">
           Get started
-        </nuxt-link>
+        </u-button>
       </div>
 
       <button id="open-menu" class="md:hidden bg-zinc-900 hover:bg-zinc-800 text-white p-2 rounded-md aspect-square font-medium transition">
@@ -44,3 +44,29 @@
     <div class="w-full border-b border-slate-200"></div>
   </nav>
 </template>
+
+<script lang="ts" setup>
+const emit = defineEmits<{
+  isScrolled: [boolean]
+}>()
+
+const yRef = ref(0)
+
+if (import.meta.client) {
+  const { y } = useScroll(window)
+  syncRef(yRef, y, { direction: 'rtl' })
+}
+
+const theme = computed(() => {
+  return [
+    'flex flex-col items-center w-full z-50',
+    {
+      'fixed bg-blue-50 shadow-2xs': yRef.value > 100
+    }
+  ]
+})
+
+whenever(yRef, () => {
+  emit('isScrolled', true)
+})
+</script>
