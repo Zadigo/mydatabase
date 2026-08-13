@@ -3,73 +3,60 @@
     <div class="grid grid-cols-12 gap-4">
       <u-card class="col-span-8">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Connectez vos outils en quelques clics
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Lemlist, Airtable, votre CRM, Google Sheets... Lorélie se branche sur vos outils existants via OAuth ou clé API, sans configuration technique ni ligne de code.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
 
       <u-card class="col-span-4">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Une base de données, générée automatiquement
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Vos données sont fusionnées et structurées en une base unifiée, prête à être interrogée.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
 
       <u-card class="col-span-3">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Serveur MCP prêt à l'emploi
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Plus besoin de coder un serveur MCP par outil : Lorélie en génère un, directement connectable à votre client LLM.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
 
       <u-card class="col-span-3">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Compatible avec votre LLM préféré
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Claude, ChatGPT ou tout autre client compatible MCP : connectez-le en un lien et discutez avec vos données.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
 
       <u-card class="col-span-3">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Synchronisation continue
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Vos données restent à jour en temps réel à mesure qu'elles évoluent dans vos outils sources.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
 
       <u-card class="col-span-3">
         <p class="font-bold">
-          Gestion de comptes multiples
+          Contrôle total des permissions
         </p>
         <p class="font-light">
-          Automatisez vos opérations par lots grâce à la RPA et gagnez jusqu'à 90 % de temps. C'est la solution idéale pour les tâches régulières et répétitives, comme la navigation web et les recherches quotidiennes.
+          Choisissez précisément quelles tables et quels champs sont accessibles à votre LLM, table par table.
         </p>
-
-        <!-- <nuxt-img :src="faker.image.url({ height: 500 })" class="w-full mt-5" /> -->
       </u-card>
     </div>
   </section>
 </template>
 
 <script lang="ts" setup>
-import { faker } from '@faker-js/faker'
 </script>

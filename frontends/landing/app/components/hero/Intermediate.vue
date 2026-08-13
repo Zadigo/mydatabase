@@ -34,6 +34,13 @@
           </div>
         </div>
       </div>
+
+      <div class="w-full flex justify-center">
+        <u-button to="/auth/waitlist" size="xl" class="mt-10">
+          S'inscrire à la liste d'attente
+          <icon name="i-lucide-arrow-right" />
+        </u-button>
+      </div>
     </div>
   </section>
 </template>
@@ -43,16 +50,16 @@ import { faker } from '@faker-js/faker'
 
 const items = [
   {
-    title: 'Des comptes plus sûrs, avec moins de risques de suspension soudaine.',
-    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem laborum omnis nihil officiis culpa. Molestias, provident sunt tempore in autem sint eum exercitationem, quo quasi rerum officiis excepturi incidunt expedita?'
+    title: "Connectez Lemlist, Airtable, votre CRM et bien d'autres.",
+    description: 'Lorélie se branche directement sur vos outils existants via OAuth ou clé API — aucune configuration technique nécessaire.'
   },
   {
-    title: 'Gérez vos comptes efficacement',
-    description: 'Avec notre solution, vous pouvez gérer des centaines de comptes en toute sécurité, réduisant ainsi les risques de suspension soudaine.'
+    title: 'Unifiez toutes vos données en une seule base.',
+    description: "Vos données sont fusionnées et structurées automatiquement, avec une synchronisation continue à mesure qu'elles évoluent dans vos outils sources."
   },
   {
-    title: 'Optimisez votre temps',
-    description: 'Notre plateforme vous permet de gérer vos comptes de manière efficace, vous faisant gagner un temps précieux.'
+    title: 'Exposez-les à votre LLM en un clic.',
+    description: "Lorélie génère un serveur MCP prêt à l'emploi, connectable directement à Claude, ChatGPT ou tout autre client compatible — sans avoir à coder de connecteur."
   }
 ]
 </script>

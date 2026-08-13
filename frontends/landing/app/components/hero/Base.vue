@@ -17,19 +17,20 @@
     </a> -->
     
     <h1 class="text-center text-blue-950 md:text-5xl/16 font-bold max-w-3xl leading-tight bg-clip-text my-2.5 px-4 mt-25">
-      Reliable automation to boost your team’s efficiency
+      Un seul lien pour connecter <span class="text-blue-300">tous</span> vos outils à votre IA
     </h1>
 
     <p class="text-center text-base text-blue-900 max-w-md px-4">
-      Toutes vos données au même endroit. Gérez vos projets, vos tâches et vos équipes avec une seule plateforme.
+      Connectez tous vos outils, unifiez vos données, et donnez-y accès à votre LLM préféré — sans écrire une ligne de code
     </p>
     
     <div class="flex items-center gap-4 mt-5 justify-center z-1">
       <u-button to="/auth/waitlist" size="xl">
         Get Started
+        <icon name="i-lucide-arrow-up-right" />
       </u-button>
 
-      <u-button to="/auth/waitlist" variant="outline" size="xl">
+      <u-button to="#intermediate" variant="outline" size="xl">
         En savoir plus
       </u-button>
     </div>

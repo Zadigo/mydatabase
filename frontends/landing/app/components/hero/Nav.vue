@@ -29,7 +29,8 @@
         </nuxt-link> -->
 
         <u-button to="/auth/waitlist" size="xl">
-          Get started
+          S'inscrire à la liste d'attente
+          <icon name="i-lucide-arrow-right" />
         </u-button>
       </div>
 
@@ -41,7 +42,7 @@
         </svg>
       </button>
     </div>
-    <div class="w-full border-b border-slate-200"></div>
+    <div class="w-full border-b border-slate-200" />
   </nav>
 </template>
 
