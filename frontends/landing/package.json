@@ -13,13 +13,17 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.122",
     "@iconify-json/simple-icons": "^1.2.93",
+    "@nuxt/image": "2.1.0",
     "@nuxt/ui": "^4.10.0",
     "nuxt": "^4.5.2",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
     "@nuxt/eslint": "^1.17.0",
+    "@nuxt/fonts": "^0.14.0",
     "@nuxt/test-utils": "^4.1.0",
+    "@nuxtjs/seo": "^5.3.12",
     "@playwright/test": "^1.62.1",
     "@vitest/ui": "^4.1.10",
     "@vue/test-utils": "^2.4.11",

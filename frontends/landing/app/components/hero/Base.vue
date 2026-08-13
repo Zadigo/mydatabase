@@ -1,7 +1,7 @@
 <template>
   <section class="flex flex-col items-center">
     <!-- Navbar -->
-    <lazy-hero-nav />
+    <lazy-hero-nav hydrate-on-idle />
     
     <a href="https://prebuiltui.com" class="flex items-center gap-2 bg-indigo-100 rounded-full p-1 pr-3 text-sm mt-23">
       <span class="bg-indigo-600 text-white text-xs px-3 py-1 rounded-full">
@@ -18,9 +18,9 @@
     <h1 class="text-center text-slate-800 text-4xl md:text-5xl/16 font-semibold max-w-3xl leading-tight bg-clip-text my-2.5 px-4">
       Reliable <span class='bg-linear-to-r from-indigo-600 to-pink-400 bg-clip-text text-transparent'>automation</span> to boost your team’s efficiency
     </h1>
-    
+
     <p class="text-center text-base text-gray-600 max-w-md px-4">
-      Workflows that never miss. automation that helps your team do more, effortlessly.
+      Toutes vos données au même endroit. Gérez vos projets, vos tâches et vos équipes avec une seule plateforme.
     </p>
     
     <div class="flex items-center gap-4 mt-5 justify-center z-1">

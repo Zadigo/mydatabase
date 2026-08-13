@@ -1,11 +1,11 @@
 <template>
   <section id="site">
-    <!-- Navbar -->
-    <!-- <lazy-navbar hydrate-on-idle /> -->
-
     <main>
       <slot />
     </main>
+
+    <!-- Footer -->
+    <lazy-base-footer hydrate-on-visible />
   </section>
 </template> 
 
