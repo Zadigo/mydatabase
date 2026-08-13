@@ -21,7 +21,7 @@
                 </div>
                 
                 <div>
-                  <p class="text-lg font-semibold mb-2">
+                  <p class="text-lg font-bold mb-2">
                     {{ item.title }}
                   </p>
     

@@ -1,70 +1,49 @@
-# My Database Application Architecture
+# Lorélie — Architecture
 
 ## Requirements & Assumptions 🟠
 
 ### Clarifying Questions
 
-*Questions that need to be answered to better understand the requirements and constraints of the system*
+*Questions à trancher pour mieux cadrer les besoins et contraintes du système*
 
-Examples of clarifying questions for an E-commerce application:
-
-- **Channels** Mobile ? Web ?
-- **Payment Methods** Credit Card ? PayPal ? Apple Pay ?
-- **User Authentication** Email/Password ? Social Login ?
-- **Inventory Management** Real-time ? Batch updates ?
-- **Shipping** Integration with third-party logistics providers ? In-house fulfillment ?
-- **Inventory**
-  * How many products will the system need to handle ?
-  * How frequently will the product catalog be updated ?
-  * In-house inventory management or integration with third-party inventory systems ?
-  * What types of products will be sold (e.g., physical goods, digital products, services) ? Do they have different variants (e.g., size, color) ?
-- **Reviews** Will the system allow customers to leave reviews and ratings for products ? If so, how will these reviews be moderated and displayed on the product pages ?
+- **Connecteurs** Quels outils prioriser en premier (Lemlist, Airtable, HubSpot, Google Sheets, CSV/Excel) ? Faut-il un SDK de connecteurs génériques pour en ajouter facilement ?
+- **Authentification aux outils tiers** OAuth par outil ? Clés API ? Comment sont stockées et chiffrées les credentials des utilisateurs ?
+- **Synchronisation** Temps réel (webhooks) ou batch (polling périodique) ? Cela dépend-il de l'outil connecté ?
+- **Serveur MCP** Un serveur MCP par utilisateur/organisation, ou un serveur mutualisé avec isolation des données par tenant ?
+- **Permissions** Comment l'utilisateur contrôle-t-il quelles données sont exposées au LLM via MCP (tout / certaines tables / certains champs) ?
+- **Client LLM** Doit-on supporter un protocole MCP standard générique, ou prévoir des intégrations spécifiques (Claude, ChatGPT, etc.) ?
+- **Historique / Audit** Faut-il tracer les requêtes faites par le LLM sur les données (pour la sécurité et la confiance utilisateur) ?
 
 ### Functional Requirements 🟢
 
-*Describes the specific features and functionalities that the system must provide*
+*Fonctionnalités principales que le système doit fournir*
 
-For example for an E-commerce application:
-
-- **Admin** Dashboard for managing products, orders, and users.
-- **Search** Allows users to search for products based on various criteria such as name, category, price, etc.
-- **Shopping Cart & Checkout** Allows users to add products to their shopping cart for purchase, can add and purchase multiple products.
-- **Payment Processing** Integrates with payment gateways to securely process payments from customers. Prevent double payment and ensure secure transactions.
-- **Order Management** Allows users to view their order history and track the status of their orders.
+- **Connecteurs d'outils** Interface pour connecter des outils tiers (Lemlist, Airtable, CRM, Google Sheets, CSV, Excel...) via OAuth ou clé API.
+- **Unification des données** Fusionne les données de plusieurs sources en une base de données structurée, avec mapping des champs entre outils.
+- **Génération de serveur MCP** Expose automatiquement la base unifiée sous forme de serveur MCP, sans configuration technique de la part de l'utilisateur.
+- **Gestion des permissions** Permet de définir précisément quelles tables/champs sont accessibles depuis le client LLM.
+- **Dashboard** Interface de gestion des connecteurs, de la base de données, et du statut du serveur MCP.
+- **Synchronisation** Garde les données à jour entre les outils sources et la base unifiée (temps réel ou planifiée selon l'outil).
 
 ## Capacity Planning ⏰
 
+*Estimation des capacités requises pour le système*
+
 ### Database
 
-Estimates the expected load on the system, such as the number of users, transactions, or requests per second. This helps in designing a system that can handle the anticipated traffic and scale as needed. For example:
+*À redéfinir selon le nombre d'outils connectés par utilisateur, la fréquence de synchronisation par connecteur, et le volume de requêtes MCP envoyées par les clients LLM (potentiellement en rafale lors de sessions de chat intensives).*
 
-For example, Bershka gets **18.9 million** visits per month:
+Facteurs à estimer :
 
-- **Yearly** 227 million visits
-- **Daily** 621,000 visits
-- **Hourly** 25,875 visits
-- **Per Second** 7.2 visits approximate database queries per second that the database needs to handle.
-
-Some frontend applications can delegate the storage of the user's session to third party services like Firebase, which can help reduce the load on the database and improve performance. This also needs to be taken into account when estimating the load on the database and designing the system architecture.
-
-For example in the case of Firebase, writes free tier is 20K/day, read is 50K/day and deletes is 20K/day. For 227 million visits per year this would approximate to:
-
-- **Writes** 620K/day (227 million visits / 365 days)
-- **Reads** 1.24 million/day (227 million visits * 5 reads per visit / 365 days)
-- **Deletes** 620K/day (227 million visits / 365 days)
-
-Storage is 1GB free tier, and for 227 million visits per year, if we assume that each visit generates around 1KB of data (e.g., session data, user interactions), this would require approximately 227GB of storage (227 million visits * 1KB per visit). This is well within the limits of Firebase's free tier, but it's important to monitor usage and consider upgrading to a paid plan if the storage requirements exceed the free tier limits.
+- **Connecteurs actifs par organisation** (ex. 3-5 outils en moyenne)
+- **Fréquence de sync** par connecteur (webhook temps réel vs polling toutes les X minutes)
+- **Requêtes MCP entrantes** par session LLM (un agent peut faire plusieurs appels successifs sur une même conversation)
 
 ### Storage
 
-On the S3 storage end, and image size in `webp` format is around 100KB. An e-commerce website like Bershka has around 100,000 products, which means that the total storage required for product images would be approximately 10GB (100KB * 100,000 products). This is a manageable amount of storage for Amazon S3, which can easily scale to accommodate larger amounts of data as needed.
-
-- **Images** 100KB x 100,000 products
-- **Estimate storage** 10GB of storage required for product images.
+*Le volume dépend désormais moins des fichiers statiques (images, CSV) que des données structurées synchronisées depuis les outils tiers (contacts Lemlist, records Airtable, etc.), à réévaluer selon les premiers connecteurs supportés.*
 
 ## High Level Architecture 🏗️
-
-Describes the overall structure of the system, including the main components and how they interact with each other. This can be illustrated using diagrams such as component diagrams or architecture diagrams.
 
 ```mermaid
 flowchart
@@ -73,6 +52,7 @@ A[Nuxt] --> B(Django)
 B --> C[(PostgreSQL)]
 B --> F((Celery))
 F --> G[(RabbitMQ)]
+F --> I[Connecteurs tiers: Lemlist, Airtable, CRM...]
 
 subgraph storage
 B --> D[(Redis)]
@@ -80,6 +60,9 @@ end
 
 A --> |Endpoints server|H(Golang)
 H --> D
+
+B --> M[Serveur MCP]
+M --> |Expose les données|L[Client LLM: Claude, ChatGPT...]
 ```
 
 ## System Workflow 🔄
@@ -92,42 +75,47 @@ autonumber
 
 box Frontend
 actor U as Alice
-actor P as Pauline
 participant N@{type: "entity"} as Nuxt
 end
 
 box Backend
 participant D@{type: "entity"} as Django
 participant G@{type: "entity"} as Golang
+participant W@{type: "entity"} as Worker(Celery)
+end
+
+box External
+participant T@{type: "entity"} as Outil tiers (Lemlist/Airtable)
+participant LLM@{type: "entity"} as Client LLM
 end
 
 box Storage
 participant R@{type: "entity"} as Redis
-participant S@{type: "database"} as S3
 participant PG@{type: "database"} as PostgreSQL
 end
 
-U->>N: Click Upload CSV
-N->>D: Upload CSV file
-D->>D: Process file
+U->>N: Connecter un outil (OAuth/API Key)
+N->>D: Envoyer les credentials
+D->>PG: Stocker la connexion (chiffrée)
+D->>W: Déclencher synchronisation initiale
+W->>T: Récupérer les données
+T-->>W: Données brutes
+W->>PG: Créer/mettre à jour les tables unifiées
+W-->>R: Mettre en cache
 
-par Store File
-D->>PG: Store details
-D<<-->>S: Store CSV file in S3
-D-->>R: Cache data
-end
+U->>N: Générer le serveur MCP
+N->>D: Demander la génération
+D->>D: Configurer les permissions/scopes
+D->>N: Retourner l'URL du serveur MCP
 
-P->>N: View database
-N->>G: Request data
-G->>R: Fetch data
-R-->>G: Cached data
-G->>()N: Data
+LLM->>D: Requête via MCP (lecture/écriture)
+D->>PG: Exécuter la requête
+D->>LLM: Retourner les résultats
 
-par Edit File
-P<<->>N: Edit CSV file
-N<<->>G: Update cached data
-G-->>R: Update cache
-G->>S: Update CSV file in S3
+par Synchronisation continue
+T->>W: Webhook (nouvelle donnée)
+W->>PG: Mettre à jour
+W-->>R: Invalider/mettre à jour le cache
 end
 ```
 
@@ -135,85 +123,100 @@ end
 
 *Describes the design of the APIs that will be used for communication between different components of the system, such as the frontend and backend. This includes the endpoints, request and response formats, authentication mechanisms, and any other relevant details about how the APIs will function.*
 
-> Determines also whether the system will be using RESTful APIs or GraphQL, and how the frontend will interact with these APIs to fetch and manipulate data.
-> If the system uses microservices architecture, the API design will also include details about how different microservices will communicate with each other, such as using RESTful APIs, gRPC, or message queues.
-
-| Endpoint          | Method | Description                            | Request Body                                                          | Response Body                             |
-| ----------------- | ------ | -------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------- |
-| /graphql          | POST   | Retrieve a list of products            | { query: string, variables: object }                                  | List of products with details             |
+| Endpoint                | Method | Description                                    | Request Body                                        | Response Body                      |
+| ----------------------- | ------ | ---------------------------------------------- | --------------------------------------------------- | ---------------------------------- |
+| /connectors             | POST   | Connecter un nouvel outil tiers                | { tool: string, credentials: object }               | Statut de connexion + premier sync |
+| /connectors/{id}/sync   | POST   | Forcer une synchronisation manuelle            | -                                                   | Statut de synchronisation          |
+| /database/tables        | GET    | Lister les tables de la base unifiée          | -                                                   | Liste des tables + schémas        |
+| /mcp/server             | POST   | Générer/régénérer le serveur MCP          | { scopes: string[], tables: string[] }              | URL du serveur MCP + clé d'accès |
+| /mcp/server/permissions | PATCH  | Modifier les permissions exposées au LLM      | { table: string, fields: string[], access: string } | Permissions mises à jour          |
+| /graphql                | POST   | Requêtes flexibles sur les données unifiées | { query: string, variables: object }                | Données demandées                |
 
 ## Data storage
 
 *Describes how the system will store and manage data, including the choice of database (e.g., relational, NoSQL), data models, and how data will be accessed and manipulated by the application.*
 
-### Amazon S3
+### Connecteurs tiers
 
-*Explains the the manner in which the system will use Amazon S3 for storing and retrieving files, including the structure of the S3 buckets, access control policies, and how the application will interact with S3 for file uploads and downloads.*
+*Décrit comment les credentials (clés API, tokens OAuth) des outils connectés sont stockés de manière chiffrée, comment les tokens sont rafraîchis (refresh tokens), et comment chaque connecteur définit son propre schéma de mapping vers la base unifiée.*
+
+### Serveur MCP
+
+*Décrit comment le serveur MCP est généré dynamiquement par utilisateur/organisation, comment l'authentification du client LLM vers ce serveur est gérée, et comment les permissions (lecture/écriture, tables/champs autorisés) sont appliquées à chaque requête entrante.*
 
 ### Database
 
-*Explains the choice of database (e.g., relational, NoSQL) and how it will be used to store and manage data for the application. This includes the data models, relationships between entities, and how the application will perform CRUD (Create, Read, Update, Delete) operations on the database.*
+*Modèle de données prenant en compte plusieurs sources : chaque table unifiée doit conserver une traçabilité de sa source d'origine (quel outil, quel champ source) pour permettre la resynchronisation et le debug.*
 
 ```mermaid
 erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ ORDER_ITEM : contains
-    PRODUCT ||--o{ ORDER_ITEM : includes
-    CUSTOMER {
+    ORGANIZATION ||--o{ CONNECTOR : owns
+    CONNECTOR ||--o{ SYNCED_TABLE : produces
+    SYNCED_TABLE ||--|{ SYNCED_FIELD : contains
+    ORGANIZATION ||--o{ MCP_SERVER : exposes
+    MCP_SERVER ||--o{ MCP_PERMISSION : defines
+
+    ORGANIZATION {
         string id
         string name
-        string email
     }
-    ORDER {
+    CONNECTOR {
         string id
-        date orderDate
+        string tool_name
+        string status
+        datetime last_synced_at
+    }
+    SYNCED_TABLE {
+        string id
+        string name
+        string source_connector_id
+    }
+    SYNCED_FIELD {
+        string id
+        string name
+        string type
+        string source_field_name
+    }
+    MCP_SERVER {
+        string id
+        string url
         string status
     }
-    PRODUCT {
-        string id
-        string name
-        float price
-    }
-    ORDER_ITEM {
-        int quantity
-        float price
+    MCP_PERMISSION {
+        string table_id
+        string field_id
+        string access_level
     }
 ```
 
 ## Caching
 
-*Describes the caching strategy for the application, including what data will be cached, how it will be cached (e.g., in-memory cache, distributed cache), and how the cache will be invalidated when data changes. For example, product data that is frequently accessed but infrequently updated can be cached to improve performance and reduce load on the database.*
+*Le cache Redis sert principalement à réduire la latence des requêtes MCP entrantes (un client LLM peut faire des appels répétés dans une même session), ainsi qu'à limiter les appels redondants vers les API des outils tiers (rate limits à respecter, ex. Lemlist/Airtable).*
 
 ## Scalability
 
-*Describes how the system will be designed to handle increasing loads and scale as needed. This includes strategies for horizontal scaling (adding more servers) and vertical scaling (upgrading existing servers), as well as any load balancing techniques that will be used to distribute traffic across multiple servers.*
+*À prévoir : montée en charge horizontale des workers Celery pour absorber les synchronisations en parallèle sur de nombreux connecteurs, et isolation/scalabilité du serveur MCP par tenant pour éviter qu'une organisation à fort trafic n'impacte les autres.*
 
 ---
 
 ## References ⏰
 
-*List of services and components that will be part of the system, along with their respective technologies and descriptions. This can be presented in a tabular format for clarity.*
-
-| Service            | Language/Framework | Description                           |
-| ------------------ | ------------------ | ------------------------------------- |
-| Cart               | Django             | Manages shopping cart functionalities |
+| Service    | Language/Framework | Description                                                    |
+| ---------- | ------------------ | -------------------------------------------------------------- |
+| Connectors | Django + Celery    | Gère les connexions et synchronisations avec les outils tiers |
+| MCP Server | Django/Golang      | Expose la base unifiée via le protocole MCP                   |
+| Cart       | Django             | *(à retirer si non pertinent pour Lorélie)*                |
 
 ## Technologies Used 🌳
 
-*List of the main technologies used in the system, along with their purpose and version. This can help in understanding the technical stack of the application and how different components are implemented.*
-
-| Technology        | Purpose/Usage                | Version |
-| ----------------- | ---------------------------- | ------- |
-| Django            | Web framework                | ✅ 6.X  |
-| PostgreSQL        | Database                     | ✅ 13.X |
-| Redis             | Caching, message broker      | ✅ -    |
-| RabbitMQ          | Message broker               | ✅ -    |
-| Docker            | Containerization             | ✅ 20.X |
-| Nuxt 4            | Frontend framework           | ✅ 4.X  |
-| Ionic             | Mobile application framework | ✅ 7.X  |
-| Firebase          | Authentication, database     | ✅ -    |
-| AWS S3            | Static and media storage     | ✅ -    |
-| Cloudfront        | CDN for static files         | ✅ -    |
-| Google Analytics  | Traffic analysis             | ✅ -    |
-| Facebook Pixels   | Traffic analysis             | ✅ -    |
-| Microsoft Clarity | Traffic analysis             | ✅ -    |
+| Technology   | Purpose/Usage                         | Version |
+| ------------ | ------------------------------------- | ------- |
+| Django       | Web framework + connecteurs           | ✅ 6.X  |
+| PostgreSQL   | Base de données unifiée             | ✅ 13.X |
+| Redis        | Caching, message broker               | ✅ -    |
+| RabbitMQ     | Message broker (sync asynchrone)      | ✅ -    |
+| Docker       | Containerization                      | ✅ 20.X |
+| Nuxt 4       | Frontend framework                    | ✅ 4.X  |
+| MCP Protocol | Exposition des données au client LLM | ✅ -    |
+| AWS S3       | Stockage fichiers (imports CSV/Excel) | ✅ -    |
+| Cloudfront   | CDN pour fichiers statiques           | ✅ -    |
