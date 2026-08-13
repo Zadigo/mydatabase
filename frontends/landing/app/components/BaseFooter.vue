@@ -1,5 +1,5 @@
 <template>
-  <footer class="px-6 md:px-16 lg:px-24 xl:px-32">
+  <footer class="px-6 py-20 bg-primary-950 md:px-16 lg:px-24 xl:px-32">
     <div class="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-gray-500/30 text-gray-500">
       <div>
         <img class="w-34 md:w-32" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoColored.svg" alt="dummyLogoColored" />

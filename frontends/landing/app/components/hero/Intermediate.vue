@@ -2,17 +2,17 @@
   <section id="intermediate" class="p-20">
     <div class="max-w-7xl mx-auto">
       <h2 class="text-4xl font-bold text-center mb-10">
-        Gérez des centaines de comptes en toute sécurité
+        Gérez des centaines de comptes en toute sécurité <br/> <span>sur un seul ordinateur</span>
       </h2>
   
       <div class="grid grid-cols-2 gap-4">
-        <div class="overflow-hidden rounded-lg">
-          <nuxt-img :src="faker.image.url({ height: 500, width: 500 })" height="500" width="500" class="w-full h-auto" alt="Avatar" />
+        <div class="overflow-hidden rounded-xl">
+          <nuxt-img :src="faker.image.url({ height: 300, width: 300 })" height="300" width="300" class="w-full h-auto" alt="Avatar" />
         </div>
           
         <div class="p-10 flex flex-col justify-center">
           <div v-for="(item, idx) in items" :key="idx" class="mb-10">
-            <p class="text-2xl font-semibold mb-2">
+            <p class="text-lg font-semibold mb-2">
               {{ item.title }}
             </p>
             <p>

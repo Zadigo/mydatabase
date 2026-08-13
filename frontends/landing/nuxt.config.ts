@@ -34,11 +34,17 @@ export default defineNuxtConfig({
   fonts: {
     families: [
       {
-        name: 'Urbanist',
+        name: 'Zain',
       },
       {
-        name: 'Open Sans',
+        name: 'Nunito',
       }
+    ]
+  },
+
+  imports: {
+    dirs: [
+      '~/constants'
     ]
   }
 })

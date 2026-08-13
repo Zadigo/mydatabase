@@ -1,5 +1,5 @@
 <template>
-  <nav class="h-[70px] relative w-full px-6 md:px-16 lg:px-24 xl:px-32 flex items-center justify-between z-20 bg-white text-gray-700 shadow-[0px_4px_25px_0px_#0000000D] transition-all">
+  <nav class="h-17.5 relative w-full px-6 md:px-16 lg:px-24 xl:px-32 flex items-center justify-between z-20 bg-white text-gray-700 shadow-[0px_4px_25px_0px_#0000000D] transition-all">
 
     <a href="https://prebuiltui.com" class="text-indigo-600">
       <svg width="157" height="40" viewBox="0 0 157 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -8,16 +8,16 @@
       </svg>
     </a>
 
-    <ul class="md:flex hidden items-center gap-10">
+    <!-- <ul class="md:flex hidden items-center gap-10">
       <li><a class="hover:text-gray-500/80 transition" href="#">Home</a></li>
       <li><a class="hover:text-gray-500/80 transition" href="#">Services</a></li>
       <li><a class="hover:text-gray-500/80 transition" href="#">Portfolio</a></li>
       <li><a class="hover:text-gray-500/80 transition" href="#">Pricing</a></li>
-    </ul>
+    </ul> -->
 
-    <button type="button" class="bg-white text-gray-600 border border-gray-300 md:inline hidden text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full">
+    <nuxt-link to="/auth/signup" class="bg-white text-gray-600 border border-gray-300 md:inline hidden text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full">
       Get started
-    </button>
+    </nuxt-link>
 
     <button aria-label="menu-btn" type="button" class="menu-btn inline-block md:hidden active:scale-90 transition">
       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="#000">
@@ -25,17 +25,17 @@
       </svg>
     </button>
 
-    <div class="mobile-menu absolute top-[70px] left-0 w-full bg-white p-6 hidden md:hidden">
-      <ul class="flex flex-col space-y-4 text-lg">
+    <div class="mobile-menu absolute top-17.5 left-0 w-full bg-white p-6 hidden md:hidden">
+      <!-- <ul class="flex flex-col space-y-4 text-lg">
         <li><a href="#" class="text-sm">Home</a></li>
         <li><a href="#" class="text-sm">Services</a></li>
         <li><a href="#" class="text-sm">Portfolio</a></li>
         <li><a href="#" class="text-sm">Pricing</a></li>
-      </ul>
+      </ul> -->
 
-      <button type="button" class="bg-white text-gray-600 border border-gray-300 mt-6 text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full">
+      <nuxt-link to="/auth/signup" class="bg-white text-gray-600 border border-gray-300 mt-6 text-sm hover:bg-gray-50 active:scale-95 transition-all w-40 h-11 rounded-full">
         Get started
-      </button>
+      </nuxt-link>
     </div>
   </nav>
 </template>
