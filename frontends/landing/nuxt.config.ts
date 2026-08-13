@@ -112,7 +112,7 @@ export default defineNuxtConfig({
       titleTemplate: '%s %separator %siteName',
       templateParams: {
         separator: '-',
-        siteName: process.env.NUXT_PUBLIC_SITE_NAME || 'John PM Consulting'
+        siteName: process.env.NUXT_PUBLIC_SITE_NAME
       }
     }
   },

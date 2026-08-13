@@ -61,7 +61,48 @@
 </template>
 
 <script lang="ts" setup>
+import { useBusinessDetails } from '~/composables/business'
+import type { PageTitleOrDescription } from '~/types'
+
 definePageMeta({
   layout: 'authentication',
 })
+
+/**
+ * SEO
+ */
+
+const { get } = useBusinessDetails()
+
+const i18n = useI18n()
+
+const titles: PageTitleOrDescription<typeof i18n.locale.value> = {
+  fr: "Liste d'attente",
+  en: "Waitlist"
+}
+
+const descriptions: PageTitleOrDescription<typeof i18n.locale.value> = {
+  fr: "Liste d'attente pour rejoindre notre plateforme.",
+  en: "Waitlist to join our platform."
+}
+
+const url = useRequestURL()
+
+useSeoMeta({
+  title: titles[i18n.locale.value],
+  description: descriptions[i18n.locale.value],
+  author: get('legalName'),
+  twitterDescription: descriptions[i18n.locale.value],
+  twitterCard: 'summary_large_image',
+  ogTitle: titles[i18n.locale.value],
+  ogDescription: descriptions[i18n.locale.value],
+  ogUrl: url.href
+})
+
+if (import.meta.env.NODE_ENV !== 'test') {
+  defineOgImage('NuxtSeoTakumi', {
+    title: titles[i18n.locale.value],
+    description: descriptions[i18n.locale.value]
+  })
+}
 </script>
