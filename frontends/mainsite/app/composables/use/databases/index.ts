@@ -6,12 +6,51 @@ export * from './endpoints'
 export * from './edition'
 
 export const _useDatabases = createGlobalState(() => {
-  const _databases = computedAsync(async () => {
-    return await $fetch<Database[]>('/api/databases', {
-      method: 'GET'
-    })
+  // const _databases = computedAsync(async () => {
+  //   return await $fetch<Database[]>('/api/databases', {
+  //     method: 'GET'
+  //   })
+  // })
+
+  // // const databases = computed(() => _databases.value || [])
+  // const databases = computed({
+  //   get: () => _databases.value || [],
+  //   set: (value) => {
+  //     value.push()
+  //   }
+  // })
+
+  const { state, execute } = useAsyncState(
+    () => $fetch<Database[]>('/api/databases', { method: 'GET' }),
+    [],
+    {
+      immediate: true,
+      resetOnExecute: false
+    }
+  )
+
+  // Local mutable source of truth
+  const localMutableDatabases = ref<Database[]>([])
+
+  // Sync fetched data into local state whenever a fetch resolves
+  watch(state, (value) => {
+    localMutableDatabases.value = value ?? []
   })
-  const databases = computed(() => _databases.value || [])
+
+  const databases = computed<Database[]>({
+    get: () => localMutableDatabases.value,
+    set: (value) => {
+      localMutableDatabases.value = value
+    }
+  })
+
+  async function refresh() {
+    await execute()
+  }
+
+  function push(database: Database) {
+    localMutableDatabases.value = [ ...localMutableDatabases.value, database ]
+  }
 
   /**
    * Search
@@ -37,7 +76,7 @@ export const _useDatabases = createGlobalState(() => {
   // const routeId = ref<Nullable<number>>(null)
   // const routeId = useRoute().params as { id: string }
   const routeId = computed(() => useRoute().params as { id: string })
-  console.log('routeId', routeId)
+  console.log('routeId', useRoute, routeId.value)
   const currentDatabase = useArrayFind<Database>(databases, database => database.id === parseInt(routeId.value.id))
   
   const availableTables = computed(() => isDefined(currentDatabase) ? currentDatabase.value.tables : [])
@@ -92,6 +131,14 @@ export const _useDatabases = createGlobalState(() => {
      * Whether the database has tables
      * @default false
      */
-    hasTables
+    hasTables,
+    /**
+     * Refresh the database data
+     */
+    refresh,
+    /**
+     * Push a newly created database in the existing ones
+     */
+    push
   }
 })

@@ -21,17 +21,17 @@ const { mockedFetch, mockedRouter } = vi.hoisted(() => {
     return undefined
   })
 
-  const mockedRouter = vi.fn(() => ({
+  const mockedRouter = vi.fn<typeof import('vue-router').useRoute>(() => ({
     params: {
-      databaseId: '1'
+      id: '1'
     }
   }))
-  
+
   return { mockedFetch, mockedRouter }
 })
 
 mockNuxtImport('$fetch', () => mockedFetch)
-mockNuxtImport('useRoute', async () => vi.fn(() => mockedRouter()))
+mockNuxtImport('useRoute', async () => mockedRouter)
 
 describe('useDatabasesComposable', () => {
   it('should return default properties', () => {
@@ -83,6 +83,8 @@ describe('useDatabasesComposable', () => {
 
   it('should have current database to "1" and currenDatabase set', () => {
     const defaults = _useDatabases()
+    
+    console.log(defaults.databases.value)
 
     expect(isDefined(defaults.currentDatabase)).toBeDefined()
     expect(defaults.currentDatabase.value?.id).toBe(1)

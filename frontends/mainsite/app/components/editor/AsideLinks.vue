@@ -3,13 +3,8 @@
     <!-- Select Table -->
     <nuxt-select-menu v-model="selectedTableName" :items="availableTables" value-key="name" label-key="name" class="w-full" placeholder="Select a table" />
 
+    <!-- Create Table -->
     <nuxt-button icon="i-lucide-plus" label="Create" size="sm" variant="soft" color="info" @click="() => { toggleCreateTable() }" />
-
-    <dev-only>
-      <p>
-        hasDocuments {{ hasDocuments }} {{ selectedTableDocumentNames }}
-      </p>
-    </dev-only>
       
     <!-- Select Data -->
     <nuxt-select-menu v-model="selectedTableDocumentName" :items="selectedTableDocumentNames" class="w-full" placeholder="Select a datasource" />
@@ -57,20 +52,6 @@ const { availableTables } = _useDatabases()
 
 // const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = useTableEditionComposable()
-
-// console.log('Editor.AsideLinks', tableData.value)
-
-/**
- * Url query parameters
- */
-
-const queryParams = useUrlSearchParams() as { table: string }
-
-watch(selectedTableDocumentName, (value) => {
-  if (isDefined(value)) {
-    queryParams.table = useToString(selectedTable.value?.id || '').value
-  }
-})
 
 /**
  * Columns

@@ -24,7 +24,8 @@ interface LinkItems {
 
 const props = defineProps<{ items: Partial<LinkItems>[] }>()
 
-const noneAlphaLinks = computed(() => props.items.filter(item => !item.isAlpha))
+const links = computed(() => props.items || [])
+const noneAlphaLinks = computed(() => links.value.filter(item => !item.isAlpha))
 </script>
 
 <style scoped>

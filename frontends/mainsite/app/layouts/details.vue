@@ -55,11 +55,7 @@ const props = defineProps<{
 
 const hasAside = computed(() => props.asideName !== 'none')
 
-// const { id } = useRoute().params as { id: string }
-// dbStore.routeId = Number(id)
-// routeId.id = id
-
-const items: (AsideLinks | AsideSeparator)[] = [
+const items = computed<(AsideLinks | AsideSeparator)[]>(() => [
   {
     name: 'Overview',
     to: `/databases/${currentDatabase.value?.id}`,
@@ -76,7 +72,7 @@ const items: (AsideLinks | AsideSeparator)[] = [
     separator: true
   },
   {
-    name:'Integrations',
+    name: 'Integrations',
     to: `/databases/${currentDatabase.value?.id}/integrations`,
     icon: 'i-lucide-plug',
     isAlpha: true
@@ -93,11 +89,7 @@ const items: (AsideLinks | AsideSeparator)[] = [
     icon: 'i-lucide-cog',
     isAlpha: false
   }
-]
-
-// onUnmounted(() => {
-//   routeId.databaseId = ''
-// })
+])
 
 /**
  * Websocket

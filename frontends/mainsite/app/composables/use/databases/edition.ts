@@ -20,18 +20,23 @@ export function useDatabaseCreation() {
   })
 
   // const dbStore = useDatabasesStore()
-  const { databases } = _useDatabases() 
+  const { push } = _useDatabases() 
 
   // TODO: Move to api/server
   async function create() {
-    const data = await $fetch<Database>('/v1/databases/create', {
+    // const data = await $fetch<Database>('/v1/databases/create', {
+    //   method: 'POST',
+    //   baseURL: useRuntimeConfig().public.prodDomain,
+    //   body: newDatabase.value
+    // })
+    
+    const data = await $fetch('/api/databases/create', {
       method: 'POST',
-      baseURL: useRuntimeConfig().public.prodDomain,
-      body: newDatabase.value
+      body: newDatabase
     })
 
     if (data) {
-      databases.push(data)
+      push(data)
       newDatabase.value = { name: '', description: '' }
       toggle()
     }

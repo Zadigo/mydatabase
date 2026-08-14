@@ -9,11 +9,16 @@ import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption 
  * manipulated etc.
  */
 export const useTableEditionComposable = createGlobalState(() => {
-  // const dbStore = useDatabasesStore()
-  // const { currentDatabase } = storeToRefs(dbStore)
-
   const { currentDatabase } = _useDatabases()
   const selectedTableDocumentName = ref<string>()
+
+  const queryParams = useUrlSearchParams() as { table: string }
+
+  watch(selectedTableDocumentName, (value) => {
+    if (isDefined(value)) {
+      queryParams.table = useToString(selectedTable.value?.id || '').value
+    }
+  })
 
   /**
    * Table selection
@@ -152,7 +157,7 @@ export const useTableEditionComposable = createGlobalState(() => {
     /**
      * The name of the selected table
      */
-    selectedTableName: readonly(selectedTableName),
+    selectedTableName: selectedTableName,
     /**
      * The name of the selected document
      * for the current table
