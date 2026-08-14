@@ -1,17 +1,14 @@
 import type { SelectMenuItem } from '@nuxt/ui'
 import type { DocumentData, SimpleTable } from '~/types'
-import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/api/tables/columns'
-
-export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>
+import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption } from '~/types/api/tables/columns'
 
 /**
- * Store used to manage the state of table edition
+ * Composable used to manage the state of table edition
  * across multiple components aka which table is
  * being edited, what data in the table is being
  * manipulated etc.
- * @deprecated Use `_useTableEdition` instead for a more reactive and async-friendly approach.
  */
-export const useTableEditionStore = defineStore('tableEdition', () => {
+export const useTableEditionComposable = createGlobalState(() => {
   const dbStore = useDatabasesStore()
   const { currentDatabase } = storeToRefs(dbStore)
 
@@ -86,7 +83,7 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
     }
   })
 
-  const [showModal, toggleEditTableDrawer] = useToggle()
+  const [ showModal, toggleEditTableDrawer ] = useToggle()
 
   async function update() {
     if (isDefined(selectedTable)) {
@@ -183,11 +180,6 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
      */
     update
   }
-}, {
-  persist: {
-    pick: ['tableData', 'selectedTableName', 'selectedTableDocumentName'],
-    storage: sessionStorage
-  }
 })
 
 export const columnTypesMenuItem: SelectMenuItem[] = [
@@ -224,9 +216,8 @@ export const columnTypesMenuItem: SelectMenuItem[] = [
 /**
  * Store used for working with table columns
  * e.g. search, modifying column types etc.
- * @deprecated Use `useTableColumnsComposable` instead for a more reactive and async-friendly approach.
  */
-export const useTableColumnsStore = defineStore('tableColumns', () => {
+export const useTableColumnsComposable = createGlobalState(() => {
   const tableStore = useTableEditionStore()
   const { selectedTableDocument } = storeToRefs(tableStore)
 
@@ -238,7 +229,7 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
    */
 
   function toggleOption(column: ColumnOptions, option: DefaultColumnOption) {
-    column[option] = !column[option]
+    column[ option ] = !column[ option ]
 
     if (isDefined(selectedTableDocument)) {
       $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
@@ -258,7 +249,7 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
   }
 
   function toggleConstraint(column: ColumnTypeOptions, constraint: 'unique' | 'nullable') {
-    column[constraint] = !column[constraint]
+    column[ constraint ] = !column[ constraint ]
   }
 
   /**
@@ -309,10 +300,5 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
      * Persist the column settings to the backend
      */
     save
-  }
-}, {
-  persist: {
-    pick: ['columnNames', 'columnOptions', 'columnTypeOptions'],
-    storage: sessionStorage
   }
 })

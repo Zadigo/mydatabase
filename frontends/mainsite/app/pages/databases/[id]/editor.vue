@@ -7,7 +7,7 @@
             {{ selectedTable.name }}
           </h2>
 
-          <nuxt-button @click="() => { tableEditionStore.toggleEditTableDrawer() }">
+          <nuxt-button @click="() => { toggleEditTableDrawer() }">
             <icon name="i-lucide-pen" class="mr-2" />
             Edit table
           </nuxt-button>
@@ -57,8 +57,10 @@ definePageMeta({
  * Edition
  */
 
-const tableEditionStore = useTableEditionStore()
-const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef } = storeToRefs(tableEditionStore)
+ const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef, toggleEditTableDrawer } = useTableEditionComposable()
+
+// const tableEditionStore = useTableEditionStore()
+// const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef } = storeToRefs(tableEditionStore)
 
 const componentMapping: Record<TableComponent, Component> = {
   'data-table': EditorTablesDataTable,

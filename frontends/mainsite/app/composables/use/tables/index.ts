@@ -1,6 +1,7 @@
 import type { MaybeTable } from '~/types'
 
 export * from './creation'
+export * from './edition'
 export * from './ws_manager'
 
 /**

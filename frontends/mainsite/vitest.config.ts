@@ -3,7 +3,7 @@ import { defineVitestProject } from '@nuxt/test-utils/config'
 
 export default defineConfig({
   test: {
-    setupFiles: [ './tests/setup.ts' ],
+    setupFiles: ['./tests/setup.ts'],
     exclude: [
       'node_modules',
       '.nuxt',
@@ -24,7 +24,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'nuxt',
-          include: ['tests/nuxt/**/*.{test,spec}.ts'],
+          include: ['test/nuxt/**/*.{test,spec}.ts'],
           environment: 'nuxt',
           testTimeout: 20000,
           tags: [
@@ -46,7 +46,7 @@ export default defineConfig({
       await defineVitestProject({
         test: {
           name: 'integration',
-          include: ['tests/integration/**/*.{test,spec}.ts'],
+          include: ['test/integration/**/*.{test,spec}.ts'],
           environment: 'node',
           testTimeout: 20000,
           tags: [
