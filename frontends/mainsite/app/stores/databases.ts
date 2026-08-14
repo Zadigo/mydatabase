@@ -4,6 +4,7 @@ import type { Database, Nullable } from '~/types'
  * Store for managing databases and their tables.
  * Provides functionality to fetch databases, filter them by search term,
  * and access details of the currently selected database.
+ * @deprecated Use `_useDatabases` instead for a more reactive and async-friendly approach.
  */
 export const useDatabasesStore = defineStore('databases', () => {
   const databases = ref<Database[]>([])

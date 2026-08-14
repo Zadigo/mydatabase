@@ -84,10 +84,12 @@ definePageMeta({
   layout: 'dashboard'
 })
 
-const databasesStore = useDatabasesStore()
-const { search, searched } = storeToRefs(databasesStore)
+// const databasesStore = useDatabasesStore()
+// const { search, searched } = storeToRefs(databasesStore)
 
-databasesStore.fetch()
+// databasesStore.fetch()
+
+const { search, searched } = _useDatabases()
 
 const { showModal, newDatabase, create, toggleCreationModal } = useDatabaseCreation()
 
