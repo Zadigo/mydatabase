@@ -1,7 +1,9 @@
-from djangobackend.consumer_mixins import BaseConsumerMixin
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from dbtables.utils import ValidateWebsocketMessage
+
 from dbtables.models import DatabaseTable
+from dbtables.utils import ValidateWebsocketMessage
+from djangobackend.consumer_mixins import BaseConsumerMixin
+
 
 class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
     """WebSocket consumer used on the table creation page in order

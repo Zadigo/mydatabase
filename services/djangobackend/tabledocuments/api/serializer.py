@@ -1,4 +1,5 @@
 from rest_framework import fields, serializers
+
 from tabledocuments.choices import ColumnTypes
 from tabledocuments.models import TableDocument
 
@@ -9,10 +10,10 @@ class SimpleDocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TableDocument
-        fields = [
+        fields = (
             'id', 'document_uuid', 'name', 'column_names', 'column_type_options',
             'column_options', 'column_types', 'updated_at', 'created_at'
-        ]
+        )
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
@@ -58,10 +59,10 @@ class UpdateDocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TableDocument
-        fields = [
+        fields = (
             'name', 'document_uuid', 'column_names', 
             'column_types', 'column_options'
-        ]
+        )
 
     def validate_name(self, value):
         return value

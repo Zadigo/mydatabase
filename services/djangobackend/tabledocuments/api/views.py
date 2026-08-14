@@ -1,8 +1,11 @@
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, UpdateAPIView
 from rest_framework.response import Response
-from tabledocuments.api.serializer import (SimpleDocumentSerializer,
-                                           UpdateColumnTypesSerializer,
-                                           UpdateDocumentSerializer)
+
+from tabledocuments.api.serializer import (
+    SimpleDocumentSerializer,
+    UpdateColumnTypesSerializer,
+    UpdateDocumentSerializer,
+)
 from tabledocuments.models import TableDocument
 
 

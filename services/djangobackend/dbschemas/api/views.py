@@ -2,6 +2,7 @@ import json
 from typing import Generic, TypeVar
 
 from django.shortcuts import get_object_or_404
+from endpoints.api.serializers import PublicApiEndpointSerializer
 from rest_framework import serializers, status
 from rest_framework.generics import (
     CreateAPIView,
@@ -19,7 +20,6 @@ from dbschemas.api.serializers import (
     ValidateIntegrationSerializer,
 )
 from dbschemas.models import DatabaseProvider, DatabaseSchema
-from endpoints.api.serializers import PublicApiEndpointSerializer
 
 T = TypeVar('T', bound=GenericAPIView)
 
@@ -33,24 +33,24 @@ class QuerysetMixin(Generic[T]):
 class ListDatabases(ListAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
-    permission_classes = []
+    permission_classes = ()
 
 
 class CreateDatabase(CreateAPIView):
     serializer_class = DatabaseSchemaSerializer
-    permission_classes = []
+    permission_classes = ()
 
 
 class DeleteDatabase(DestroyAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
-    permission_classes = []
+    permission_classes = ()
 
 
 class UpdateDatabase(RetrieveUpdateAPIView):
     queryset = DatabaseSchema.objects.all()
     serializer_class = DatabaseSchemaSerializer
-    permission_classes = []
+    permission_classes = ()
 
 
 class RestartProject(GenericAPIView):
@@ -61,7 +61,7 @@ class RestartProject(GenericAPIView):
     queryset = DatabaseSchema.objects.all()
     lookup_url_kwarg = 'pk'
     url_kwarg = 'pk'
-    permission_classes = []
+    permission_classes = ()
 
     def post(self, request, *args, **kwargs):
         obj = super().get_object()
@@ -84,7 +84,7 @@ class ListDatabaseEndpoints(ListAPIView):
 
     queryset = DatabaseSchema.objects.all()
     serializer_class = PublicApiEndpointSerializer
-    permission_classes = []
+    permission_classes = ()
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -100,7 +100,7 @@ class RetrieveUpdateDestroyRelationships(GenericAPIView):
     serializer_class = RelationshipSerializer
     lookup_field = 'pk'
     lookup_url_kwarg = 'pk'
-    permission_classes = []
+    permission_classes = ()
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()

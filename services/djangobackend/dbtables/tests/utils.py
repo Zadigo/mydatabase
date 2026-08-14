@@ -1,8 +1,9 @@
-from faker import Faker
-from factory.django import DjangoModelFactory
-from dbtables.models import DatabaseTable
-from factory.declarations import SubFactory
 from dbschemas.tests.utils import DatabaseSchemaFactory
+from factory.declarations import SubFactory
+from factory.django import DjangoModelFactory
+from faker import Faker
+
+from dbtables.models import DatabaseTable
 
 faker = Faker()
 

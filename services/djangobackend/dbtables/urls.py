@@ -1,4 +1,5 @@
 from django.urls import re_path
+
 from dbtables.api import views
 
 app_name = 'database_tables'

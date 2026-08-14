@@ -165,4 +165,4 @@ class DatabaseProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DatabaseProvider
-        fields = ['id', 'has_google_sheet_connection']
+        fields = ('id', 'has_google_sheet_connection')

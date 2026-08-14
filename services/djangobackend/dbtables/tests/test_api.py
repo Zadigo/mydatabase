@@ -1,19 +1,21 @@
 import csv
 import pathlib
 
-from dbtables.models import DatabaseTable
+from dbschemas.tests.utils import DatabaseSchemaFactory
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.test import TransactionTestCase
 from django.urls import reverse
-from django.core.files.base import ContentFile
 
+from dbtables.models import DatabaseTable
 from dbtables.tests.utils import DatabaseTableFactory
 
 
 class TestApiTables(TransactionTestCase):
-    fixtures = ['fixtures/databases']
+    fixtures = ('fixtures/databases')
 
     def setUp(self):
+        self.databae = DatabaseSchemaFactory.create()
         self.instance = DatabaseTable.objects.first()
 
     def test_get_table(self):
@@ -46,7 +48,8 @@ class TestApiTables(TransactionTestCase):
 
         data = {'name': 'Simple table', 'database': self.instance.id}
         response = self.client.post(
-            path, data=data, content_type='application/json')
+            path, data=data, content_type='application/json'
+        )
         self.assertEqual(response.status_code, 201, response.content)
 
         data = response.json()
@@ -55,7 +58,7 @@ class TestApiTables(TransactionTestCase):
 
 
 class TestUploadApiTables(TransactionTestCase):
-    fixtures = ['fixtures/databases']
+    fixtures = ('fixtures/databases')
 
     def setUp(self):
         self.table = DatabaseTable.objects.first()

@@ -1,13 +1,18 @@
-from dbtables.api.serializers import (DatabaseTableSerializer,
-                                      UploadFileSerializer)
-from dbtables.models import DatabaseTable
+import pandas
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, GenericAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    GenericAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
+from rest_framework.request import Request
 from rest_framework.response import Response
 from tabledocuments.api.serializer import SimpleDocumentSerializer
-from rest_framework.request import Request
-import pandas
 from tabledocuments.logic.utils import user_preference_column_options
+
+from dbtables.api.serializers import DatabaseTableSerializer, UploadFileSerializer
+from dbtables.models import DatabaseTable
+
 
 class UpdateTable(RetrieveUpdateDestroyAPIView):
     """Endpoint used to update metadata for a 
@@ -17,7 +22,7 @@ class UpdateTable(RetrieveUpdateDestroyAPIView):
     serializer_class = DatabaseTableSerializer
     lookup_field = 'pk'
     lookup_url_kwarg = 'pk'
-    permission_classes = []
+    permission_classes = ()
 
 
 class CheckoutDocument(GenericAPIView):
@@ -66,7 +71,7 @@ class UploadNewDocument(CreateAPIView):
 
     queryset = DatabaseTable.objects.all()
     serializer_class = UploadFileSerializer
-    permission_classes = []
+    permission_classes = ()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -91,4 +96,4 @@ class CreateTable(CreateAPIView):
 
     queryset = DatabaseTable.objects.all()
     serializer_class = DatabaseTableSerializer
-    permission_classes = []
+    permission_classes = ()
