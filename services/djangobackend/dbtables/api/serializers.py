@@ -1,17 +1,17 @@
 import re
 
-from dbschemas.models import DatabaseSchema
 from django.db import IntegrityError
 from rest_framework import fields, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
+
+from dbschemas.models import DatabaseSchema
+from dbtables.models import DatabaseTable
 from tabledocuments import tasks
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.choices import ColumnTypes
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import is_csv_file, is_json_file
-
-from dbtables.models import DatabaseTable
 
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
@@ -215,7 +215,8 @@ class UploadFileSerializer(serializers.Serializer):
             if providers.exists():
                 try:
                     google_provider = providers.get(
-                        has_google_sheet_connection=True)
+                        has_google_sheet_connection=True
+                    )
                 except:
                     raise ValidationError(
                         'No provider with Google Sheet connection found')
@@ -235,8 +236,3 @@ class UploadFileSerializer(serializers.Serializer):
                 )
                 
         return document
-
-
-class CustomCharField(fields.CharField):
-    def run_validation(self, data):
-        return super().run_validation(data)

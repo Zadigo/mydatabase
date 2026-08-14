@@ -61,15 +61,16 @@ class DatabaseTable(models.Model):
 
     class Meta:
         verbose_name = 'database table'
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=['name', 'database_schema'],
                 name='unique_table_name_per_schema'
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return self.name
+
 
 @receiver(pre_save, sender=DatabaseTable)
 def create_table_slug(instance, **kwargs):
