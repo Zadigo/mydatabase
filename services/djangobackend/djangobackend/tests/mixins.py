@@ -1,10 +1,10 @@
-from channels.testing import WebsocketCommunicator
-from django.test import TestCase
 from unittest import IsolatedAsyncioTestCase
-from django.urls import re_path
-from tabledocuments import routing as document_routing
+
+from channels.testing import WebsocketCommunicator
+
 from dbtables import routing as table_routing
 from djangobackend.asgi import URLRouter
+from tabledocuments import routing as document_routing
 
 
 class ConsumerMixin(IsolatedAsyncioTestCase):

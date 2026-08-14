@@ -25,6 +25,7 @@ dependencies = [
     "graphene-django>=3.2.3",
     "gspread>=6.2.1",
     "httpx>=0.28.1",
+    "huey>=3.3.4",
     "markdown>=3.10.2",
     "orjson>=3.11.7",
     "pandas>=3.0.1",

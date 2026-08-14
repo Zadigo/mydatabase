@@ -4,7 +4,6 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
-from djangobackend.ws_middlewares import JWTTokenAuthMiddleware
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangobackend.settings')
 
@@ -17,7 +16,7 @@ django_asgi_application = get_asgi_application()
 # https://channels.readthedocs.io/en/stable/deploying.html#configuring-the-asgi-application
 
 from tabledocuments.routing import urlpatterns as tabledocuments_urlpatterns  # noqa
-from dbtables.routing import urlpatterns as dbtables_urlpatterns  # noqa
+from dbtables.routing import urlpatterns as dbtables_urlpatterns
 
 application = ProtocolTypeRouter({
     'http': django_asgi_application,

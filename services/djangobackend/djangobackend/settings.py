@@ -208,7 +208,7 @@ REDIS_HOST = env('REDIS_HOST', default='127.0.0.1')
 
 REDIS_PASSWORD = env('REDIS_PASSWORD', default='')
 
-REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379'
+REDIS_URL = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379/0'
 
 RABBITMQ_HOST = env('RABBITMQ_HOST', default='localhost')
 
@@ -239,9 +239,20 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [REDIS_URL]
-        }
+        'hosts': [
+            {
+                'host': REDIS_HOST,
+                'port': 6379,
+                'password': REDIS_PASSWORD,
+                'db': 0,
+                'socket_timeout': 15,
+                'socket_connect_timeout': 5,
+                'socket_keepalive': True,
+                'health_check_interval': 30,
+                'retry_on_timeout': True,
+                'retry_on_error': [ConnectionError, TimeoutError],
+            }
+        ]
     }
 }
 

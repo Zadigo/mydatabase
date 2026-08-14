@@ -1,10 +1,12 @@
 import dataclasses
-from typing import Any, Optional
+from typing import Any
+
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
+from djangobackend.consumer_mixins import BaseConsumerMixin
 from tabledocuments.logic.edit import DocumentEdition, DocumentTransform
 from tabledocuments.utils import WebsocketActions
 
-from djangobackend.consumer_mixins import BaseConsumerMixin
 
 # TODO: Rename to TableEditionConsumer
 class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
@@ -17,7 +19,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
 
         self.document_edition = DocumentEdition(self)
         self.document_transform = DocumentTransform(self.document_edition)
-        self.database_id: Optional[int] = None
+        self.database_id: int | None = None
 
     async def connect(self):
         await self.accept()

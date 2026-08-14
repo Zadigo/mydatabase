@@ -1,5 +1,6 @@
 from django.utils.crypto import get_random_string
 
+
 def create_endpoint(prefix: str) -> str:
     """Creates a unique endpoint identifier"""
     parts = [

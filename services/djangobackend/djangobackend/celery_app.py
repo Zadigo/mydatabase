@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 
 # Windows: celery -A djangobackend.celery_app worker -E --pool=solo
 # Windows - Beat: celery -A djangobackend.celery_app beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -12,12 +11,12 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangobackend.settings')
 
 def get_broker():
     from django.conf import settings
-    return getattr(settings, 'CELERY_BROKER_URL')
+    return settings.CELERY_BROKER_URL
 
 
 def get_backend():
     from django.conf import settings
-    return getattr(settings, 'CELERY_RESULT_BACKEND')
+    return settings.CELERY_RESULT_BACKEND
 
 
 app = Celery(

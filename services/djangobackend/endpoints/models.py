@@ -113,7 +113,6 @@ def set_http_methods(instance: PublicApiEndpoint, created: bool, **kwargs):
     """The http methods are used to define what kind of operations
     can be done on the endpoint. If no method is specified,
     we set all methods by default."""
-    if created:
-        if not instance.methods:
-            instance.methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-            instance.save()
+    if created and not instance.methods:
+        instance.methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+        instance.save()
