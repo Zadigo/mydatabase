@@ -1,10 +1,11 @@
-from django.test import TestCase
-from django.test import override_settings
-from dbtables.api import serializers
-from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import Mock, patch
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
+
+from dbtables.api import serializers
 from dbtables.tests.utils import DatabaseTableFactory
+
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestUploadFileSerializer(TestCase):

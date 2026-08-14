@@ -13,7 +13,7 @@ class DocumentFactory(DjangoModelFactory):
         model = TableDocument
 
     name = faker.file_name(extension='csv')
-    column_names = ['firstname', 'lastname']
+    column_names = ('firstname', 'lastname')
     url = 'https://jsonplaceholder.typicode.com/users'
 
 

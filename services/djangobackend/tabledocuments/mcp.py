@@ -1,9 +1,8 @@
-from typing import Optional
-
 from asgiref.sync import async_to_sync
 from django.db.models import Q
 from mcp.types import TextContent
 from mcp_server import MCPToolset, ModelQueryToolset
+
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
@@ -11,7 +10,7 @@ from tabledocuments.models import TableDocument
 
 class TableDocumentsQueryTool(ModelQueryToolset):
     model = TableDocument
-    search_fields = [
+    search_fields = (
         'name',
         'file',
         'column_names',
@@ -21,11 +20,11 @@ class TableDocumentsQueryTool(ModelQueryToolset):
         'google_sheet_id',
         'updated_at',
         'created_at'
-    ]
+    )
 
 
 class TableDocumentsTools(MCPToolset):
-    def get_document(self, document_uuid: str, name: Optional[str] = None) -> dict:
+    def get_document(self, document_uuid: str, name: str | None = None) -> dict:
         """Returns the details of a document file (TableDocument)
 
         Args:

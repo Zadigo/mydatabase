@@ -211,28 +211,18 @@ class UploadFileSerializer(serializers.Serializer):
         # we need to fetch the data from the sheet and create
         # the csv file locally
         if document.google_sheet_id and document.file is None:
-            providers = table.database_schema.databaseprovider_set.all()
-            if providers.exists():
-                try:
-                    google_provider = providers.get(
-                        has_google_sheet_connection=True
+            tasks.get_document_from_google_sheet.apply_async(
+                args=[
+                    table.id,
+                    document.google_sheet_id
+                ],
+                link=[
+                    tasks.create_csv_file_from_data.s(
+                        document.pk, 
+                        entry_key, 
+                        columns_serializer.validated_data
                     )
-                except:
-                    raise ValidationError(
-                        'No provider with Google Sheet connection found')
-                
-                tasks.get_document_from_google_sheet.apply_async(
-                    args=[
-                        google_provider.google_service_account_credentials,
-                        document.google_sheet_id
-                    ],
-                    link=[
-                        tasks.create_csv_file_from_data.s(
-                            document.pk, 
-                            entry_key, 
-                            columns_serializer.validated_data
-                        )
-                    ]
-                )
+                ]
+            )
                 
         return document

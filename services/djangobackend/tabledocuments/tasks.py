@@ -10,9 +10,13 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.core.files.base import ContentFile
+from django.db.models import QuerySet
 from django.utils.crypto import get_random_string
+from gspread.exceptions import APIError
 from gspread.utils import rowcol_to_a1
+from rest_framework.exceptions import ValidationError
 
+from dbschemas.models import DatabaseProvider
 from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.logic.utils import (
     clean_user_column_type_options,
@@ -26,7 +30,7 @@ logger = get_task_logger(__name__)
 
 
 @shared_task
-def update_document_options(document_uuid: str, column_type_options: list[dict[str, str | bool]] = [], from_file: bool = False):
+def update_document_options(document_uuid: str, column_type_options: list[dict[str, str | bool]] | None = None, from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
     the column names, etc."""
@@ -45,12 +49,11 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
         column_type_options = create_column_type_options(df.columns.tolist())
 
     document.column_type_options = clean_user_column_type_options(column_type_options)
-    document.column_names = list(
-        map(
-            lambda x: x['newName'] or x['name'], 
-            document.column_type_options
-        )
-    )
+    document.column_names = [
+        x['newName'] or x['name']
+            for x in document.column_type_options
+
+    ]
 
     column_types = {}
     for item in document.column_type_options:
@@ -69,7 +72,7 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
 
 
 @shared_task
-def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] = []):
+def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] | None = None):
     if data is None or data == '':
         logger.warning(f'No data provided? Received {data}')
         return
@@ -233,7 +236,7 @@ def get_document_from_public_google_sheet(api_key: str, sheet_id: str, range: st
 
 
 @shared_task
-def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -> str:
+def get_document_from_google_sheet(table_id: int, sheet_id: str) -> str:
     """Loads data from a Google Sheet using a service account and sheet ID and
     returns the values as string.
     
@@ -244,35 +247,50 @@ def get_document_from_google_sheet(credentials: dict[str, str], sheet_id: str) -
     
     :return: A CSV string containing the data from the Google Sheet.
     """
-    instance = gspread.service_account_from_dict(credentials)
-
     try:
-        sheet = instance.open_by_key(sheet_id)
-    except Exception as e:
-        logger.error(f'Failed to open spreadsheet: {e}')
+        table = TableDocument.objects.get(id=table_id)
+    except TableDocument.DoesNotExist:
+        logger.error(f"TableDocument with ID {table_id} does not exist.")
         return
+    else:
+        providers: QuerySet[DatabaseProvider] = table.database_schema.databaseprovider_set.all()
+        if providers.exists():
+            try:
+                provider = providers.get(has_google_sheet_connection=True)
+            except DatabaseProvider.DoesNotExist:
+                raise ValidationError(
+                    'No provider with Google Sheet connection found')
 
-    headers = sheet.sheet1.row_values(1)
-    records = sheet.sheet1.get_all_records()
-    cache.set(sheet_id, [headers, records], timeout=3600)
+            # Attacj the crendtials to the provider for use with gspread
+            instance = gspread.service_account_from_dict(provider.google_sheet_credentials)
 
-    if 'record_id' not in headers:
-        sheet.sheet1.insert_cols([['record_id']], 1)
+            try:
+                sheet = instance.open_by_key(sheet_id)
+            except APIError as e:
+                logger.error(f'Failed to open spreadsheet: {e}')
+                return
 
-        # Create the auto-incrementing record_id column
-        cell_name = 'A2:' + rowcol_to_a1(len(records) + 1, 1)
-        cell_list = sheet.sheet1.range(cell_name)
+            headers = sheet.sheet1.row_values(1)
+            records = sheet.sheet1.get_all_records()
+            cache.set(sheet_id, [headers, records], timeout=3600)
 
-        for i, cell in enumerate(cell_list):
-            cell.value = i + 1
+            if 'record_id' not in headers:
+                sheet.sheet1.insert_cols([['record_id']], 1)
 
-        sheet.sheet1.update_cells(cell_list)
+                # Create the auto-incrementing record_id column
+                cell_name = 'A2:' + rowcol_to_a1(len(records) + 1, 1)
+                cell_list = sheet.sheet1.range(cell_name)
 
-    logger.warning(
-        f'Successfully retrieved data from Google Sheet: {sheet_id}')
+                for i, cell in enumerate(cell_list):
+                    cell.value = i + 1
 
-    df = pandas.DataFrame(records, columns=headers)
-    return df.to_csv(index=False, encoding='utf-8', doublequote=True)
+                sheet.sheet1.update_cells(cell_list)
+
+            logger.warning(
+                f'Successfully retrieved data from Google Sheet: {sheet_id}')
+
+            df = pandas.DataFrame(records, columns=headers)
+            return df.to_csv(index=False, encoding='utf-8', doublequote=True)
 
 
 @shared_task
