@@ -33,11 +33,11 @@ export default defineConfig({
               description: 'Tests for Nuxt'
             },
             {
-              name: 'unit',
+              name: 'composables',
               description: 'Tests for composables'
             },
             {
-              name: 'nuxt_page',
+              name: 'pages',
               description: 'Tests for pages'
             }
           ]

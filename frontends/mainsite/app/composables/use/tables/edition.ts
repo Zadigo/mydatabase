@@ -9,8 +9,10 @@ import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption 
  * manipulated etc.
  */
 export const useTableEditionComposable = createGlobalState(() => {
-  const dbStore = useDatabasesStore()
-  const { currentDatabase } = storeToRefs(dbStore)
+  // const dbStore = useDatabasesStore()
+  // const { currentDatabase } = storeToRefs(dbStore)
+  
+  const { currentDatabase } = _useDatabases()
 
   const selectedTableDocumentName = ref<string>()
 

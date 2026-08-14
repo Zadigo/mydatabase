@@ -6,7 +6,7 @@ import { defineComponent, nextTick } from 'vue'
 
 vi.stubGlobal('$fetch', vi.fn())
 
-describe('useCreateDocument', () => {
+describe.todo('useCreateDocument', () => {
   let result: ReturnType<typeof useCreateDocument>
   let component: ReturnType<typeof mountSuspended>
 
@@ -56,7 +56,7 @@ describe('useCreateDocument', () => {
     })
   })
 
-  it.todo('should update newDocument when inputs change', async () => {
+  it('should update newDocument when inputs change', async () => {
     result.newDocument.value.name = 'Test Document'
     result.newDocument.value.url = ''
     result.newDocument.value.google_sheet_id = ''

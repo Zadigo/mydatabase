@@ -1,8 +1,8 @@
-import type { Database, DatabaseFunction } from '../../app/types'
+import type { Database, DatabaseFunction, SimpleTable } from '../../app/types'
 import { faker } from '@faker-js/faker'
 
 export const databaseFixture: Database = {
-  id: faker.number.int({ min: 1, max: 1000 }),
+  id: 1,
   name: 'Test Database',
   tables: [],
   active: true,
@@ -37,4 +37,16 @@ export const datatabaseFunctionFixture: DatabaseFunction = {
       }
     }
   }
+}
+
+export const tableFixture: SimpleTable = {
+  id: 1,
+  name: 'Test Table',
+  description: 'This is a test table',
+  active_document_datasource: null,
+  component: 'data-table',
+  active: true,
+  documents: [],
+  updated_at: new Date().toISOString(),
+  created_at: new Date().toISOString()
 }

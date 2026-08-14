@@ -1,5 +1,7 @@
 import type { H3Event } from 'h3'
 
+export * from './testcases'
+
 type Options = {
   body: Record<string, unknown>
   params: Record<string, unknown>

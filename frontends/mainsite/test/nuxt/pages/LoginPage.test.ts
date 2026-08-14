@@ -10,7 +10,7 @@ vi.stubGlobal('$fetch', vi.fn((url: string, options: any) => {
   return Promise.reject(new Error('Unknown API endpoint'))
 }))
 
-describe('LoginPage', { tags: ['nuxt_page'] }, () => {
+describe('LoginPage', { tags: ['pages'] }, () => {
   it('should render page correctly', async () => {
     const component = await mountSuspended(LoginPage)
     

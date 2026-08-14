@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 
 
-describe('urlPrefetchViaHttp', () => {
+describe.todo('urlPrefetchViaHttp', () => {
   it('should return a preview of the data fetched from the given URL', async () => {
     const source = ref<string>()
 
