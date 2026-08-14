@@ -1,7 +1,8 @@
 import dataclasses
 import datetime
 import re
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import httpx
 import pandas
@@ -11,6 +12,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
 from requests.models import Response
+
 from tabledocuments.models import TableDocument
 
 # endpoint test: https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/cfa@datailedefrance/records?limit=20
@@ -37,7 +39,7 @@ class Document:
     metadata: dict[str, str | bool] = dataclasses.field(default_factory=dict)
 
     def __hash__(self):
-        return hash((self.document_cache_key))
+        return hash(self.document_cache_key)
 
 
 async def load_document_by_url(url: str, **request_params: Any) -> tuple[Response | None, list[str]]:
@@ -185,7 +187,7 @@ class DocumentEdition:
 
         return True, await self.clean(df)
 
-    async def load_json_document_by_url(self, url: str, entry_key: Optional[str] | None = None, **request_params: Any) -> Document | None:
+    async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
         """Function used to load the content of document returned via an API endpoint
         as a json format. The content will be loaded and transformed back to a csv database file.
 
@@ -237,7 +239,7 @@ class DocumentEdition:
                     # By any means, if the data is not valid, pandas
                     # will also automatically raise an error
                     df = pandas.DataFrame(data)
-                except:
+                except ValueError:
                     self.errors.append(
                         "Failed to create DataFrame "
                         "from JSON data"
@@ -256,8 +258,8 @@ class DocumentTransform:
         self.consumer = consumer
         self.editor = editor
 
-        self.current_document: Optional[Document] = None
-        self.initial_dataframe: Optional[pandas.DataFrame] = None
+        self.current_document: Document | None = None
+        self.initial_dataframe: pandas.DataFrame | None = None
 
     @property
     def can_transform(self):
@@ -284,7 +286,7 @@ class DocumentTransform:
         )
         self.initial_dataframe = cache.get(cache_key, None)
 
-    async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] = [], select: list[str] = []):
+    async def create_foreign_key(self, lh_document, rh_document, relationship_fields: list[str] | None = None, select: list[str] | None = None):
         """Artificially create a foreign key between two documents. The end
         user will then be able to view documents who are not merged as one
 

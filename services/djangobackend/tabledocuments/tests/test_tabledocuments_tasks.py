@@ -82,7 +82,6 @@ class TestCreateFromCsvFile(TestCase):
             self.assertIsNotNone(self.instance.file)
 
 
-
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestCreateJsonFileFromData(TestCaseMixin):
     def test_create_with_none(self):
@@ -135,16 +134,6 @@ class TestCreateJsonFileFromData(TestCaseMixin):
 
             self.instance.refresh_from_db()
             self.assertIsNotNone(self.instance.file)
-
-
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-class TestCreateFileFromData(TestCase):
-    def setUp(self):
-        self.instance: TableDocument = DocumentFactory.create()
-
-    def test_invalid_document(self):
-        pass
-
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)

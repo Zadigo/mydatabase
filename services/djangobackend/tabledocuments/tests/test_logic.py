@@ -1,12 +1,14 @@
 import dataclasses
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
+import factory
 import pandas
 from asgiref.sync import async_to_sync
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from factory.django import DjangoModelFactory
-from faker import Faker as FakerClass
+from faker import Faker
 
 from tabledocuments.logic.edit import (
     DocumentEdition,
@@ -16,24 +18,24 @@ from tabledocuments.logic.edit import (
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.mixins import ConsumerMixin
 
-faker = FakerClass()
+faker = Faker()
 
 
 class DocumentFactory(DjangoModelFactory):
     class Meta:
         model = TableDocument
 
-    name = faker.file_name(extension='csv')
-    column_names = ['firstname', 'lastname']
+    name = factory.Faker('file_name', extension='csv')
+    column_names = ('firstname', 'lastname')
     url = 'https://jsonplaceholder.typicode.com/users'
 
 
-class TestLogicDocumentEdition(ConsumerMixin):
+class TestLogicDocumentEdition(TestCase):
     def setUp(self):
         super().setUp()
 
         consumer = AsyncMock()
-        self.documents = DocumentFactory.create_batch(5)
+        self.documents = DocumentFactory.create_batch(2)
         self.instance = DocumentEdition(consumer)
 
     def test_document_edition_instance(self):
@@ -85,13 +87,29 @@ class TestLogicDocumentEdition(ConsumerMixin):
         self.assertIsNotNone(doc)
         document.file.delete()
 
-    def test_load_json_document_by_url(self):
+    def test_load_json_document_by_url_valid(self):
         instance = DocumentEdition()
-        doc = async_to_sync(instance.load_json_document_by_url)(
-            'https://jsonplaceholder.typicode.com/users'
-        )
+        doc = async_to_sync(
+            instance.load_json_document_by_url
+        )('https://jsonplaceholder.typicode.com/users')
         self.assertIsNotNone(doc)
         self.assertTrue(dataclasses.is_dataclass(doc))
+
+    def test_load_json_document_with_entry_key(self):
+        data = {'data': [{'id': 1}]}
+        with patch('tabledocuments.logic.edit.load_document_by_url') as mloader:
+            response = Mock()
+
+            type(response).status_code = 200
+            type(response).headers = {'Content-Type': 'application/json'}
+            response.json.return_value = data
+
+            mloader.return_value = (response, None)
+
+            instance = DocumentEdition()
+            doc = async_to_sync(
+                instance.load_json_document_by_url
+            )('https://jsonplaceholder.typicode.com/users', 'data')
 
 
 class TestLogicDocumentTransform(ConsumerMixin):
