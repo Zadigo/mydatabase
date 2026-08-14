@@ -81,8 +81,9 @@ function restartProject() {
 
 function pauseProject() {}
 
-const dbStore = useDatabasesStore()
-const { currentDatabase } = storeToRefs(dbStore)
+// const dbStore = useDatabasesStore()
+// const { currentDatabase } = storeToRefs(dbStore)
+const { currentDatabase } = _useDatabases() 
 
 const { newDatabaseName, isUpdating } = useEditDatabase(currentDatabase)
 </script>

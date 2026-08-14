@@ -11,8 +11,9 @@ import type { EditableTableRef } from '~/types'
  * @deprecated Use `_useTableEdition` instead for a more reactive and async-friendly approach.
  */
 export const useTableEditionStore = defineStore('tableEdition', () => {
-  const dbStore = useDatabasesStore()
-  const { currentDatabase } = storeToRefs(dbStore)
+  // const dbStore = useDatabasesStore()
+  // const { currentDatabase } = storeToRefs(dbStore)
+  const { currentDatabase } = _useDatabases()
 
   const selectedTableDocumentName = ref<string>()
 

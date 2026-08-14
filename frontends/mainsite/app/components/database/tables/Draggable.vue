@@ -5,7 +5,7 @@
         {{ table.name }}
       </nuxt-button>
 
-      <nuxt-button :to="`/databases/${dbStore.currentDatabase?.id}/editor?table=${table.id}`" size="sm" icon="i-lucide-link" variant="soft" />
+      <nuxt-button :to="`/databases/${currentDatabase?.id}/editor?table=${table.id}`" size="sm" icon="i-lucide-link" variant="soft" />
     </div>
 
     <ul class="cursor-move overflow-y-scroll h-70">
@@ -52,7 +52,8 @@ const { style } = useDraggable(tableEl, {
  * Current Database
  */
 
-const dbStore = useDatabasesStore()
+// const dbStore = useDatabasesStore()
+const { currentDatabase } = _useDatabases() 
 
 /**
  * Current Table

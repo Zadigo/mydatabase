@@ -49,8 +49,9 @@ const props = defineProps<{ endpoint: DatabaseEndpoint }>()
 
 const editableEndpoint = ref({ ...props.endpoint })
 
-const databaseStore = useDatabasesStore()
-const { currentDatabase } = storeToRefs(databaseStore)
+// const databaseStore = useDatabasesStore()
+// const { currentDatabase } = storeToRefs(databaseStore)
+const { currentDatabase } = _useDatabases() 
 
 /**
  * Toggle

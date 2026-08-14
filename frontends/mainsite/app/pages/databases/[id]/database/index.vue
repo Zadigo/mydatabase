@@ -21,8 +21,9 @@ definePageMeta({
   }
 })
 
-const dbStore = useDatabasesStore()
-const { availableTables } = storeToRefs(dbStore)
+// const dbStore = useDatabasesStore()
+// const { availableTables } = storeToRefs(dbStore)
+const { availableTables } = _useDatabases() 
 
 const containerEl = useTemplateRef('containerEl')
 </script>

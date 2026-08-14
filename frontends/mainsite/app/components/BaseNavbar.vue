@@ -15,7 +15,8 @@
 <script setup lang="ts">
 import type { BreadcrumbItem, DropdownMenuItem } from '@nuxt/ui'
 
-const dbStore = useDatabasesStore()
+// const dbStore = useDatabasesStore()
+const { currentDatabase } = _useDatabases()
 
 const baseItems = computed(() => {
   return [
@@ -32,13 +33,13 @@ const baseItems = computed(() => {
 })
 
 const dbPageItems = computed(() => {
-  if (dbStore.currentDatabase) {
+  if (currentDatabase) {
     return [
       ...baseItems.value,
       {
-        label: dbStore.currentDatabase.name,
+        label: currentDatabase.value?.name,
         icon: 'i-lucide-database',
-        to: `/databases/${dbStore.currentDatabase.id}`
+        to: `/databases/${currentDatabase.value?.id}`
       }
     ] as BreadcrumbItem[]
   } else {

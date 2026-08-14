@@ -22,7 +22,7 @@
           Cancel
         </nuxt-button>
 
-        <nuxt-button v-if="canSend" :disabled="!dbStore.hasTables" @click="() => { create() }">
+        <nuxt-button v-if="canSend" :disabled="!hasTables" @click="() => { create() }">
           Create
         </nuxt-button>
         
@@ -55,7 +55,8 @@ useFileCheckout(selectedTable, newDocument)
  * Checks
  */
 
-const dbStore = useDatabasesStore()
+// const dbStore = useDatabasesStore()
+const { hasTables } = _useDatabases() 
 
 /**
  * Stepper

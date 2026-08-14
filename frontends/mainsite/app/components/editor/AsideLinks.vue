@@ -50,10 +50,13 @@
 </template>
 
 <script setup lang="ts">
-const dbStore = useDatabasesStore()
-const { availableTables } = storeToRefs(dbStore)
+// const dbStore = useDatabasesStore()
+// const { availableTables } = storeToRefs(dbStore)
 
-const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
+const { availableTables } = _useDatabases() 
+
+// const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
+const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = useTableEditionComposable()
 
 // console.log('Editor.AsideLinks', tableData.value)
 

@@ -56,8 +56,10 @@ interface NewSchedule {
   }
 }
 
-const databaseStore = useDatabasesStore()
-const { allTableDocuments } = storeToRefs(databaseStore)
+// const databaseStore = useDatabasesStore()
+// const { allTableDocuments } = storeToRefs(databaseStore)
+
+const { allTableDocuments } = _useDatabases() 
 
 const showCron = ref<boolean>(false)
 

@@ -7,7 +7,7 @@
             {{ selectedTable.name }}
           </h2>
 
-          <nuxt-button @click="() => { toggleEditTableDrawer() }">
+          <nuxt-button id="edit-table" @click="() => { toggleEditTableDrawer() }">
             <icon name="i-lucide-pen" class="mr-2" />
             Edit table
           </nuxt-button>
@@ -107,6 +107,4 @@ provide('hasDocuments', hasDocuments)
 provide('editableTableRef', editableTableRef)
 provide('selectedTable', selectedTable)
 provide('selectedTableDocument', selectedTableDocument)
-
-console.log('editableTableRef', editableTableRef.value)
 </script>

@@ -3,7 +3,7 @@
     <div class="space-y-2">
       {{ newDocument }}
       <!-- Alert -->
-      <nuxt-alert v-if="!dbStore.hasTables" class="mb-5" title="Missing tables" description="Your database currently has no tables. You will nened to create one in order to upload a file" />
+      <nuxt-alert v-if="!hasTables" class="mb-5" title="Missing tables" description="Your database currently has no tables. You will nened to create one in order to upload a file" />
 
       <!-- Name -->
       <nuxt-input v-model="newDocument.name" variant="subtle" class="w-full" placeholder="Document Name" />
@@ -50,7 +50,8 @@ import type { TabsItem } from '@nuxt/ui'
  * Store
  */
 
-const dbStore = useDatabasesStore()
+// const dbStore = useDatabasesStore()
+const { hasTables } = _useDatabases()
 
 /**
  * Creation

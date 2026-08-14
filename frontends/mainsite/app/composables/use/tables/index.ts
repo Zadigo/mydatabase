@@ -11,8 +11,10 @@ export * from './ws_manager'
  * @param currentTable The current table being viewed/edited
  */
 export function useEditorPageRefresh(currentTable: MaybeTable) {
-  const dbStore = useDatabasesStore()
-  const { availableTables } = storeToRefs(dbStore)
+  // const dbStore = useDatabasesStore()
+  // const { availableTables } = storeToRefs(dbStore)
+
+  const { availableTables, currentDatabase, databases } = _useDatabases()
 
   const _currentTable = toRef(currentTable)
 
@@ -32,8 +34,8 @@ export function useEditorPageRefresh(currentTable: MaybeTable) {
     const params = useRoute().params as { id: string }
     const id = useToNumber(params.id)
 
-    if (!dbStore.currentDatabase) {
-      const databaseToView = dbStore.databases.find(database => database.id === id.value)
+    if (!currentDatabase) {
+      const databaseToView = databases.value.find(database => database.id === id.value)
       console.log('databaseToView.value', databaseToView)
     }
   })

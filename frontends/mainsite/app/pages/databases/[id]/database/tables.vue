@@ -42,8 +42,9 @@ definePageMeta({
  * Tables
  */
 
-const databasesStore = useDatabasesStore()
-const { currentDatabase } = storeToRefs(databasesStore)
+// const databasesStore = useDatabasesStore()
+// const { currentDatabase } = storeToRefs(databasesStore)
+const { currentDatabase } = _useDatabases() 
 
 /**
  * Select the current document object from a table

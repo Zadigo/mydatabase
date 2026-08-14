@@ -19,7 +19,8 @@ export function useDatabaseCreation() {
     description: ''
   })
 
-  const dbStore = useDatabasesStore()
+  // const dbStore = useDatabasesStore()
+  const { databases } = _useDatabases() 
 
   // TODO: Move to api/server
   async function create() {
@@ -30,7 +31,7 @@ export function useDatabaseCreation() {
     })
 
     if (data) {
-      dbStore.databases.push(data)
+      databases.push(data)
       newDatabase.value = { name: '', description: '' }
       toggle()
     }

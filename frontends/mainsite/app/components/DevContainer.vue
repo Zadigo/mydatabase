@@ -43,7 +43,8 @@
 <script lang="ts" setup>
 const devContainerEl = useTemplateRef('devContainerEl')
 
-const { currentDatabase } = storeToRefs(useDatabasesStore())
+// const { currentDatabase } = storeToRefs(useDatabasesStore())
+const { currentDatabase } = _useDatabases() 
 
 const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())
 const { style } = useDraggable(devContainerEl, { initialValue: { x: 40, y: 0 }})

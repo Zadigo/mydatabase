@@ -50,8 +50,10 @@ import type { DatabaseFunction } from '~/types'
 
 const { databaseFunction } = defineProps<{ databaseFunction: DatabaseFunction }>()
 
-const databaseStore = useDatabasesStore()
-const { currentDatabase } = storeToRefs(databaseStore)
+// const databaseStore = useDatabasesStore()
+// const { currentDatabase } = storeToRefs(databaseStore)
+
+const { currentDatabase } = _useDatabases() 
 
 /**
  * Function
