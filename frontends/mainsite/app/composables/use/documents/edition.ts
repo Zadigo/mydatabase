@@ -8,8 +8,9 @@ import type { StepperItem } from '@nuxt/ui'
 export const useEditDocument = createGlobalState(() => {
   const [showEditDocumentModal, toggleShowEditDocumentModal] = useToggle()
 
-  const tableEditionStore = useTableEditionStore()
-  const { tableDocuments } = storeToRefs(tableEditionStore)
+  // const tableEditionStore = useTableEditionStore()
+  // const { tableDocuments } = storeToRefs(tableEditionStore)
+  const { tableDocuments } = useTableEditionComposable()
 
   // watchDebounced(tableDocuments, async (newValue) => {
   //   // Update Django with the new column types for each document

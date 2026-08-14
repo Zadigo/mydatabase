@@ -35,8 +35,10 @@ export const _useDatabases = createGlobalState(() => {
    */
 
   // const routeId = ref<Nullable<number>>(null)
-  const routeId = useRoute().params as { databaseId: string }
-  const currentDatabase = useArrayFind<Database>(databases, database => database.id === parseInt(routeId.databaseId))
+  // const routeId = useRoute().params as { id: string }
+  const routeId = computed(() => useRoute().params as { id: string })
+  console.log('routeId', routeId)
+  const currentDatabase = useArrayFind<Database>(databases, database => database.id === parseInt(routeId.value.id))
   
   const availableTables = computed(() => isDefined(currentDatabase) ? currentDatabase.value.tables : [])
   const availableTableNames = useArrayMap(isDefined(currentDatabase) ? currentDatabase.value.tables : [], table => table.name)

@@ -1,7 +1,7 @@
 <template>
-  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto max-h-100 max-w-100 w-auto backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
+  <div ref="devContainerEl" class="rounded-3xl fixed top-0 left-0 h-auto max-h-100 max-w-150 w-auto backdrop-blur-3xl bg-primary/50 z-50 overflow-y-scroll p-5 shadow-3xl space-y-2" :style="style">
     <nuxt-button variant="soft" color="neutral" @click="() => { reduceElements = !reduceElements }">
-      Reduce
+      {{ reduceElements ? 'Open': 'Reduce' }}
     </nuxt-button>
     
     <div v-show="!reduceElements" class="max-h-150 overflow-y-scroll">
@@ -46,8 +46,9 @@ const devContainerEl = useTemplateRef('devContainerEl')
 // const { currentDatabase } = storeToRefs(useDatabasesStore())
 const { currentDatabase } = _useDatabases() 
 
-const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())
-const { style } = useDraggable(devContainerEl, { initialValue: { x: 40, y: 0 }})
+// const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())
+const { selectedTable, selectedTableDocument, tableDocuments } = useTableEditionComposable()
+const { style } = useDraggable(devContainerEl, { initialValue: { x: 1200, y: 0 }})
 
 const reduceElements = ref(true)
 

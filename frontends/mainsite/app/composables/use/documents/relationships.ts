@@ -6,8 +6,9 @@ export function useEditDocumentRelationship() {
     // Do something
   }
 
-  const tableEditionStore = useTableEditionStore()
-  const { tableDocuments, selectedTableDocument } = storeToRefs(tableEditionStore)
+  // const tableEditionStore = useTableEditionStore()
+  // const { tableDocuments, selectedTableDocument } = storeToRefs(tableEditionStore)
+  const { tableDocuments, selectedTableDocument } = useTableEditionComposable()
 
   // const availableDocuments = computed(() => useArrayFilter(tableDocuments, (doc) => doc.document_uuid !== selectedTableDocument.value?.document_uuid).value)
 

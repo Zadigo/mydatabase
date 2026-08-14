@@ -59,7 +59,8 @@ const { currentDatabase } = _useDatabases()
  * Current Table
  */
 
-const tableEdition = useTableEditionStore()
+// const tableEdition = useTableEditionStore()
+// const {} = useTableEditionComposable()
 
 /**
  * Columns

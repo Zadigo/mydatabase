@@ -227,8 +227,9 @@ export const columnTypesMenuItem: SelectMenuItem[] = [
  * @deprecated Use `useTableColumnsComposable` instead for a more reactive and async-friendly approach.
  */
 export const useTableColumnsStore = defineStore('tableColumns', () => {
-  const tableStore = useTableEditionStore()
-  const { selectedTableDocument } = storeToRefs(tableStore)
+  // const tableStore = useTableEditionStore()
+  // const { selectedTableDocument } = storeToRefs(tableStore)
+  const { selectedTableDocument } = useTableEditionComposable()
 
   const columnNames = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [], set: value => value })
   const columnOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [], set: value => value })

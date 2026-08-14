@@ -43,8 +43,9 @@ const stepperEl = useTemplateRef('stepper')
  * Document creation
  */
 
-const tableEditionStore = useTableEditionStore()
-const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+// const tableEditionStore = useTableEditionStore()
+// const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+const { selectedTable, selectedTableDocument } = useTableEditionComposable()
 
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal, canSend, updateStep } = useCreateDocument(wsObject)

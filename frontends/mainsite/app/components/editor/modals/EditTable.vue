@@ -25,11 +25,11 @@
 
     <template #footer>
       <div class="flex justify-end">
-        <nuxt-button variant="subtle" class="ml-2" @click="() => { tableEditionStore.toggleEditTableDrawer() }">
+        <nuxt-button variant="subtle" class="ml-2" @click="() => { toggleEditTableDrawer() }">
           Cancel
         </nuxt-button>
 
-        <nuxt-button class="ml-2" @click="tableEditionStore.update()">
+        <nuxt-button class="ml-2" @click="update()">
           Save
         </nuxt-button>
       </div>
@@ -38,6 +38,7 @@
 </template>
 
 <script setup lang="ts">
-const tableEditionStore = useTableEditionStore()
-const { editableTableRef, showModal } = storeToRefs(tableEditionStore)
+// const tableEditionStore = useTableEditionStore()
+// const { editableTableRef, showModal } = storeToRefs(tableEditionStore)
+const { editableTableRef, showModal, update, toggleEditTableDrawer } = useTableEditionComposable()
 </script>

@@ -55,8 +55,9 @@ const props = defineProps<{
 
 const hasAside = computed(() => props.asideName !== 'none')
 
-const { id } = useRoute().params as { id: string }
-dbStore.routeId = Number(id)
+// const { id } = useRoute().params as { id: string }
+// dbStore.routeId = Number(id)
+// routeId.id = id
 
 const items: (AsideLinks | AsideSeparator)[] = [
   {
@@ -94,16 +95,17 @@ const items: (AsideLinks | AsideSeparator)[] = [
   }
 ]
 
-onUnmounted(() => {
-  dbStore.routeId = null
-})
+// onUnmounted(() => {
+//   routeId.databaseId = ''
+// })
 
 /**
  * Websocket
  */
 
-const tableEditionStore = useTableEditionStore()
-const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+// const tableEditionStore = useTableEditionStore()
+// const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+const { selectedTable, selectedTableDocument } = useTableEditionComposable()
 
 const { wsObject, isConnected } = useTableWebocketManager(selectedTable, selectedTableDocument)
 </script>

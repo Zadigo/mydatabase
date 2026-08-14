@@ -89,8 +89,10 @@ watch(() => newDocument.value, (newDoc) => {
 
 
 // TESTING
-const tableEditionStore = useTableEditionStore()
-const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+// const tableEditionStore = useTableEditionStore()
+// const { selectedTable, selectedTableDocument } = storeToRefs(tableEditionStore)
+const { selectedTable, selectedTableDocument } = useTableEditionComposable()
+
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 const { parse } = useWebsocketMessage()
 
