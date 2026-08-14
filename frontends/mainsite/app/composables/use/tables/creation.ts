@@ -36,9 +36,14 @@ export const useCreateTable = createGlobalState(() => {
   async function create() {
     newTable.value.database = dbStore.currentDatabase?.id
 
-    const data = await $fetch<SimpleTable>(`/v1/tables/create`, {
+    // const data = await $fetch<SimpleTable>(`/v1/tables/create`, {
+    //   method: 'POST',
+    //   baseURL: useRuntimeConfig().public.prodDomain,
+    //   body: newTable.value
+    // })
+
+    const data = await $fetch<SimpleTable>('/api/tables/create', {
       method: 'POST',
-      baseURL: useRuntimeConfig().public.prodDomain,
       body: newTable.value
     })
 

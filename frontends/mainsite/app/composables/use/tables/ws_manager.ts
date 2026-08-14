@@ -25,7 +25,8 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
   // const { tableData } = storeToRefs(tableEditionStore)
   const { tableData } = useTableEditionComposable()
 
-  const wsObject = useWebSocket<BaseReceiveWsAction>(`${config.public.wsProdDomain}/ws/databases/${currentDatabase.value?.id}/documents`, {
+  const url = computed(() => `${config.public.wsProdDomain}/ws/databases/${currentDatabase.value?.id}/documents`)
+  const wsObject = useWebSocket<BaseReceiveWsAction>(url, {
     immediate: false,
     onMessage(ws, event: MessageEvent<string>) {
       const data = parse(event.data)

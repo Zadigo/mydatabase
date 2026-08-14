@@ -1,6 +1,8 @@
 <template>
   <section id="data-table">
+    <!-- Table -->
     <nuxt-table v-if="items" v-model:column-visibility="columnVisibility" :data="items" :columns="tableColumns" :sticky="true" />
+
     <div v-else>
       <nuxt-skeleton class="h-10 w-full" />
       <nuxt-skeleton class="h-10 w-6/12" />
@@ -11,13 +13,14 @@
 
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-// import { h } from 'vue'
 import type { DocumentData } from '~/types'
 
 const items = inject<ComputedRef<DocumentData[]>>('tableData')
 
-const tableColumnsStore = useTableColumnsStore()
-const { columnNames, columnOptions } = storeToRefs(tableColumnsStore)
+// const tableColumnsStore = useTableColumnsStore()
+// const { columnNames, columnOptions } = storeToRefs(tableColumnsStore)
+
+const { columnNames, columnOptions } = useTableColumnsComposable()
 
 /**
  * Columns

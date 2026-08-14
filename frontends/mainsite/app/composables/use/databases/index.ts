@@ -6,20 +6,6 @@ export * from './endpoints'
 export * from './edition'
 
 export const _useDatabases = createGlobalState(() => {
-  // const _databases = computedAsync(async () => {
-  //   return await $fetch<Database[]>('/api/databases', {
-  //     method: 'GET'
-  //   })
-  // })
-
-  // // const databases = computed(() => _databases.value || [])
-  // const databases = computed({
-  //   get: () => _databases.value || [],
-  //   set: (value) => {
-  //     value.push()
-  //   }
-  // })
-
   const { state, execute } = useAsyncState(
     () => $fetch<Database[]>('/api/databases', { method: 'GET' }),
     [],
@@ -76,7 +62,6 @@ export const _useDatabases = createGlobalState(() => {
   // const routeId = ref<Nullable<number>>(null)
   // const routeId = useRoute().params as { id: string }
   const routeId = computed(() => useRoute().params as { id: string })
-  console.log('routeId', useRoute, routeId.value)
   const currentDatabase = useArrayFind<Database>(databases, database => database.id === parseInt(routeId.value.id))
   
   const availableTables = computed(() => isDefined(currentDatabase) ? currentDatabase.value.tables : [])

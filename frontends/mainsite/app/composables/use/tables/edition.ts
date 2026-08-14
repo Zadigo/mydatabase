@@ -102,7 +102,7 @@ export const useTableEditionComposable = createGlobalState(() => {
       //   body: editableTableRef.value
       // })
 
-      const data = await $fetch<SimpleTable>(`/api/tables/${selectedTable.value.id}`, {
+      const data = await $fetch<SimpleTable>(`/api/tables/${selectedTable.value.id}/update`, {
         method: 'PATCH',
         body: editableTableRef.value
       })
