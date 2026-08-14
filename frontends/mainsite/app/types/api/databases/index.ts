@@ -51,3 +51,8 @@ export interface Database extends _BaseDatabaseObject {
    */
   created_at: string
 }
+
+/**
+ * @todo Move to shared/types and add Zod schema for validation
+ */
+export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>

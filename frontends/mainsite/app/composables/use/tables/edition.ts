@@ -11,9 +11,9 @@ import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption 
 export const useTableEditionComposable = createGlobalState(() => {
   // const dbStore = useDatabasesStore()
   // const { currentDatabase } = storeToRefs(dbStore)
-  
-  const { currentDatabase } = _useDatabases()
 
+  const { currentDatabase } = _useDatabases()
+  console.log(currentDatabase.value)
   const selectedTableDocumentName = ref<string>()
 
   /**
@@ -41,7 +41,6 @@ export const useTableEditionComposable = createGlobalState(() => {
   // we need to automatically set the value on the
   // select input when the user selects that table
   watch(selectedTable, (table) => {
-    console.log('Selected table changed:', table)
     if (isDefined(table)) {
       if (table.active_document_datasource) {
         const tableDocument = tableDocuments.value.find(doc => doc.document_uuid === table.active_document_datasource)
@@ -57,7 +56,11 @@ export const useTableEditionComposable = createGlobalState(() => {
    * Documents
    */
 
-  const tableDocuments = computed({ get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], set: value => value })
+  const tableDocuments = computed({
+    get: () => isDefined(selectedTable) ? selectedTable.value.documents : [], 
+    set: value => value
+  })
+  
   const hasDocuments = computed(() => tableDocuments.value.length > 0)
 
   const selectedTableDocument = useArrayFind(tableDocuments, doc => doc.name === selectedTableDocumentName.value)
@@ -145,7 +148,7 @@ export const useTableEditionComposable = createGlobalState(() => {
     /**
      * The name of the selected table
      */
-    selectedTableName,
+    selectedTableName: readonly(selectedTableName),
     /**
      * The name of the selected document
      * for the current table

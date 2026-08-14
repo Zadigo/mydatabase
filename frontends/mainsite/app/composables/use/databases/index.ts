@@ -1,4 +1,4 @@
-import type { Database, Nullable } from '~/types'
+import type { Database } from '~/types'
 
 export * from './functions'
 export * from './triggers'

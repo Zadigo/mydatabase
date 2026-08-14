@@ -1,8 +1,7 @@
 import type { SelectMenuItem } from '@nuxt/ui'
 import type { DocumentData, SimpleTable } from '~/types'
 import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/api/tables/columns'
-
-export type EditableTableRef = Pick<SimpleTable, 'name' | 'description' | 'component' | 'active_document_datasource'>
+import type { EditableTableRef } from '~/types'
 
 /**
  * Store used to manage the state of table edition
