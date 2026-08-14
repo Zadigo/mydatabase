@@ -1,19 +1,11 @@
-import { useAsyncValidator } from '@vueuse/integrations/useAsyncValidator'
 import type { SimpleTable } from '~/types'
-
-/**
- * @todo Zod
- */
-export interface NewTable {
-  name: string
-  database: number | undefined
-}
+import type { NewTable } from '~~/shared/types'
 
 /**
  * Composable used to create a new table
  */
 export const useCreateTable = createGlobalState(() => {
-  const dbStore = useDatabasesStore()
+  const { currentDatabase } = _useDatabases()
 
   const [showModal, toggleCreateTable] = useToggle()
 
@@ -22,43 +14,27 @@ export const useCreateTable = createGlobalState(() => {
     database: undefined
   })
 
-  const { errorFields } = useAsyncValidator(newTable, {
-    name: {
-      type: 'string',
-      min: 5,
-      max: 20,
-      required: true
-    }
-  })
-
-  const { availableTables } = storeToRefs(useDatabasesStore())
 
   async function create() {
-    newTable.value.database = dbStore.currentDatabase?.id
-
-    // const data = await $fetch<SimpleTable>(`/v1/tables/create`, {
-    //   method: 'POST',
-    //   baseURL: useRuntimeConfig().public.prodDomain,
-    //   body: newTable.value
-    // })
-
     const data = await $fetch<SimpleTable>('/api/tables/create', {
       method: 'POST',
-      body: newTable.value
+      body: {
+        ...toValue(newTable),
+        database: toValue(currentDatabase)?.id
+      }
     })
 
     if (data) {
-      availableTables.value.push(data)
+      if (isDefined(currentDatabase)) {
+        currentDatabase.value.tables.push(data)
+      }
+
       newTable.value.name = ''
       toggleCreateTable()
     }
   }
 
   return {
-    /**
-     * Validation errors
-     */
-    errorFields,
     /**
      * Modal state
      */

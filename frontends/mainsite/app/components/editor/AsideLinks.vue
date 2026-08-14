@@ -19,11 +19,13 @@
     <editor-column-option-block :column-options="columnOptions" title="Column visibility">
       <template #default="{ column }">
         <nuxt-tooltip :text="column.name">
-          <span class="text-sm">{{ truncate(column.name, 15) }}</span>
+          <span class="text-sm">
+            {{ truncate(column.name, 15) }}
+          </span>
         </nuxt-tooltip>
 
         <div id="actions">
-          <nuxt-button color="info" size="sm" variant="soft" @click="() => tableColumnsStore.toggleOption(column, 'visible')">
+          <nuxt-button color="info" size="sm" variant="soft" @click="() => toggleOption(column, 'visible')">
             <icon v-if="column.visible" name="i-fa7-solid:eye" />
             <icon v-else name="i-fa7-solid:eye-slash" />
           </nuxt-button>
@@ -51,14 +53,15 @@
 const { availableTables } = _useDatabases() 
 
 // const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
-const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = useTableEditionComposable()
+const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames } = useTableEditionComposable()
 
 /**
  * Columns
  */
 
-const tableColumnsStore = useTableColumnsStore()
-const { columnOptions } = storeToRefs(tableColumnsStore)
+// const tableColumnsStore = useTableColumnsStore()
+// const { columnOptions } = storeToRefs(tableColumnsStore)
+const { columnOptions, toggleOption } = useTableColumnsComposable()
 
 /**
  * Fix column names 

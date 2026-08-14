@@ -1,6 +1,5 @@
 import re
 
-from django.db import IntegrityError
 from rest_framework import fields, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
@@ -27,12 +26,13 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
             try:
                 database_id = validated_data.pop('database')
                 instance = DatabaseSchema.objects.get(id=database_id)
-            except IntegrityError:
+            except DatabaseSchema.DoesNotExist:
                 raise serializers.ValidationError(detail={
                     'database': 'Database with this id does not exist'
                 })
 
             validated_data['database_schema'] = instance
+        print('validated_data', validated_data)
         return validated_data
 
 

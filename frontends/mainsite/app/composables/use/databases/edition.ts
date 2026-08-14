@@ -1,12 +1,13 @@
 import type { Database } from '~/types'
 import type { DatabaseEndpoint } from '~/types/api/databases/endpoints'
+import type { NewDatabase } from '#shared/types'
 
 export type NewEndpoint = Pick<DatabaseEndpoint, 'endpoint'>
 
-export interface NewDatabase {
-  name: string
-  description: string
-}
+// export interface NewDatabase {
+//   name: string
+//   description: string
+// }
 
 /**
  * Composable used to create a new database
@@ -22,22 +23,18 @@ export function useDatabaseCreation() {
   // const dbStore = useDatabasesStore()
   const { push } = _useDatabases() 
 
-  // TODO: Move to api/server
   async function create() {
-    // const data = await $fetch<Database>('/v1/databases/create', {
-    //   method: 'POST',
-    //   baseURL: useRuntimeConfig().public.prodDomain,
-    //   body: newDatabase.value
-    // })
-    
     const data = await $fetch('/api/databases/create', {
       method: 'POST',
-      body: newDatabase
+      body: toValue(newDatabase)
     })
 
     if (data) {
       push(data)
-      newDatabase.value = { name: '', description: '' }
+      newDatabase.value = { 
+        name: '',
+        description: ''
+      }
       toggle()
     }
   }
