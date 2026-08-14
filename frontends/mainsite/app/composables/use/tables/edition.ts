@@ -1,5 +1,5 @@
 import type { SelectMenuItem } from '@nuxt/ui'
-import type { DocumentData, SimpleTable } from '~/types'
+import type { DocumentData, SimpleTable, EditableTableRef } from '~/types'
 import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption } from '~/types/api/tables/columns'
 
 /**
@@ -13,7 +13,6 @@ export const useTableEditionComposable = createGlobalState(() => {
   // const { currentDatabase } = storeToRefs(dbStore)
 
   const { currentDatabase } = _useDatabases()
-  console.log(currentDatabase.value)
   const selectedTableDocumentName = ref<string>()
 
   /**
@@ -88,13 +87,18 @@ export const useTableEditionComposable = createGlobalState(() => {
     }
   })
 
-  const [ showModal, toggleEditTableDrawer ] = useToggle()
+  const [showModal, toggleEditTableDrawer] = useToggle()
 
   async function update() {
     if (isDefined(selectedTable)) {
-      const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
+      // const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
+      //   method: 'PATCH',
+      //   baseURL: useRuntimeConfig().public.prodDomain,
+      //   body: editableTableRef.value
+      // })
+
+      const data = await $fetch<SimpleTable>(`/api/tables/${selectedTable.value.id}`, {
         method: 'PATCH',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: editableTableRef.value
       })
 
@@ -219,15 +223,25 @@ export const columnTypesMenuItem: SelectMenuItem[] = [
 ]
 
 /**
- * Store used for working with table columns
+ * Composable used for working with table columns
  * e.g. search, modifying column types etc.
  */
 export const useTableColumnsComposable = createGlobalState(() => {
-  const tableStore = useTableEditionStore()
-  const { selectedTableDocument } = storeToRefs(tableStore)
+  // const tableStore = useTableEditionStore()
+  // const { selectedTableDocument } = storeToRefs(tableStore)
 
-  const columnNames = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [], set: value => value })
-  const columnOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [], set: value => value })
+  const { selectedTableDocument } = useTableEditionComposable()
+  console.log('useTableEditionComposable', useTableEditionComposable)
+
+  const columnNames = computed({
+    get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_names : [],
+    set: value => value
+  })
+
+  const columnOptions = computed({
+    get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_options : [],
+    set: value => value
+  })
 
   /**
    * Column options

@@ -1,3 +1,4 @@
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Database, SimpleTable } from '~/types'
 import { databaseFixture, tableFixture, staticTableDocumentFixture } from '~~/test/__fixtures__'
@@ -20,13 +21,13 @@ const { mockedUseDatabases } = vi.hoisted(() => {
   const fn = vi.fn<typeof import('~/composables/use/databases')._useDatabases>(() => ({
     allTableDocuments: computed(() => [staticTableDocumentFixture]),
     currentDatabase: computed(() => db),
-    availableTableNames: computed(() => [ 'Test Table' ]),
+    availableTableNames: computed(() => ['Test Table']),
     availableTables: computed(() => [ table ]),
-    databases: computed(() => [ db ]),
+    databases: computed(() => [db]),
     hasTables: computed(() => true),
     routeId: { databaseId: '1' },
     search: computed(() => ''),
-    searched: computed(() => [ db ])
+    searched: computed(() => [db])
   }))
 
   return {
@@ -42,6 +43,8 @@ vi.mock('~/composables/use/databases' , async (original) => {
     _useDatabases: mockedUseDatabases
   }
 })
+
+mockNuxtImport('$fetch', () => vi.fn<typeof import('ofetch')['$fetch']>().mockResolvedValue(tableFixture))
 
 describe('useTableEditionComposable', () => {
   beforeEach(() => {
@@ -88,7 +91,7 @@ describe('useTableEditionComposable', () => {
     expect(toValue(defaults.hasDocuments)).toBe(true)
   })
 
-  it('should select table active datasource when set', async () => {
+  it('should select table by table name with active datasource when set', async () => {
     const table = db.tables[0]
     
     if (table) {
@@ -112,6 +115,6 @@ describe('useTableEditionComposable', () => {
     const defaults = useTableEditionComposable()
     defaults.selectedTable.value = tableFixture
 
-    expect(toValue(defaults.))
+    expect(toValue(defaults.selectedTableName)).toBeDefined()
   })
 })

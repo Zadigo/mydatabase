@@ -2,11 +2,42 @@ type ComponentOptions<T> = {
   props: T
 }
 
-type Conditions = {
-  testValue: string | number | boolean | null | undefined
-  expectedValue: string | number | boolean | null | undefined
+type InferValueType<T> =
+  T extends string ? string :
+  T extends number ? number :
+  T extends boolean ? boolean :
+  T extends object ? object :
+  unknown
+
+type Conditions<T extends unknown = string | number | boolean | object> = {
+  /**
+   * The value to be test for
+   */
+  testValue: T | null | undefined
+  /**
+   * Expected value for the test
+   */
+  expectedValue: InferValueType<T> | null | undefined
+  /**
+   * Expected length of an object
+   */
   expectedLength?: number
+  /**
+   * A conditional function that expects to return
+   * an expected value for the test. This result of the
+   * function will override `testValue`
+   * @param t The current test case
+   */
+  conditionalTestValue?: <R extends InferValueType<T>>(t: TestCase) => R
+  /**
+   * Whether to skip the case
+   * @default false
+   */
   skip: boolean
+  /**
+   * Whether the case should use authentication
+   * @default false
+   */
   isAuthenticated: boolean
 }
 
@@ -39,6 +70,11 @@ class TestCaseManager {
 
   parameterize(testCase: TestCase[]): TestCaseManager {
     this.cases.push(...testCase.map((tc) => ({ ...tc, uuid: crypto.randomUUID() })))
+    this.cases.forEach((testCase) => {
+      if (testCase.conditionalTestValue) {
+        testCase.testValue = testCase.conditionalTestValue(testCase)
+      }
+    })
     return this
   }
 
