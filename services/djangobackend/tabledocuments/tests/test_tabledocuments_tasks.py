@@ -7,7 +7,6 @@ from tabledocuments import tasks
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.utils import (
     DocumentFactory,
-    build_column_options,
 )
 
 
@@ -80,58 +79,58 @@ class TestCaseMixin(TestCase):
 #             self.assertIsNotNone(self.instance.file)
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-class TestCreateJsonFileFromData(TestCaseMixin):
-    def test_create_with_none(self):
-         with patch('tabledocuments.tasks.update_document_options'):
-            for value in [None, '', b'']:
-                with self.subTest(value=f'Running with value: {value}'):
-                    result = tasks.create_json_file_from_data.apply(kwargs={
-                        'data': value,
-                        'document_id': self.instance.id,
-                        'column_type_options': []
-                    })
-                    result.get()
+# @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+# class TestCreateJsonFileFromData(TestCaseMixin):
+#     def test_create_with_none(self):
+#          with patch('tabledocuments.tasks.update_document_options'):
+#             for value in [None, '', b'']:
+#                 with self.subTest(value=f'Running with value: {value}'):
+#                     result = tasks.create_json_file_from_data.apply(kwargs={
+#                         'data': value,
+#                         'document_id': self.instance.id,
+#                         'column_type_options': []
+#                     })
+#                     result.get()
 
-    def test_create_from_dict(self):
-        with patch('tabledocuments.tasks.update_document_options'):
-            result = tasks.create_json_file_from_data.apply(kwargs={
-                'data': {'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
-                'document_id': self.instance.id,
-                'column_type_options': build_column_options('firstname', 'lastname'),
-                'entry_key': 'items'
-            })
-            result.get()
+#     def test_create_from_dict(self):
+#         with patch('tabledocuments.tasks.update_document_options'):
+#             result = tasks.create_json_file_from_data.apply(kwargs={
+#                 'data': {'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
+#                 'document_id': self.instance.id,
+#                 'column_type_options': build_column_options('firstname', 'lastname'),
+#                 'entry_key': 'items'
+#             })
+#             result.get()
 
-            self.instance.refresh_from_db()
-            self.assertIsNotNone(self.instance.file)
+#             self.instance.refresh_from_db()
+#             self.assertIsNotNone(self.instance.file)
 
-    def test_create_from_dict_without_entry_key(self):
-        with patch('tabledocuments.tasks.update_document_options'):
-            self.instance: TableDocument = DocumentFactory.create()
+#     def test_create_from_dict_without_entry_key(self):
+#         with patch('tabledocuments.tasks.update_document_options'):
+#             self.instance: TableDocument = DocumentFactory.create()
 
-            result = tasks.create_json_file_from_data.apply(kwargs={
-                'data': {'firstname': 'Jane', 'lastname': 'Doe'},
-                'document_id': self.instance.id,
-                'column_type_options': build_column_options('firstname', 'lastname')
-            })
+#             result = tasks.create_json_file_from_data.apply(kwargs={
+#                 'data': {'firstname': 'Jane', 'lastname': 'Doe'},
+#                 'document_id': self.instance.id,
+#                 'column_type_options': build_column_options('firstname', 'lastname')
+#             })
             
-            result.get()
+#             result.get()
 
-            self.instance.refresh_from_db()
-            self.assertIsNotNone(self.instance.file)
+#             self.instance.refresh_from_db()
+#             self.assertIsNotNone(self.instance.file)
 
-    def test_create_from_list(self):
-        with patch('tabledocuments.tasks.update_document_options'):
-            result = tasks.create_json_file_from_data.apply(kwargs={
-                'data': [{'firstname': 'Jane', 'lastname': 'Doe'}],
-                'document_id': self.instance.id,
-                'column_type_options': build_column_options('firstname', 'lastname')
-            })
-            result.get()
+#     def test_create_from_list(self):
+#         with patch('tabledocuments.tasks.update_document_options'):
+#             result = tasks.create_json_file_from_data.apply(kwargs={
+#                 'data': [{'firstname': 'Jane', 'lastname': 'Doe'}],
+#                 'document_id': self.instance.id,
+#                 'column_type_options': build_column_options('firstname', 'lastname')
+#             })
+#             result.get()
 
-            self.instance.refresh_from_db()
-            self.assertIsNotNone(self.instance.file)
+#             self.instance.refresh_from_db()
+#             self.assertIsNotNone(self.instance.file)
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)

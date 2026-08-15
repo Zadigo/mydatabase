@@ -18,5 +18,6 @@
         "--cov-report=html:djangobackend-coverage",
         "--report-log=reports/reports.json",
         "-s",
-    ]
+    ],
+    "python.envFile": "${workspaceFolder}/.env"
 }

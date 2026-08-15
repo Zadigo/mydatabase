@@ -1,13 +1,12 @@
 import pathlib
 import uuid
 
-from django.utils.functional import cached_property
-from typing import Any
 from django.db import models
 from django.db.models import Q
 from django.db.models.constraints import CheckConstraint
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+
 from tabledocuments.utils import upload_file_to, validate_file
 
 
@@ -68,19 +67,19 @@ class TableDocument(models.Model):
         null=True
     )
     updated_at = models.DateTimeField(
-        auto_now_add=True
+        auto_now=True
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             CheckConstraint(
                 condition=Q(file__isnull=False) | Q(url__isnull=False),
                 name='file_or_url_required'
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return self.name or str(self.document_uuid)

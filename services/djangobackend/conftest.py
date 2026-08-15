@@ -7,7 +7,6 @@ BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
 fake = Faker()
 
-
 def pytest_configure(config):
     if not settings.configured:
         settings.configure(
