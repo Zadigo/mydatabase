@@ -9,7 +9,7 @@ from django.db.models import QuerySet
 
 from dbschemas.models import DatabaseSchema
 from dbtables.models import DatabaseTable
-from djangobackend.django_tasks import huey_task
+from djangobackend.huey_app import huey_task
 from tabledocuments.models import TableDocument
 
 

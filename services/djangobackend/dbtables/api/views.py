@@ -7,11 +7,11 @@ from rest_framework.generics import (
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
-from tabledocuments.api.serializer import SimpleDocumentSerializer
-from tabledocuments.logic.utils import user_preference_column_options
 
 from dbtables.api.serializers import DatabaseTableSerializer, UploadFileSerializer
 from dbtables.models import DatabaseTable
+from tabledocuments.api.serializer import SimpleDocumentSerializer
+from tabledocuments.logic.utils import user_preference_column_options
 
 
 class UpdateTable(RetrieveUpdateDestroyAPIView):

@@ -1,11 +1,11 @@
-from typing import Optional
+import enum
 
 from pydantic import BaseModel
-import enum
+
 
 class ValidateWebsocketMessage(BaseModel):
     action: str
-    file: Optional[bytes] = None
+    file: bytes | None = None
 
 
 class TableWebSocketActions(enum.Enum):

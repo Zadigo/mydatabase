@@ -51,11 +51,13 @@ def clean_user_column_type_options(column_options: list[dict]):
     any fields that are not expected. This is used when the user sends
     their preferences for a given document to the backend, to ensure that
     only valid fields are processed."""
+    column_options = column_options or []
     expected_fields = ['name', 'newName', 'columnType', 'unique', 'nullable']
     
     clean_options: list[dict] = []
     for option in column_options:
         clean_option = {}
+        
         for field in expected_fields:
             clean_option[field] = option[field]
         clean_options.append(clean_option)
