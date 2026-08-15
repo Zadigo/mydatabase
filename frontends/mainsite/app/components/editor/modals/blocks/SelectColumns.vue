@@ -5,5 +5,5 @@
 </template>
 
 <script setup lang="ts">
-const { fileCheckoutResponse } = useFileCheckoutStore()
+const { fileCheckoutResponse } = usePrefetchStore()
 </script>

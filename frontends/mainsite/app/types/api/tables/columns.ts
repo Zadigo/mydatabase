@@ -1,16 +1,8 @@
+import { columnType } from '~/constants/columns'
+
 export type DefaultColumnOption = 'visible' | 'editable' | 'sortable' | 'searchable'
 
 export type ColumnOptions = { name: string, columnType: ColumnType } & { [K in DefaultColumnOption]: boolean }
-
-export const columnType = [
-  'String',
-  'Number',
-  'Boolean',
-  'Date',
-  'DateTime',
-  'Array',
-  'Dict'
-] as const
 
 export type ColumnType = typeof columnType[number]
 

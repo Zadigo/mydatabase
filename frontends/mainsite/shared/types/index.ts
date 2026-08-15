@@ -13,3 +13,24 @@ export const NewTableSchema = z.object({
 })
 
 export type NewTable = z.infer<typeof NewTableSchema>
+
+// export const ColumnTypeSchema = z.object({
+//   name: z.string(),
+//   newName: z.string(),
+//   columnType: z.enum('')
+// })
+
+// export const NewDocumentSchema = z.object({
+//   name: z.string().nullish(),
+//   using_columns: ,
+//   documents: z.array(
+//     z.object({
+//       name: z.string().min(2),
+//       url: z.string().nullish(),
+//       file: z.file().nullish(),
+//       entry_key: z.string().nullish()
+//     })
+//   )
+// })
+
+// export type NewDocument = z.infer<typeof NewDocumentSchema>

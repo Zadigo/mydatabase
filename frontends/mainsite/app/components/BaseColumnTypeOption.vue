@@ -8,8 +8,11 @@
       </nuxt-checkbox>
     </div>
 
+    <!-- Name -->
     <nuxt-input v-model="editedColumn.name" class="col-span-3" disabled />
+    <!-- New Name -->
     <nuxt-input v-model="editedColumn.newName" class="col-span-3" />
+    <!-- Column Type -->
     <nuxt-select v-model="editedColumn.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
 
     <div class="col-span-1">
