@@ -3,13 +3,13 @@ def create_column_type_options(columns: list[str]):
     such uniqueness or nullity or the type of data it holds"""
     return [
         {
-                'name': column,
-                'newName': column,
-                'columnType': 'String',
-                'unique': False,
-                'nullable': True
-            } for column in columns
-        ]
+            'name': column,
+            'newName': column,
+            'columnType': 'String',
+            'unique': False,
+            'nullable': True
+        } for column in columns
+    ]
 
 
 def create_column_options(columns: list[str]):
@@ -18,13 +18,13 @@ def create_column_options(columns: list[str]):
     other functionalities on specific given columns"""
     return [
         {
-                'name': column,
-                'visible': True,
-                'editable': True,
-                'sortable': True,
-                'searchable': True
-            } for column in columns
-            ]
+            'name': column,
+            'visible': True,
+            'editable': True,
+            'sortable': True,
+            'searchable': True
+        } for column in columns
+    ]
 
 
 def user_preference_column_options(columns: list[str]):

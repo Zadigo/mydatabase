@@ -7,11 +7,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from dbtables.models import DatabaseTable
-
-# from django.core.files.base import ContentFile
-# from django.test import TransactionTestCase
-# from django.urls import reverse
-# from dbtables.models import DatabaseTable
+from dbtables.tests.constants import OPENDATASOFT_COLUMN_TYPES, OPENDATASOFT_URL
 from dbtables.tests.utils import DatabaseTableFactory
 from djangobackend.huey_app import huey_task
 
@@ -119,100 +115,11 @@ URL_DATA = pytest.mark.parametrize(
             'description': 'One document points to a valid JSON file',
             'data': {
                 'name': '',
-                'using_columns': [
-                    {
-                        'name': 'numero',
-                        'newName': 'numero',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'etat',
-                        'newName': 'etat',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'date_de_1er_montage',
-                        'newName': 'date_de_1er_montage',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'type_panneau',
-                        'newName': 'type_panneau',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'affichage',
-                        'newName': 'affichage',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'adresse_emplacement',
-                        'newName': 'adresse_emplacement',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'details_emplacements',
-                        'newName': 'details_emplacements',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'code_postal',
-                        'newName': 'code_postal',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'commune',
-                        'newName': 'commune',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'coordonnees_gps',
-                        'newName': 'coordonnees_gps',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    },
-                    {
-                        'name': 'street_view',
-                        'newName': 'street_view',
-                        'columnType': 'String',
-                        'unique': False,
-                        'nullable': True,
-                        'visible': True,
-                    }
-                ],
+                'using_columns': OPENDATASOFT_COLUMN_TYPES,
                 'documents': [
                     {
                         'name': 'Open Data',
-                        'url': 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/panneaux4x3-feuille1@issy-les-moulineaux/records?limit=5',
+                        'url': OPENDATASOFT_URL,
                         'file': None,
                         'entry_key': 'results',
                         'source_type': 'url',
@@ -223,13 +130,6 @@ URL_DATA = pytest.mark.parametrize(
                 'merge': False
             }
         }
-        # {
-        #     'expected_status': 201,
-        #     'description': 'url points to a valid CSV file',
-        #     'data': {
-        #         'url': 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/panneaux4x3-feuille1@issy-les-moulineaux/records?limit=5'
-        #     }
-        # }
     ]
 )
 

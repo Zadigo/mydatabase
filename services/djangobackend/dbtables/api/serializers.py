@@ -135,7 +135,7 @@ class UploadFileSerializer(serializers.Serializer):
         default=False
     )
 
-    def _upload_with_file(self, document: TableDocument, **kwargs: str):
+    def _upload_with_file(self, **kwargs: str):
         request: HttpRequest = self._context['request']
         file = request.FILES.get('file', None)
 
@@ -147,19 +147,18 @@ class UploadFileSerializer(serializers.Serializer):
 
             params = {
                 'data': file_content,
-                'document_id': document.pk,
                 'column_type_json': []
             }
 
-            if document['content_type'] == 'csv':
+            if kwargs['content_type'] == 'csv':
                 django_tasks.create_csv_file_from_data(**params)
 
-            if document['content_type'] == 'json':
-                params['entry_key'] = document['entry_key']
+            if kwargs['content_type'] == 'json':
+                params['entry_key'] = kwargs['entry_key']
                 django_tasks.create_json_file_from_data(**params)
 
 
-    def _upload_with_url(self, document: TableDocument, **kwargs: str):
+    def _upload_with_url(self, url: str, **kwargs: str):
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -170,9 +169,8 @@ class UploadFileSerializer(serializers.Serializer):
             headers['Content-Type'] = 'text/csv'
             headers['Accept'] = 'text/csv'
 
-        entry_key = kwargs.get('entry_key', None)
-        using_columns = kwargs.get('using_columns', None)
-        django_tasks.create_csv_from_url(document.url, entry_key=entry_key, using_columns=using_columns, headers=headers)
+        kwargs['headers'] = headers
+        django_tasks.create_csv_from_url(url, **kwargs)
 
     def validate(self, data: dict):
         name: str = data.get('name')
@@ -204,16 +202,21 @@ class UploadFileSerializer(serializers.Serializer):
             if file is None and url is None:
                 raise ValidationError(f'Both file and url cannot be None for document: {i}')
 
-            instance = TableDocument.objects.create(**params)
-            table.documents.add(instance)
-            instances.append(instance)
+            # instance = TableDocument.objects.create(**params)
+            # table.documents.add(instance)
+            # instances.append(instance)
 
             if source_type == 'file':
-                self._upload_with_file(instance)
+                self._upload_with_file(
+                    entry_key=entry_key,
+                    content_type=content_type,
+                    using_columns=using_columns,
+                )
 
             if source_type == 'url':
                 self._upload_with_url(
-                    instance, 
+                    url,
+                    name = params.get('name', None),
                     entry_key=entry_key, 
                     content_type=content_type,
                     using_columns=using_columns,

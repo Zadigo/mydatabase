@@ -16,6 +16,7 @@ from gspread.exceptions import APIError
 from gspread.utils import rowcol_to_a1
 
 from dbschemas.models import DatabaseProvider
+from dbtables.models import DatabaseTable
 from djangobackend.huey_app import huey_task
 from tabledocuments.logic.utils import (
     clean_user_column_type_options,
@@ -151,15 +152,10 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
             if 'error' in data:
                 return data
 
-            try:
-                data = data[entry_key]
-            except KeyError:
-                string_data = json.dumps(data)
-                # logger.error(
-                #     f'Entry key {entry_key} not found '
-                #     f'in data: {string_data[:100]}...'
-                # )
-                return
+            if entry_key is not None:
+                tokens: list[str] = entry_key.split('.')
+                for token in tokens:
+                    data = data['data'].get(token, {})
 
         if isinstance(data, list):
             df = create_dataframe(data, column_type_options)
@@ -178,6 +174,12 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
         # column_options, column_types and column_names
         t1 = update_document_options.s(str(document.document_uuid), column_type_options)
         huey_task.enqueue(t1)
+
+        date = str(datetime.datetime.now(tz=pytz.UTC))
+        cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
+
+        raw_data = df.to_csv(index=False, encoding='utf-8', doublequote=True)
+        document = Document(cache_key, raw_data, metadata={'date': date})
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
@@ -261,7 +263,7 @@ def prefetch_data_from_url(url: str, **params):
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
-def create_csv_from_url(url: str, entry_key: str | None = None, using_columns: list[dict] | None = None, headers: dict[str, str] | None = None) -> tuple[str, dict | list]:
+def create_csv_from_url(url: str, **kwargs) -> tuple[str, dict | list]:
     """Task used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv
     database file
@@ -272,44 +274,74 @@ def create_csv_from_url(url: str, entry_key: str | None = None, using_columns: l
         using_columns (list[dict], optional): A list of columns to include in the resulting CSV file. Defaults to None.
         headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to None.
     """
+    cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
+
+    name: str = kwargs.get('name', cache_key)
+    entry_key: str = kwargs.get('entry_key', None)
+    using_columns: list[dict] | None = kwargs.get('using_columns')
+    headers: dict[str, str] | None = kwargs.get('headers', {})
+    table_id: int | None = kwargs.get('table_id', None)
+
+    try:
+        table = DatabaseTable.objects.get(id=table_id)
+    except DatabaseTable.DoesNotExist:
+        return
+
+    template = {'cache_key': '', 'data': None, 'errors': []}
+
     response = prefetch_data_from_url(url, headers=headers or {})
     data: dict = response.get()
 
     if data['errors']:
-        return data['errors']
+        return template | data
 
-    if entry_key is not None:
-        tokens: list[str] = entry_key.split('.')
-        for token in tokens:
-            data = data['data'].get(token, {})
+    # if entry_key is not None:
+    #     tokens: list[str] = entry_key.split('.')
+    #     for token in tokens:
+    #         data = data['data'].get(token, {})
 
-    df = create_dataframe(data, using_columns or [])
+    if using_columns is None:
+        return template | {'errors': ['No columns provided for CSV creation.']}
 
-    date = str(datetime.datetime.now(tz=pytz.UTC))
-    cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
-    document = Document(cache_key, df, metadata={'url': url, 'date': date})
+    # df = create_dataframe(data, using_columns)
 
-    # Convert the content of the dataframe to a CSV content
-    str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
+    # date = str(datetime.datetime.now(tz=pytz.UTC))
+    # document = Document(cache_key, df, metadata={'url': url, 'date': date})
 
-    name = get_random_string(8)
-    content_file = ContentFile(str_data, name=f'{cache_key}.csv')
+    # # Convert the content of the dataframe to a CSV content
+    # str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
 
-    # Create the document
+    # name = get_random_string(8)
+    # content_file = ContentFile(str_data, name=f'{cache_key}.csv')
+
+    # # Create the document
     instance = TableDocument.objects.create(name=name)
-    instance.file = content_file
     instance.url = url
     instance.save()
+
+    table.documents.add(instance)
+
+    # instance.file = content_file
+    # instance.save()
+
+    # Create a task to create the CSV file from 
+    # the data and store it in the document
+    t1 = create_json_file_from_data.s(
+        data=data,
+        document_id=instance.id,
+        entry_key=entry_key,
+        column_type_options=using_columns
+    )
+    huey_task.enqueue(t1)
 
     update_document_options.schedule(
         args=(
             str(instance.document_uuid),
-            create_column_options(document.content.columns.tolist())
+            using_columns
         ),
-        delay=20,
+        delay=10,
         priority=50
     )
 
     return {'cache_key': cache_key, 'data': data}
     
-    # logger.warning(f"Successfully create file: {name}")
