@@ -5,6 +5,7 @@ import pytest
 
 from dbschemas.tests.utils import add_provider_credentials
 from dbtables.tests.utils import DatabaseTableFactory
+from djangobackend.huey_app import huey_task
 from tabledocuments import django_tasks
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.utils import (
@@ -19,6 +20,17 @@ from tabledocuments.validation_models import ColumnOption
 def db():
     return create_file_based_instance()
 
+
+def test_prefetch_data_from_url():
+    huey_task.immediate = True
+    url='https://jsonplaceholder.typicode.com/posts'
+
+    result = django_tasks.prefetch_data_from_url(url)
+    data = result.get()
+
+    assert len(data['errors']) == 0
+    assert data['data'] is not None
+    assert isinstance(data['data'], (list, dict))
 
 
 class TestUpdateDocumentOptions:

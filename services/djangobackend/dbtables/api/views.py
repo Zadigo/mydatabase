@@ -81,12 +81,12 @@ class UploadNewDocument(CreateAPIView):
         headers = self.get_success_headers(serializer.data)
 
         response_serializer = SimpleDocumentSerializer(
-            instance=serializer.instance
+            instance=serializer.instance,
+            many=True
         )
         
         template = {
-            'id': response_serializer.data.get('id'), 
-            'document_uuid': response_serializer.data.get('document_uuid')
+            'documents': response_serializer.data
         }
         return Response(template, status=status.HTTP_201_CREATED, headers=headers)
 

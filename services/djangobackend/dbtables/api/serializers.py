@@ -37,14 +37,22 @@ class DatabaseTableSerializer(serializers.ModelSerializer):
 
 class _ValidateColumnTypes(serializers.Serializer):
     name = fields.CharField()
-    newName = fields.CharField()
+    newName = fields.CharField(
+        allow_null=True
+    )
     columnType = fields.ChoiceField(
         choices=ColumnTypes.choices,
         default=ColumnTypes.STRING
     )
-    unique = fields.BooleanField(default=False)
-    visible = fields.BooleanField(default=True)
-    nullable = fields.BooleanField(default=True)
+    unique = fields.BooleanField(
+        default=False
+    )
+    visible = fields.BooleanField(
+        default=True
+    )
+    nullable = fields.BooleanField(
+        default=True
+    )
 
     def validate_new_name(self, value):
         # Name should not contain special
@@ -103,20 +111,31 @@ class UploadFileSerializer(serializers.Serializer):
     case of using an url, the user can indicate an entry key that
     will be used to get the actual data nested in the JSON response."""
 
+    # new_documents = SimpleDocumentSerializer(
+    #     many=True, 
+    #     read_only=True
+    # )
     name = serializers.CharField(
-        max_length=255
+        write_only=True,
+        allow_blank=True,
+        allow_null=True,
+        max_length=255,
+        help_text='Name used in case the user wants to merge the documents. This will be the unified name of the document.'
     )
     using_columns = _ValidateColumnTypes(
+        write_only=True,
         many=True
     )
     documents = _ValidateDocuments(
+        write_only=True,
         many=True
     )
     merge = serializers.BooleanField(
+        write_only=True,
         default=False
     )
 
-    def _upload_with_file(self, table: TableDocument, document: dict):
+    def _upload_with_file(self, document: TableDocument, **kwargs: str):
         request: HttpRequest = self._context['request']
         file = request.FILES.get('file', None)
 
@@ -140,46 +159,67 @@ class UploadFileSerializer(serializers.Serializer):
                 django_tasks.create_json_file_from_data(**params)
 
 
-    def _upload_with_url(self, table: TableDocument, document: dict):
+    def _upload_with_url(self, document: TableDocument, **kwargs: str):
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }            
 
-        if document['content_type'] == 'csv':
+        content_type = kwargs.get('content_type', None)
+        if content_type  == 'csv':
             headers['Content-Type'] = 'text/csv'
             headers['Accept'] = 'text/csv'
 
-        django_tasks.create_csv_from_url(document['url'], headers=headers)
+        entry_key = kwargs.get('entry_key', None)
+        using_columns = kwargs.get('using_columns', None)
+        django_tasks.create_csv_from_url(document.url, entry_key=entry_key, using_columns=using_columns, headers=headers)
 
     def validate(self, data: dict):
         name: str = data.get('name')
         data['name'] = name.lower().title()
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, dict | str | list]):
         request: HttpRequest = self._context['request']
         table_id = request.parser_context['kwargs']['pk']
 
         table = DatabaseTable.objects.get(id=table_id)
 
-        documents = validated_data.pop('documents')
-        for i, document in enumerate(documents):
-            file = document.get('file', None)
-            url = document.get('url', None)
+        using_columns = validated_data['using_columns']
+        instances: list[TableDocument] = []
+
+        if validated_data['merge']:
+            return
+
+        documents: list[dict] = validated_data.pop('documents')
+        for i, params in enumerate(documents):
+            url = params.get('url', None)
+
+            file = params.pop('file', None)
+            entry_key = params.pop('entry_key', None)
+            source_type = params.pop('source_type')
+            content_type = params.pop('content_type')
+            primary_key_field = params.pop('primary_key_field')
 
             if file is None and url is None:
                 raise ValidationError(f'Both file and url cannot be None for document: {i}')
 
-            document = TableDocument.objects.create(**validated_data)
-            table.documents.add(document)
+            instance = TableDocument.objects.create(**params)
+            table.documents.add(instance)
+            instances.append(instance)
 
-            source_type = document.get('source_type')
             if source_type == 'file':
-                self._upload_with_file(table, document)
+                self._upload_with_file(instance)
 
             if source_type == 'url':
-                self._upload_with_url(table, document)
+                self._upload_with_url(
+                    instance, 
+                    entry_key=entry_key, 
+                    content_type=content_type,
+                    using_columns=using_columns,
+                )
+
+        return instances
 
 
 

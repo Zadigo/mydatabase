@@ -241,39 +241,54 @@ def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str:
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('prefetch_data_from_url', 100, 30)
 def prefetch_data_from_url(url: str, **params):
-    with httpx2.Client(url) as client:
+    with httpx2.Client() as client:
+        template = {'data': None, 'errors': []}
+
         try:
             response = client.get(url, **params)
             response.raise_for_status()
         except httpx2.RequestError as e:
-            return None, [str(e)]
+            template['errors'] = [str(e)]
+            return template
         else:
             if response.status_code != 200:
-                return None, [f"Failed to load document. Status code: {response.status_code}"]
+                template['errors'] = [f"Failed to load document. Status code: {response.status_code}"]
+                return template
 
-            return response, []
+            template['data'] = response.json()
+            return template
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
-def create_csv_from_url(url: str, headers: dict[str, str] = {}) -> tuple[str, dict | list]:
+def create_csv_from_url(url: str, entry_key: str | None = None, using_columns: list[dict] | None = None, headers: dict[str, str] | None = None) -> tuple[str, dict | list]:
     """Task used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv
     database file
     
     Args:
-
+        url (str): The URL of the API endpoint to fetch data from.
+        entry_key (str, optional): The key to extract data from the JSON response. Defaults to None.
+        using_columns (list[dict], optional): A list of columns to include in the resulting CSV file. Defaults to None.
+        headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to None.
     """
-    data, errors = prefetch_data_from_url(url, headers=headers)
- 
-    if errors is not None:
-        pass 
+    response = prefetch_data_from_url(url, headers=headers or {})
+    data: dict = response.get()
 
-    df = create_dataframe(data)
+    if data['errors']:
+        return data['errors']
+
+    if entry_key is not None:
+        tokens: list[str] = entry_key.split('.')
+        for token in tokens:
+            data = data['data'].get(token, {})
+
+    df = create_dataframe(data, using_columns or [])
 
     date = str(datetime.datetime.now(tz=pytz.UTC))
     cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
     document = Document(cache_key, df, metadata={'url': url, 'date': date})
+
     # Convert the content of the dataframe to a CSV content
     str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
 
@@ -295,6 +310,6 @@ def create_csv_from_url(url: str, headers: dict[str, str] = {}) -> tuple[str, di
         priority=50
     )
 
-    return cache_key, data
+    return {'cache_key': cache_key, 'data': data}
     
     # logger.warning(f"Successfully create file: {name}")

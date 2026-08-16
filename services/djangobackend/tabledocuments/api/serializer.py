@@ -49,7 +49,6 @@ class UpdateColumnTypesSerializer(serializers.Serializer):
         return instance
 
 
-
 class UpdateDocumentSerializer(serializers.ModelSerializer):
     """A serializer that returns the document details *without*
     the data it contains. It returns only metadata about the document."""

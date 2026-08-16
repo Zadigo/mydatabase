@@ -22,9 +22,12 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
     filtering visible columns, enforcing unique columns
     
     Args:
-    
-    """
+        clean_data (list[dict[str, Any] | list[Any]]): The cleaned data to create the dataframe from.
+        column_options (list[dict[str, str | bool]]): The column options to apply to the dataframe.
 
+    Returns:
+        pandas.DataFrame: The created dataframe after applying the column options.
+    """
     def boolean_converter(value):
         if value is None:
             return value
@@ -50,6 +53,8 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
         columns=all_column_names
     )
 
+    # For each column, apply the type 
+    # conversion based on the column options
     for column in column_options:
         column_name = column['name']
         item_series = df[column_name]
