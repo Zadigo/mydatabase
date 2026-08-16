@@ -1,13 +1,17 @@
 import csv
+import datetime
 import json
 from typing import Any
 
 import gspread
+import httpx2
 import pandas
+import pytz
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
+from django.utils.crypto import get_random_string
 from gspread.exceptions import APIError
 from gspread.utils import rowcol_to_a1
 
@@ -19,10 +23,12 @@ from tabledocuments.logic.utils import (
     create_column_type_options,
 )
 from tabledocuments.models import TableDocument
-from tabledocuments.utils import create_dataframe
+from tabledocuments.utils import Document
+from tabledocuments.utils.constants import DOCUMENT_CACHE_KEY_PREFIX
+from tabledocuments.utils.file_manipulation import create_dataframe
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60)
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=10)
 def update_document_options(document_uuid: str, column_type_options: list[dict[str, str | bool]] | None = None, from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
@@ -63,7 +69,7 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
     # )
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60)
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_file_from_data', 100, 60)
 def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] | None = None):
     if data is None or data == '':
@@ -112,7 +118,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_type_opt
         huey_task.enqueue(t1)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60)
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_json_file_from_data', 100, 60)
 def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: list[dict[str, Any]] = []):
     if data is None or data == '':
@@ -174,7 +180,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
         huey_task.enqueue(t1)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60)
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
 def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str:
     """Loads data from a Google Sheet using a service account and sheet ID and
@@ -230,3 +236,65 @@ def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str:
 
             df = pandas.DataFrame(records, columns=headers)
             return df.to_csv(index=False, encoding='utf-8', doublequote=True)
+
+
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.rate_limit('prefetch_data_from_url', 100, 30)
+def prefetch_data_from_url(url: str, **params):
+    with httpx2.Client(url) as client:
+        try:
+            response = client.get(url, **params)
+            response.raise_for_status()
+        except httpx2.RequestError as e:
+            return None, [str(e)]
+        else:
+            if response.status_code != 200:
+                return None, [f"Failed to load document. Status code: {response.status_code}"]
+
+            return response, []
+
+
+@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
+def create_csv_from_url(url: str, headers: dict[str, str] = {}) -> tuple[str, dict | list]:
+    """Task used to load the content of document returned via an API endpoint
+    as a json format. The content will be loaded and transformed back to a csv
+    database file
+    
+    Args:
+
+    """
+    data, errors = prefetch_data_from_url(url, headers=headers)
+ 
+    if errors is not None:
+        pass 
+
+    df = create_dataframe(data)
+
+    date = str(datetime.datetime.now(tz=pytz.UTC))
+    cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
+    document = Document(cache_key, df, metadata={'url': url, 'date': date})
+    # Convert the content of the dataframe to a CSV content
+    str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
+
+    name = get_random_string(8)
+    content_file = ContentFile(str_data, name=f'{cache_key}.csv')
+
+    # Create the document
+    instance = TableDocument.objects.create(name=name)
+    instance.file = content_file
+    instance.url = url
+    instance.save()
+
+    update_document_options.schedule(
+        args=(
+            str(instance.document_uuid),
+            create_column_options(document.content.columns.tolist())
+        ),
+        delay=20,
+        priority=50
+    )
+
+    return cache_key, data
+    
+    # logger.warning(f"Successfully create file: {name}")

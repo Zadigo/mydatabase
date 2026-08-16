@@ -24,7 +24,7 @@ from tabledocuments.logic.utils import (
     create_column_type_options,
 )
 from tabledocuments.models import TableDocument
-from tabledocuments.utils import create_dataframe
+from tabledocuments.utils.file_manipulation import create_dataframe
 
 logger = get_task_logger(__name__)
 

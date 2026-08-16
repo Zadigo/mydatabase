@@ -1,36 +1,30 @@
 def create_column_type_options(columns: list[str]):
     """Function that constrains the types of the column
     such uniqueness or nullity or the type of data it holds"""
-    return list(
-        map(
-            lambda column: {
+    return [
+        {
                 'name': column,
                 'newName': column,
                 'columnType': 'String',
                 'unique': False,
                 'nullable': True
-            },
-            columns
-        )
-    )
+            } for column in columns
+        ]
 
 
 def create_column_options(columns: list[str]):
     """Function that creates column options that is used
     in the frontend to toggle visibility, editability or
     other functionalities on specific given columns"""
-    return list(
-        map(
-            lambda column: {
+    return [
+        {
                 'name': column,
                 'visible': True,
                 'editable': True,
                 'sortable': True,
                 'searchable': True
-            },
-            columns
-        )
-    )
+            } for column in columns
+            ]
 
 
 def user_preference_column_options(columns: list[str]):

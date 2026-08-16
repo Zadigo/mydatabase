@@ -1,12 +1,15 @@
 import re
 
+from django.http.request import HttpRequest
 from rest_framework import fields, serializers
 from rest_framework.exceptions import ValidationError
 
 from dbschemas.models import DatabaseSchema
 from dbtables.models import DatabaseTable
+from tabledocuments import django_tasks
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.choices import ColumnTypes
+from tabledocuments.models import TableDocument
 
 
 class DatabaseTableSerializer(serializers.ModelSerializer):
@@ -95,7 +98,6 @@ class _ValidateDocuments(serializers.Serializer):
         return attrs
 
 
-
 class UploadFileSerializer(serializers.Serializer):
     """Serializer used to validate file uploads. In the specific
     case of using an url, the user can indicate an entry key that
@@ -114,10 +116,72 @@ class UploadFileSerializer(serializers.Serializer):
         default=False
     )
 
+    def _upload_with_file(self, table: TableDocument, document: dict):
+        request: HttpRequest = self._context['request']
+        file = request.FILES.get('file', None)
+
+        if file is not None:
+            file_content = ''
+
+            for chunk in file.chunks():
+                file_content += chunk.decode('utf-8')
+
+            params = {
+                'data': file_content,
+                'document_id': document.pk,
+                'column_type_json': []
+            }
+
+            if document['content_type'] == 'csv':
+                django_tasks.create_csv_file_from_data(**params)
+
+            if document['content_type'] == 'json':
+                params['entry_key'] = document['entry_key']
+                django_tasks.create_json_file_from_data(**params)
+
+
+    def _upload_with_url(self, table: TableDocument, document: dict):
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }            
+
+        if document['content_type'] == 'csv':
+            headers['Content-Type'] = 'text/csv'
+            headers['Accept'] = 'text/csv'
+
+        django_tasks.create_csv_from_url(document['url'], headers=headers)
+
     def validate(self, data: dict):
         name: str = data.get('name')
         data['name'] = name.lower().title()
         return data
+
+    def create(self, validated_data):
+        request: HttpRequest = self._context['request']
+        table_id = request.parser_context['kwargs']['pk']
+
+        table = DatabaseTable.objects.get(id=table_id)
+
+        documents = validated_data.pop('documents')
+        for i, document in enumerate(documents):
+            file = document.get('file', None)
+            url = document.get('url', None)
+
+            if file is None and url is None:
+                raise ValidationError(f'Both file and url cannot be None for document: {i}')
+
+            document = TableDocument.objects.create(**validated_data)
+            table.documents.add(document)
+
+            source_type = document.get('source_type')
+            if source_type == 'file':
+                self._upload_with_file(table, document)
+
+            if source_type == 'url':
+                self._upload_with_url(table, document)
+
+
 
     # def create(self, validated_data):
     #     request: Request = self._context['request']

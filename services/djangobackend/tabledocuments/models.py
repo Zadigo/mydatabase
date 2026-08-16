@@ -7,7 +7,7 @@ from django.db.models.constraints import CheckConstraint
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
-from tabledocuments.utils import upload_file_to, validate_file
+from tabledocuments.utils.model_utils import upload_file_to, validate_file
 
 
 class TableDocument(models.Model):

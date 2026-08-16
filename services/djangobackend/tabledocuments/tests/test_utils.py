@@ -2,7 +2,7 @@ import pandas
 from django.test import TestCase
 
 from tabledocuments.tests.utils import build_column_options
-from tabledocuments.utils import create_dataframe
+from tabledocuments.utils.file_manipulation import create_dataframe
 from tabledocuments.validation_models import ColumnOption, ColumnTypes
 
 

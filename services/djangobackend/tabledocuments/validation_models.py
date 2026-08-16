@@ -1,7 +1,8 @@
-from pydantic.fields import Field
-from pydantic import BaseModel
-from typing import Annotated, Optional
 import enum
+from typing import Annotated
+
+from pydantic import BaseModel
+from pydantic.fields import Field
 
 
 class ColumnTypes(enum.Enum):
@@ -14,7 +15,7 @@ class ColumnTypes(enum.Enum):
 
 class ColumnOption(BaseModel):
     name: str
-    newName: Optional[str] = None
+    newName: str | None = None
     columnType: Annotated[ColumnTypes, Field(default=ColumnTypes.STRING.value)]
     unique: Annotated[bool, Field(default=False)]
     visible: Annotated[bool, Field(default=True)]

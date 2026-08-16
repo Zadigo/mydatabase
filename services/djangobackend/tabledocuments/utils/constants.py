@@ -1,0 +1,5 @@
+DOCUMENT_CACHE_KEY_PREFIX = 'document_{name}'
+
+DOCUMENT_CACHE_KEY_TRANSFORMED_SUFFIX = '{name}-transformed'
+
+RAW_DOCUMENT_CACHE_KEY_SUFFIX = '{name}-raw'

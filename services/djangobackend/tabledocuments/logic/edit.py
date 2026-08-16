@@ -1,10 +1,11 @@
 import dataclasses
 import datetime
 import re
+import warnings
 from collections.abc import Callable
 from typing import Any
 
-import httpx
+import httpx2
 import pandas
 import pytz
 from channels.db import database_sync_to_async
@@ -42,14 +43,15 @@ class Document:
         return hash(self.document_cache_key)
 
 
+@warnings.deprecated('Use huey task for fetching')
 async def load_document_by_url(url: str, **request_params: Any) -> tuple[Response | None, list[str]]:
     """Function used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv database file"""
-    async with httpx.AsyncClient() as client:
+    async with httpx2.AsyncClient() as client:
         try:
             response = await client.get(url, **request_params)
             response.raise_for_status()
-        except httpx.RequestError as e:
+        except httpx2.RequestError as e:
             return None, [str(e)]
         else:
             if response.status_code != 200:
@@ -187,6 +189,7 @@ class DocumentEdition:
 
         return True, await self.clean(df)
 
+    @warnings.deprecated('Use huey task to process file data')
     async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
         """Function used to load the content of document returned via an API endpoint
         as a json format. The content will be loaded and transformed back to a csv database file.
