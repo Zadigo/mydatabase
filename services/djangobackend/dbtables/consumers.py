@@ -1,8 +1,8 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from dbtables.models import DatabaseTable
-from dbtables.utils import ValidateWebsocketMessage
 from djangobackend.consumer_mixins import BaseConsumerMixin
+from djangobackend.validators import ValidateWebsocketMessage
 
 
 class TableCreationConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):

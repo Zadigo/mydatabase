@@ -1,5 +1,6 @@
-from dbtables.tests.mixins import ConsumerMixin
-from dbtables.utils import TableWebSocketActions
+from dbtables.choices import TableWebSocketActions
+from dbtables.tests.utils import ConsumerMixin
+
 
 class TestTableCreationConsumer(ConsumerMixin):
     async def test_websocket_connection(self):
