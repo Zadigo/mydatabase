@@ -1,8 +1,6 @@
 import json
-from typing import Generic, TypeVar
 
 from django.shortcuts import get_object_or_404
-from endpoints.api.serializers import PublicApiEndpointSerializer
 from rest_framework import serializers, status
 from rest_framework.generics import (
     CreateAPIView,
@@ -20,11 +18,10 @@ from dbschemas.api.serializers import (
     ValidateIntegrationSerializer,
 )
 from dbschemas.models import DatabaseProvider, DatabaseSchema
+from endpoints.api.serializers import PublicApiEndpointSerializer
 
-T = TypeVar('T', bound=GenericAPIView)
 
-
-class QuerysetMixin(Generic[T]):
+class QuerysetMixin[T]:
     def get_queryset(self):
         qs = super().get_queryset()
         return qs.filter(user=self.request.user)
