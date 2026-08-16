@@ -55,7 +55,7 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
         item_series = df[column_name]
         column_type = column['columnType']
 
-        print(f"Processing column: {column_name} with type {column_type}")
+        # print(f"Processing column: {column_name} with type {column_type}")
 
         if column_type == ColumnTypes.STRING.value or column_type == ColumnTypes.STRING:
             df[column_name] = item_series.astype(str)

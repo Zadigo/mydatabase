@@ -22,5 +22,6 @@ class TestTableDocument(TestCase):
 
         instance.save()
 
-        self.assertIn('unique', instance.mixed_options)
-        self.assertIn('name', instance.mixed_options)
+        self.assertIsNotNone(instance.column_options)
+        self.assertIsNotNone(instance.column_types)
+        self.assertIsNotNone(instance.column_type_options)

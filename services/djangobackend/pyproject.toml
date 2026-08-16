@@ -65,6 +65,7 @@ reportMissingImports = true
 reportUntypedBaseClass = true
 
 [tool.pytest]
+testpaths = ["tests"]
 timeout="5000"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",

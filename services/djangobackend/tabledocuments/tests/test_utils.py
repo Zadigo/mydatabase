@@ -11,9 +11,18 @@ class TestCreateDataframe(TestCase):
         self.data = [
             {
                 'firstname': 'Jane',
-                'lastname': 'Doe'
+                'lastname': 'Doe',
+                'is_active': 'true',
+                'meta': '{"age": 30, "city": "New York"}'
             }
         ]
+
+    def test_with_empty_data(self):
+        column_options = build_column_options('firstname', 'lastname')
+
+        df = create_dataframe([], column_options)
+        self.assertIsInstance(df, pandas.DataFrame)
+        self.assertEqual(len(df), 0)
 
     def test_simple_creation(self):
         column_options = build_column_options('firstname', 'lastname')
