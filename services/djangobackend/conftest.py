@@ -1,5 +1,6 @@
 import pathlib
 
+import pytest
 from django.conf import settings
 from faker import Faker
 
@@ -59,3 +60,10 @@ def pytest_configure(config):
             STATIC_URL='/static/',
             MEDIA_ROOT=BASE_DIR / 'media',
         )
+
+
+@pytest.fixture(scope='session')
+def api_client():
+    from rest_framework.test import APIClient
+    client = APIClient()
+    return client
