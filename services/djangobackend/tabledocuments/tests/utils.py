@@ -24,9 +24,9 @@ class FileBasedTableDocumentFactory(DjangoModelFactory):
     document_uuid = fake.uuid4()
     name = fake.word()
     file = None
-    column_names = []
-    column_options = []
-    column_types = []
+    column_names = ()
+    column_options = ()
+    column_types = ()
     url = None
     google_sheet_id = None
 

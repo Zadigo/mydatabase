@@ -180,7 +180,7 @@ class DocumentEdition:
 
         is_valid, df = await get_document()
 
-        if not is_valid:
+        if not is_valid or df is None:
             return False, None
 
         # Pre-cache the document content here. Does not matter

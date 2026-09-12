@@ -1,5 +1,6 @@
 import csv
 import datetime
+import io
 import json
 from typing import Any
 
@@ -184,7 +185,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
-def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str:
+def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str | None:
     """Loads data from a Google Sheet using a service account and sheet ID and
     returns the values as string.
     
@@ -344,4 +345,71 @@ def create_csv_from_url(url: str, **kwargs) -> tuple[str, dict | list]:
     )
 
     return {'cache_key': cache_key, 'data': data}
-    
+
+
+def append_to_dataframe(document_uuid: str, data_to_append: bytes | str):
+    """Function used to append data to an existing document. The data
+    to append is provided as a CSV string or bytes. The function will load the existing
+    document, merge the data and save it back to the file.
+
+    ### 1. Load the data to append into a dataframe
+    ### 2. Load the existing document into a dataframe
+    """
+    if isinstance(data_to_append, bytes):
+        buffer1 = io.BytesIO(data_to_append)
+    else:
+        buffer1 = io.StringIO(data_to_append)
+
+    df1 = pandas.read_csv(buffer1)
+
+    try:
+        document = TableDocument.objects.get(document_uuid=document_uuid)
+    except TableDocument.DoesNotExist:
+        logger.error(f'Failed to get document with UUID {document_uuid}')
+        return
+
+    df2 = pandas.read_csv(document.file.path)
+
+    # If the documents does not have the same columns,
+    # then do not try to append the documents
+    if df1.columns.tolist() != df2.columns.tolist():
+        logger.warning('Columns mismatch')
+        return
+
+    # 1. Run the before insert functions here on df1
+
+    # 2. Merge the dataframes
+    merged = pandas.concat([df1, df2], ignore_index=True)
+
+    # 3. Run after insert functions here on merged
+
+    # 4. Update the content of the physical file
+    csv_content = merged.to_csv(
+        index=False,
+        encoding='utf-8',
+        doublequote=True
+    )
+    content = ContentFile(csv_content, name=document.file.name)
+
+    # 5. Sync the saved data with the database
+    # providers if required
+
+    document.file.save(f'{document.name}.csv', content)
+    return content
+
+
+def create_csv_from_public_ggoogle_sheet(api_key: str, sheet_id: str, range: str | None = None) -> str:
+    """Loads data from a public Google Sheet using an API key and sheet ID."""
+    instance = gspread.api_key(api_key)
+    sheet = instance.open_by_key(sheet_id)
+
+    # data = sheet.values_get(range or 'A1:B2')
+
+    # sheet.sheet1.add_cols(1)
+    # sheet.sheet1.update('C1', 'New Column')
+
+    # values = data['values']
+    # headers = values.pop(0)
+
+    # df = pandas.DataFrame(values, columns=headers)
+    # return df.to_csv(index=True, index_label='record_id', encoding='utf-8', doublequote=True)
