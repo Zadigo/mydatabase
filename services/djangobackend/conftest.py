@@ -1,6 +1,8 @@
 import pathlib
 
 import pytest
+from channels.routing import URLRouter
+from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from faker import Faker
 
@@ -67,3 +69,18 @@ def api_client():
     from rest_framework.test import APIClient
     client = APIClient()
     return client
+
+
+@pytest.fixture(scope='session')
+async def ws_router():
+    from dbtables import routing as table_routing
+    from tabledocuments import routing as document_routing
+    router = URLRouter(document_routing.urlpatterns + table_routing.urlpatterns)
+    return router
+
+
+@pytest.fixture(scope='session')
+async def ws_documents(ws_router):
+    communicator = WebsocketCommunicator(ws_router, '/ws/databases/1/documents')
+    state, _ = await communicator.connect()
+    return communicator

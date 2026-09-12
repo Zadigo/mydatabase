@@ -57,10 +57,11 @@ dev = [
     "pytest-rabbitmq>=4.0.0",
     "pytest-reportlog>=1.0.0",
     "pytest-timeout>=2.4.0",
+    "ruff>=0.16.7",
 ]
 
 [tool.pyright]
-typeCheckingMode = "off"
+typeCheckingMode = "basic"
 reportMissingImports = true
 reportUntypedBaseClass = true
 

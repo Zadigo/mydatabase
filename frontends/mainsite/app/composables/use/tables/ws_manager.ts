@@ -1,4 +1,4 @@
-import type { SimpleTable, TableDocument } from '~/types'
+import type { SimpleTable, TableDocument } from '#shared/types'
 import type { BaseReceiveWsAction } from '..'
 import { useWebsocketMessage } from '..'
 

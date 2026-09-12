@@ -26,11 +26,15 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
         await self.send_json({'action': 'connected'})
 
         self.database_id = self.scope['url_route']['kwargs']['database_id']
-        await self.channel_layer.group_add(f'database_{self.database_id}', self.channel_name)
+
+        if self.channel_layer is not None:
+            await self.channel_layer.group_add(f'database_{self.database_id}', self.channel_name)
 
     async def disconnect(self, close_code):
         await self.close(code=close_code)
-        await self.channel_layer.group_discard(f'database_{self.database_id}', self.channel_name)
+        
+        if self.channel_layer is not None:
+            await self.channel_layer.group_discard(f'database_{self.database_id}', self.channel_name)
 
     async def receive_json(self, content: dict[str, Any], **kwargs):
         try:

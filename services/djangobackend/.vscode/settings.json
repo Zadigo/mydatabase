@@ -18,7 +18,10 @@
         "--cov-report=html:djangobackend-coverage",
         "--report-log=reports/reports.json",
         "-s",
-        "--reuse-db"
+        "--reuse-db",
+        "-rapP",
+        "--durations=10",
+        "--durations-min=1.0",
     ],
     "python.envFile": "${workspaceFolder}/.env"
 }

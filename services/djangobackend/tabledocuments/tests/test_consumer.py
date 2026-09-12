@@ -1,36 +1,29 @@
-from asgiref.sync import sync_to_async
-
-from djangobackend.tests.mixins import ConsumerMixin
-from tabledocuments.tests.utils import DocumentFactory
+import pytest
 from tabledocuments.utils import WebsocketActions
+from tabledocuments.ws_models import DocumentInfoModel, WsMessageModel
+from tabledocuments.
 
 
-class TestDocumentEditionConsumer(ConsumerMixin):
-    websocket_path = r'^ws/documents$'
-    
-    async def test_connection(self):
-        document = await sync_to_async(DocumentFactory.create)()
+@pytest.mark.django_db
+async def test_load_document_via_id(ws_documents):
+    response = await ws_documents.receive_json_from()
 
-        conn = await self.create_connection()
-        response = await conn.receive_json_from()
+    assert response is not None
+    assert response['action'] == 'connected'
 
-        # Test no action
-        await conn.send_json_to({})
-        response = await conn.receive_json_from()
-        self.assertIn('No action provided', response['message'])
+    model = WsMessageModel(
+        action=WebsocketActions.LOAD_VIA_ID.value,
+        table_id='1',
+        document=DocumentInfoModel(
+            uuid='something',
+            name='Some table'
+        )
+    )
+    await ws_documents.send_json_to(model.model_dump())
 
-        # Test load via ID
-        await conn.send_json_to({
-            'action': WebsocketActions.LOAD_VIA_ID.value,
-            'document': {
-                'id': document.id
-            }
-        })
+    response = await ws_documents.receive_json_from()
 
-        response = await conn.receive_json_from()
+    assert response is not None
+    assert response['action'] == 'loaded_via_id'
 
-        print(response)
-
-        # Checkout Url
-
-        await conn.disconnect()
+    await ws_documents.disconnect()

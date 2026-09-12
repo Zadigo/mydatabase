@@ -8,16 +8,16 @@ from tabledocuments import routing as document_routing
 
 
 class ConsumerMixin(IsolatedAsyncioTestCase):
-    websocket_path = None
+    websocket_path: str | None = None
 
     def setUp(self):
         self.app = URLRouter(document_routing.urlpatterns + table_routing.urlpatterns)
 
     async def create_connection(self):
-        instance = WebsocketCommunicator(
-            self.app,
-            self.websocket_path
-        )
+        if self.websocket_path is None:
+            raise ValueError("websocket_path must be set before creating a connection.")
+        
+        instance = WebsocketCommunicator(self.app, self.websocket_path)
         state, _ = await instance.connect()
 
         self.assertTrue(state)

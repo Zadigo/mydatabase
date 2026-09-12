@@ -1,4 +1,4 @@
-import type { Arrayable, ColumnOptions, ColumnTypeOptions, Empty, Nullable, Undefineable } from '~/types'
+import type { ColumnOptions, ColumnTypeOptions } from '#shared/types'
 
 interface DocumentData {
   document_data: string
