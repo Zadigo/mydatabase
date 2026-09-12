@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from djangobackend.consumer_mixins import BaseConsumerMixin
 from tabledocuments.logic.edit import DocumentEdition, DocumentTransform
 from tabledocuments.utils import WebsocketActions
-from tabledocuments.ws_models import (
+from tabledocuments.validation_models import (
     LoadedViaIdColumns,
     WsMessageModel,
     WsSendMessageModel,

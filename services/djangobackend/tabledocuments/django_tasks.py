@@ -2,6 +2,7 @@ import csv
 import datetime
 import io
 import json
+from collections.abc import Sequence
 from typing import Any
 
 import gspread
@@ -20,18 +21,19 @@ from dbschemas.models import DatabaseProvider
 from dbtables.models import DatabaseTable
 from djangobackend.huey_app import huey_task
 from tabledocuments.logic.utils import (
-    clean_user_column_type_options,
     create_column_options,
     create_column_type_options,
+    resolve_models,
 )
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import Document
 from tabledocuments.utils.constants import DOCUMENT_CACHE_KEY_PREFIX
 from tabledocuments.utils.file_manipulation import create_dataframe
+from tabledocuments.validation_models import ColumnTypeOptionsModel
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=10)
-def update_document_options(document_uuid: str, column_type_options: list[dict[str, str | bool]] | None = None, from_file: bool = False):
+def update_document_options(document_uuid: str, column_type_options: Sequence[dict[str, str | bool | None]] | None = None, from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
     the column names, etc."""
@@ -41,28 +43,29 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
         # logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
+    _column_type_options = column_type_options or []
+
     # If the task is triggered from the admin interface, then we need to
     # load the document from the file to update the column options
     # based on the content of the file. Otherwise, we can directly use the
     # column options provided as arguments when the task is triggered from Nuxt
     if from_file and document.file is not None:
         df = pandas.read_csv(document.file.path)
-        column_type_options = create_column_type_options(df.columns.tolist())
+        _column_type_options = create_column_type_options(df.columns.tolist())
+    else:
+        _column_type_options = [ColumnTypeOptionsModel(**option) for option in _column_type_options]
 
-    document.column_type_options = clean_user_column_type_options(column_type_options)
-    document.column_names = [
-        x['newName'] or x['name']
-            for x in document.column_type_options
-    ]
+    document.column_type_options = resolve_models(_column_type_options)
+    document.column_names = [item.newName or item.name for item in _column_type_options]
 
     column_types = {}
-    for item in document.column_type_options:
-        column_name = item['newName'] or item['name']
-        column_types[column_name] = item['columnType']
+    for item in _column_type_options:
+        column_name = item.newName or item.name
+        column_types[column_name] = item.columnType
 
     document.column_types = column_types
 
-    column_options = create_column_options(document.column_names)
+    column_options = resolve_models(create_column_options(document.column_names))
     document.column_options = column_options
     document.save()
 
@@ -73,7 +76,7 @@ def update_document_options(document_uuid: str, column_type_options: list[dict[s
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_file_from_data', 100, 60)
-def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: list[dict[str, Any]] | None = None):
+def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
         # logger.warning(f'No data provided? Received {data}')
         return
@@ -122,7 +125,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_type_opt
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_json_file_from_data', 100, 60)
-def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: list[dict[str, Any]] = []):
+def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
         # logger.warning(f'No data provided? Received {data}')
         return
@@ -264,7 +267,7 @@ def prefetch_data_from_url(url: str, **params):
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
-def create_csv_from_url(url: str, **kwargs) -> tuple[str, dict | list]:
+def create_csv_from_url(url: str, **kwargs: Any):
     """Task used to load the content of document returned via an API endpoint
     as a json format. The content will be loaded and transformed back to a csv
     database file
@@ -272,14 +275,14 @@ def create_csv_from_url(url: str, **kwargs) -> tuple[str, dict | list]:
     Args:
         url (str): The URL of the API endpoint to fetch data from.
         entry_key (str, optional): The key to extract data from the JSON response. Defaults to None.
-        using_columns (list[dict], optional): A list of columns to include in the resulting CSV file. Defaults to None.
+        using_columns (Sequence[dict], optional): A list of columns to include in the resulting CSV file. Defaults to None.
         headers (dict[str, str], optional): A dictionary of headers to include in the request. Defaults to None.
     """
     cache_key = DOCUMENT_CACHE_KEY_PREFIX.format(name=get_random_string(length=10))
 
     name: str = kwargs.get('name', cache_key)
-    entry_key: str = kwargs.get('entry_key', None)
-    using_columns: list[dict] | None = kwargs.get('using_columns')
+    entry_key: str | None = kwargs.get('entry_key', None)
+    using_columns: Sequence[dict] | None = kwargs.get('using_columns')
     headers: dict[str, str] | None = kwargs.get('headers', {})
     table_id: int | None = kwargs.get('table_id', None)
 
@@ -288,48 +291,29 @@ def create_csv_from_url(url: str, **kwargs) -> tuple[str, dict | list]:
     except DatabaseTable.DoesNotExist:
         return
 
-    template = {'cache_key': '', 'data': None, 'errors': []}
+    template: dict[str, Any] = {'cache_key': '', 'data': None, 'errors': []}
 
     response = prefetch_data_from_url(url, headers=headers or {})
-    data: dict = response.get()
+    data: dict[str, Any] = response.get()
 
     if data['errors']:
         return template | data
 
-    # if entry_key is not None:
-    #     tokens: list[str] = entry_key.split('.')
-    #     for token in tokens:
-    #         data = data['data'].get(token, {})
-
     if using_columns is None:
         return template | {'errors': ['No columns provided for CSV creation.']}
 
-    # df = create_dataframe(data, using_columns)
-
-    # date = str(datetime.datetime.now(tz=pytz.UTC))
-    # document = Document(cache_key, df, metadata={'url': url, 'date': date})
-
-    # # Convert the content of the dataframe to a CSV content
-    # str_data = document.content.to_csv(index=False, encoding='utf-8', doublequote=True)
-
-    # name = get_random_string(8)
-    # content_file = ContentFile(str_data, name=f'{cache_key}.csv')
-
-    # # Create the document
+    # Create the document
     instance = TableDocument.objects.create(name=name)
     instance.url = url
     instance.save()
 
     table.documents.add(instance)
 
-    # instance.file = content_file
-    # instance.save()
-
     # Create a task to create the CSV file from 
     # the data and store it in the document
     t1 = create_json_file_from_data.s(
         data=data,
-        document_id=instance.id,
+        document_id=instance.pk,
         entry_key=entry_key,
         column_type_options=using_columns
     )

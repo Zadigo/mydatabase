@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.utils import DocumentFactory, create_file_based_instance
-from tabledocuments.validation_models import ColumnOption, ColumnTypeOption
+from tabledocuments.validation_models import ColumnOptionsModel, ColumnTypeOptionsModel
 
 
 class TestTableDocument(TestCase):
@@ -14,10 +14,10 @@ class TestTableDocument(TestCase):
     def test_mixed_options(self):
         instance: TableDocument = DocumentFactory.create()
 
-        options = ColumnOption(name='firstname')
+        options = ColumnOptionsModel(name='firstname')
         instance.column_options = [options.model_dump()]
         
-        type_options = ColumnTypeOption(name='firstname')
+        type_options = ColumnTypeOptionsModel(name='firstname')
         instance.column_types = [type_options.model_dump()]
 
         instance.save()

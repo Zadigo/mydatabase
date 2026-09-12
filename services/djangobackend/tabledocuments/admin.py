@@ -1,23 +1,26 @@
 from django.contrib import admin
 from django.contrib.messages import SUCCESS, add_message
+
+from tabledocuments.django_tasks import (
+    create_csv_from_url,
+    huey_task,
+    update_document_options,
+)
 from tabledocuments.models import TableDocument
-from tabledocuments.tasks import (create_csv_file_from_data,
-                                  get_document_from_url,
-                                  update_document_options)
 
 
 @admin.register(TableDocument)
 class TableDocumentsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'file', 'created_at', 'updated_at']
-    list_display_links = ['id', 'name']
-    search_fields = ['name']
+    list_display = ('id', 'name', 'file', 'created_at', 'updated_at')
+    list_display_links = ('id', 'name')
+    search_fields = ('name',)
     list_per_page = 25
-    actions = ['update_document_options', 'refresh_document']
+    actions = ('update_document_options', 'refresh_document')
 
     def update_document_options(self, request, queryset):
         for document in queryset:
             if document.file is not None:
-                update_document_options.apply_async(
+                update_document_options.s(
                     kwargs={
                         'document_uuid': str(document.document_uuid), 
                         'from_file': True
@@ -42,8 +45,5 @@ class TableDocumentsAdmin(admin.ModelAdmin):
                 document.save()
 
             if document.url:
-                get_document_from_url.apply_async(
-                    args=[document.url],
-                    countdown=10,
-                    link=[create_csv_file_from_data.s(document.id, 'results')]
-                )
+                task = create_csv_from_url.s(document.url)
+                huey_task.enqueue(task)

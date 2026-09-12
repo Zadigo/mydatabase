@@ -4,6 +4,8 @@ import pytest
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 from faker import Faker
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
@@ -84,3 +86,32 @@ async def ws_documents(ws_router):
     communicator = WebsocketCommunicator(ws_router, '/ws/databases/1/documents')
     state, _ = await communicator.connect()
     return communicator
+
+
+@pytest.fixture(scope='session')
+def authenticated_client():
+    user_model = get_user_model()
+    user_model.objects.create_user(username='testuser', password='touparet')
+
+    user = user_model.objects.first()
+    if user is None:
+        raise ValueError("User creation failed")
+    
+    if user is not None:
+        user.set_password('touparet')
+        user.save()
+
+    client = APIClient()
+    path = reverse('token_obtain_pair')
+    response = client.post(
+        path, {
+            'username': user.username,
+            'password': 'touparet'
+        }
+    )
+
+    assert response.status_code == 200
+
+    token = response.json()['access']
+    client.headers = {'HTTP_AUTHORIZATION': f'Token {token}'}
+    return client

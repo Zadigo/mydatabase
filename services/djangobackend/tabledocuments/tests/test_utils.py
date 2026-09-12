@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from tabledocuments.tests.utils import build_column_options
 from tabledocuments.utils.file_manipulation import create_dataframe
-from tabledocuments.validation_models import ColumnOption, ColumnTypes
+from tabledocuments.validation_models import ColumnTypeOptionsModel, ColumnTypes
 
 
 class TestCreateDataframe(TestCase):
@@ -71,11 +71,11 @@ class TestCreateDataframe(TestCase):
 
     def test_column_type_check(self):
         options = [
-            ColumnOption(name='firstname', columnType=ColumnTypes.STRING.value),
-            ColumnOption(name='is_tall', columnType=ColumnTypes.BOOLEAN.value),
-            ColumnOption(name='age', columnType=ColumnTypes.NUMBER.value),
-            ColumnOption(name='hobbies', columnType=ColumnTypes.ARRAY.value),
-            ColumnOption(name='profile', columnType=ColumnTypes.DICT.value)
+            ColumnTypeOptionsModel(name='firstname', columnType=ColumnTypes.STRING.value),
+            ColumnTypeOptionsModel(name='is_tall', columnType=ColumnTypes.BOOLEAN.value),
+            ColumnTypeOptionsModel(name='age', columnType=ColumnTypes.NUMBER.value),
+            ColumnTypeOptionsModel(name='hobbies', columnType=ColumnTypes.ARRAY.value),
+            ColumnTypeOptionsModel(name='profile', columnType=ColumnTypes.DICT.value)
         ]
 
         options = [option.model_dump() for option in options]

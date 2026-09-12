@@ -1,9 +1,11 @@
+from collections.abc import Sequence
+
 from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 from faker import Faker as FakerClass
 
 from tabledocuments.models import TableDocument
-from tabledocuments.validation_models import ColumnOption
+from tabledocuments.validation_models import UserSelectedColumnOptionsModel
 
 fake = FakerClass()
 
@@ -47,12 +49,12 @@ def create_file_based_instance() -> TableDocument:
 def build_column_options(
     *columns: str, 
     new_names: dict = {}, 
-    not_visible: list[str] = [], 
-    not_editable: list[str] = [], 
-    not_sortable: list[str] = [], 
-    not_searchable: list[str] = [], 
-    nullable: list[str] = [],
-    unique: list[str] = [],
+    not_visible: Sequence[str] = (), 
+    not_editable: Sequence[str] = (), 
+    not_sortable: Sequence[str] = (), 
+    not_searchable: Sequence[str] = (), 
+    nullable: Sequence[str] = (),
+    unique: Sequence[str] = (),
     **kwargs: bool
 ):
     """Returns a dictionnary of mixed options"""
@@ -69,11 +71,7 @@ def build_column_options(
 
     options = []
     for column in columns:
-
-        instance = ColumnOption(
-            name=column,
-            **default_options
-        )
+        instance = UserSelectedColumnOptionsModel(name=column, **default_options)
 
         instance.visible = column not in not_visible 
         instance.editable = column not in not_editable

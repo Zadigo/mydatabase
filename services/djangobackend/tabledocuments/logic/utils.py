@@ -1,33 +1,36 @@
-def create_column_type_options(columns: list[str]):
+from collections.abc import Sequence
+from typing import Any
+
+from pydantic import BaseModel
+
+from tabledocuments.validation_models import ColumnOptionsModel, ColumnTypeOptionsModel
+
+
+def create_column_type_options(columns: Sequence[str]):
     """Function that constrains the types of the column
     such uniqueness or nullity or the type of data it holds"""
     return [
-        {
-            'name': column,
-            'newName': column,
-            'columnType': 'String',
-            'unique': False,
-            'nullable': True
-        } for column in columns
+        ColumnTypeOptionsModel(name=column, newName=column)
+        for column in columns
     ]
 
 
-def create_column_options(columns: list[str]):
+def create_column_options(columns: Sequence[str]):
     """Function that creates column options that is used
     in the frontend to toggle visibility, editability or
     other functionalities on specific given columns"""
     return [
-        {
-            'name': column,
-            'visible': True,
-            'editable': True,
-            'sortable': True,
-            'searchable': True
-        } for column in columns
+        ColumnOptionsModel(name=column)
+        for column in columns
     ]
 
 
-def user_preference_column_options(columns: list[str]):
+def resolve_models[T = BaseModel](models: Sequence[T]) -> list[dict[str, Any]]:
+    """Function that resolves a sequence of Pydantic models into dictionaries"""
+    return [model.model_dump() for model in models]
+
+
+def user_preference_column_options(columns: Sequence[str]):
     """Function that creates column options that the user can
     set as preferences for the final table presentation. This is used
     when the user wants to save their preferences for a given document"""
@@ -38,21 +41,3 @@ def user_preference_column_options(columns: list[str]):
         item.update(visible=True)
         options.append(item)
     return options
-
-
-def clean_user_column_type_options(column_options: list[dict]):
-    """Function that cleans the user column type options by removing
-    any fields that are not expected. This is used when the user sends
-    their preferences for a given document to the backend, to ensure that
-    only valid fields are processed."""
-    column_options = column_options or []
-    expected_fields = ['name', 'newName', 'columnType', 'unique', 'nullable']
-    
-    clean_options: list[dict] = []
-    for option in column_options:
-        clean_option = {}
-        
-        for field in expected_fields:
-            clean_option[field] = option[field]
-        clean_options.append(clean_option)
-    return clean_options
