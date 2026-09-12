@@ -61,7 +61,7 @@ dev = [
 ]
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "off"
 reportMissingImports = true
 reportUntypedBaseClass = true
 

@@ -18,7 +18,7 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
     serializer_class = SimpleDocumentSerializer
     lookup_field = 'document_uuid'
     lookup_url_kwarg = 'document_uuid'
-    permission_classes = []
+    permission_classes = ()
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -42,4 +42,4 @@ class UpdateColumnTypes(UpdateAPIView):
 
     queryset = TableDocument.objects.all()
     serializer_class = UpdateColumnTypesSerializer
-    permission_classes = []
+    permission_classes = ()
