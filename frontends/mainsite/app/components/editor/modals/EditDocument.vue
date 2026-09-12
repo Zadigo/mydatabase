@@ -40,7 +40,7 @@
 
             <div v-for="(column, index) in tableDocument.column_type_options" :key="index" class="grid grid-cols-7 gap-1 content-center">
               <nuxt-input v-model="column.newName" class="col-span-3" />
-              <nuxt-select v-model="column.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
+              <nuxt-select v-model="column.columnType" :items="COLUMN_TYPES_MENU_ITEM" item-label="label" value-key="label" class="col-span-3" />
               
               <div>
                 <nuxt-dropdown-menu :items="constrainMenuItem">

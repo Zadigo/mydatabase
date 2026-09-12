@@ -1,5 +1,6 @@
 import re
 
+import pandas
 from django.http.request import HttpRequest
 from rest_framework import fields, serializers
 from rest_framework.exceptions import ValidationError
@@ -54,7 +55,7 @@ class _ValidateColumnTypes(serializers.Serializer):
         default=True
     )
 
-    def validate_new_name(self, value):
+    def validate_newName(self, value):
         # Name should not contain special
         # characters other than "_" or "-"
         if not re.match(r'^[\w-]+$', value):
@@ -92,6 +93,9 @@ class _ValidateDocuments(serializers.Serializer):
             ('csv', 'CSV'),
             ('google_sheet', 'Google sheet')
         )
+    )
+    primary_document = serializers.BooleanField(
+        default=False
     )
     primary_key_field = serializers.BooleanField(
         default=False
@@ -136,6 +140,17 @@ class UploadFileSerializer(serializers.Serializer):
     )
 
     def _upload_with_file(self, **kwargs: str):
+        """Upload a document from a file. The file can be either a CSV or JSON file.
+        If the file is a JSON file, the user can specify an entry key that will be
+        used to resolve the data in the JSON response.
+        
+        Args:
+            entry_key (str, optional): The entry key to resolve the data in the JSON response. Defaults to None.
+            content_type (str): The content type of the document. Can be either 'csv' or 'json'.
+            using_columns (list): List of column type options to use when creating the document. Each item in the list should be a dictionary with the following keys:
+                - name (str): The name of the column.
+                - type (str): The type of the column.
+        """
         request: HttpRequest = self._context['request']
         file = request.FILES.get('file', None)
 
@@ -157,8 +172,19 @@ class UploadFileSerializer(serializers.Serializer):
                 params['entry_key'] = kwargs['entry_key']
                 django_tasks.create_json_file_from_data(**params)
 
-
     def _upload_with_url(self, url: str, **kwargs: str):
+        """Upload a document from an url. The url can point to a CSV or JSON file.
+        If the url points to a JSON file, the user can specify an entry key that will be used 
+        to resolve the data in the JSON response.
+        
+        Args:
+            url (str): The url of the document to upload.
+            entry_key (str, optional): The entry key to resolve the data in the JSON response. Defaults to None.
+            content_type (str): The content type of the document. Can be either 'csv' or 'json'.
+            using_columns (list): List of column type options to use when creating the document. Each item in the list should be a dictionary with the following keys:
+                - name (str): The name of the column.
+                - type (str): The type of the column.
+        """
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -172,6 +198,50 @@ class UploadFileSerializer(serializers.Serializer):
         kwargs['headers'] = headers
         django_tasks.create_csv_from_url(url, **kwargs)
 
+    def _merge_documents(self, documents: list[dict], **kwargs: str):
+        """Retrieve the content of all the documents and merge them into a single one.
+        
+        Args:
+            documents (list[dict]): List of documents to merge. Each document should contain the following keys:
+                - url (str): The URL of the document.
+                - primary_document (bool): Whether the document is the primary one.
+                - entry_key (str, optional): The entry key to resolve the data within the document.
+
+        Raises:
+            ValidationError: If there are no primary documents or if there are multiple primary documents.
+        """
+        primary_documents: int = 0
+
+        for document in documents:
+            if document['primary_document']:
+                primary_documents += 1
+
+        if primary_documents == 0:
+            raise ValidationError('At least one document should be marked as primary')
+
+        if primary_documents > 1:
+            raise ValidationError('Only one document can be marked as primary')
+
+        primary_document: pandas.DataFrame = None
+        other_documents: list[pandas.DataFrame] = []
+
+        for document in documents:
+            if document['primary_document'] and primary_document is not None:
+                result = django_tasks.prefetch_data_from_url(document['url'])
+                response_data: dict = result.get()
+                primary_document = pandas.DataFrame(response_data['data'])
+                continue
+
+            result = django_tasks.prefetch_data_from_url(document['url'])
+            response_data: dict = result.get()
+            other_documents.append(pandas.DataFrame(response_data['data']))
+
+        columns = primary_document.columns.tolist()
+
+        dfs = [pandas.DataFrame(item, columns=columns) for item in other_documents]
+        merged = pandas.concat([primary_document] + dfs, ignore_index=True)
+        return django_tasks.create_csv_file_from_data(merged.to_csv(index=False), **kwargs)
+        
     def validate(self, data: dict):
         name: str = data.get('name')
         data['name'] = name.lower().title()
@@ -187,6 +257,12 @@ class UploadFileSerializer(serializers.Serializer):
         instances: list[TableDocument] = []
 
         if validated_data['merge']:
+            # Get the content of the all the documents 
+            # and merge them into a single document
+            self._merge_documents(
+                validated_data['documents'], 
+                using_columns=using_columns
+            )
             return
 
         documents: list[dict] = validated_data.pop('documents')

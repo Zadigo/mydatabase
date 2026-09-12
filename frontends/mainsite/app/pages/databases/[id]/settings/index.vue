@@ -53,11 +53,21 @@ definePageMeta({
 })
 
 const { id } = useRoute().params as { id: string }
-const config = useRuntimeConfig()
 
-const { execute } = useFetch(`/v1/databases/${id}/delete`, {
+// const { execute } = useFetch(`/v1/databases/${id}/delete`, {
+//   method: 'DELETE',
+//   baseURL: config.public.prodDomain,
+//   immediate: false,
+//   onResponse(response) {
+//     console.log(response)
+//     if (response.response.status === 204) {
+//       navigateTo('/databases')
+//     }
+//   }
+// })
+
+const { execute } = useFetch(`/api/databases/${id}/remove`, {
   method: 'DELETE',
-  baseURL: config.public.prodDomain,
   immediate: false,
   onResponse(response) {
     console.log(response)
@@ -68,9 +78,8 @@ const { execute } = useFetch(`/v1/databases/${id}/delete`, {
 })
 
 function restartProject() {
-  $fetch(`/v1/databases/${id}/restart`, {
+  $fetch(`/api/databases/${id}/restart`, {
     method: 'POST',
-    baseURL: config.public.prodDomain,
     onResponse(response) {
       if (response.response.status === 204) {
         navigateTo('/databases')

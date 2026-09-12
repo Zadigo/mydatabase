@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SimpleTable } from '~/types'
+import type { SimpleTable } from '#shared/types'
 
 definePageMeta({
   label: 'Database: Tables',

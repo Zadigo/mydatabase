@@ -12,14 +12,23 @@ export const useEditDocument = createGlobalState(() => {
 
   async function remove(tableDocument: TableDocument) {
     // TODO: Move to server
-    const { status } = await useFetch(`/v1/documents/${tableDocument.document_uuid}`, {
+    // const { status } = await useFetch(`/v1/documents/${tableDocument.document_uuid}`, {
+    //   baseURL: useRuntimeConfig().public.prodDomain,
+    //   method: 'DELETE'
+    // })
+    
+    // if (status.value === 'success') {
+    //   tableDocuments.value = tableDocuments.value.filter(doc => doc.id !== tableDocument.id)
+    // }
+    
+    await $fetch(`/api/documents/${tableDocument.document_uuid}`, {
       baseURL: useRuntimeConfig().public.prodDomain,
-      method: 'DELETE'
+      method: 'DELETE',
+      onRequest() {
+        tableDocuments.value = tableDocuments.value.filter(doc => doc.id !== tableDocument.id)
+      }
     })
 
-    if (status.value === 'success') {
-      tableDocuments.value = tableDocuments.value.filter(doc => doc.id !== tableDocument.id)
-    }
   }
 
   return {

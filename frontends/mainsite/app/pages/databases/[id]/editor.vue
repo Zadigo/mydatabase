@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { EditorTablesDataTable } from '#components'
-import type { TableComponent } from '~/types'
+import type { TableComponent } from '#shared/types'
 
 definePageMeta({
   label: 'Editor: Table',

@@ -1,7 +1,6 @@
-import type { SelectMenuItem } from '@nuxt/ui'
-import type { DocumentData, SimpleTable } from '~/types'
-import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '~/types/api/tables/columns'
-import type { EditableTableRef } from '~/types'
+import type { DocumentData, SimpleTable } from '#shared/types'
+import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '#shared/types/api/tables/columns'
+import type { EditableTableRef } from '#shared/types'
 
 /**
  * Store used to manage the state of table edition
@@ -90,6 +89,12 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
 
   async function update() {
     if (isDefined(selectedTable)) {
+      // const data = await $fetch<SimpleTable>(`/api/tables/${selectedTable.value.id}`, {
+      //   method: 'PATCH',
+      //   body: editableTableRef.value
+      // })
+      
+      // TODO
       const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
         method: 'PATCH',
         baseURL: useRuntimeConfig().public.prodDomain,
@@ -190,37 +195,6 @@ export const useTableEditionStore = defineStore('tableEdition', () => {
   }
 })
 
-export const columnTypesMenuItem: SelectMenuItem[] = [
-  {
-    label: 'String',
-    icon: 'i-lucide-text'
-  },
-  {
-    label: 'Number',
-    icon: 'i-lucide-superscript'
-  },
-  {
-    label: 'Boolean',
-    icon: 'i-lucide-check-square'
-  },
-  {
-    label: 'Date',
-    icon: 'i-lucide-calendar'
-  },
-  {
-    label: 'DateTime',
-    icon: 'i-lucide-clock'
-  },
-  {
-    label: 'Array',
-    icon: 'i-lucide-list'
-  },
-  {
-    label: 'Dict',
-    icon: 'i-lucide-folder'
-  }
-]
-
 /**
  * Store used for working with table columns
  * e.g. search, modifying column types etc.
@@ -242,9 +216,8 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
     column[option] = !column[option]
 
     if (isDefined(selectedTableDocument)) {
-      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      $fetch(`/api/documents/${selectedTableDocument.value.id}/column-types`, {
         method: 'PATCH',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_options: columnOptions.value
         }
@@ -268,9 +241,8 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
 
   function save() {
     if (isDefined(selectedTableDocument)) {
-      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      $fetch(`/api/documents/${selectedTableDocument.value.id}/column-types`, {
         method: 'PATCH',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_types: columnTypeOptions.value
         }

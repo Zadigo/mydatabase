@@ -1,4 +1,4 @@
-import type { Database } from '~/types'
+import type { Database } from '#shared/types'
 
 export * from './functions'
 export * from './triggers'

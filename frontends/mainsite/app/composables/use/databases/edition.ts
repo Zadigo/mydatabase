@@ -62,8 +62,6 @@ export function useDatabaseCreation() {
  * @param database The database to edit
  */
 export function useEditDatabase(database: Ref<Database | undefined>) {
-  const config = useRuntimeConfig()
-
   const newDatabaseName = ref<string>(database.value?.name || '')
 
   const isUpdating = ref<boolean>(false)
@@ -75,8 +73,15 @@ export function useEditDatabase(database: Ref<Database | undefined>) {
     // await execute()
     toggleIsUpdating(true)
 
-    updated = await $fetch<Database>(`/v1/databases/${database.value?.id}`, {
-      baseURL: config.public.prodDomain,
+    // updated = await $fetch<Database>(`/v1/databases/${database.value?.id}`, {
+    //   baseURL: config.public.prodDomain,
+    //   method: 'POST',
+    //   body: {
+    //     name: newDatabaseName.value
+    //   }
+    // })
+
+    updated = await $fetch<Database>(`/api/databases/${database.value?.id}`, {
       method: 'POST',
       body: {
         name: newDatabaseName.value

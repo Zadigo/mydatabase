@@ -13,7 +13,7 @@
     <!-- New Name -->
     <nuxt-input v-model="editedColumn.newName" class="col-span-3" />
     <!-- Column Type -->
-    <nuxt-select v-model="editedColumn.columnType" :items="columnTypesMenuItem" item-label="label" value-key="label" class="col-span-3" />
+    <nuxt-select v-model="editedColumn.columnType" :items="COLUMN_TYPES_MENU_ITEM" item-label="label" value-key="label" class="col-span-3" />
 
     <div class="col-span-1">
       <nuxt-checkbox v-model="editedColumn.unique">
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ColumnTypeOptions, Undefineable } from '~/types'
+import type { ColumnTypeOptions } from '#shared/types'
 
 const props = defineProps<{
   columnType: Undefineable<ColumnTypeOptions>

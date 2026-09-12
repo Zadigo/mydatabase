@@ -1,17 +1,11 @@
-# from unittest.mock import Mock, patch
 
-# from django.core.files.uploadedfile import SimpleUploadedFile
-# from django.test import TestCase, override_settings
-
-# from dbtables.api import serializers
-# from dbtables.tests.utils import DatabaseTableFactory
-import pathlib
+from unittest.mock import patch
 
 import pytest
-from django.conf import settings
 from faker import Faker
 
 from dbtables.api.serializers import UploadFileSerializer
+from dbtables.tests.constants import UPLOAD_DOCUMENT_DATA
 
 fake = Faker()
 
@@ -21,10 +15,6 @@ FAKE_DATA = {
     'documents': [],
     'merge': False
 }
-
-DATA_FILES = pytest.mark.datafiles(
-    pathlib.Path(settings.MEDIA_ROOT).joinpath('testfile.json')
-)
 
 
 @pytest.fixture
@@ -78,76 +68,50 @@ def test_upload_serializer_base_data(base_data, data_with_columns):
 
 
 
-@DATA_FILES
 def test_upload_with_file(datafiles):
     print('datafiles', datafiles)
 
-# @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-# class TestUploadFileSerializer(TestCase):
-#     def setUp(self):
-#         table = DatabaseTableFactory.create()
 
-#         request = Mock()
-#         request.parser_context = {'kwargs': {'pk': table.pk}}
-#         self._context = {'request': request}
-#         self.request = request
 
-#         self.data = {
-#             'name': None,
-#             'file': None,
-#             'url': '',
-#             'google_sheet_id': '',
-#             'using_columns': [
-#                 {
-#                     'name': 'col1',
-#                     'newName': 'col1',
-#                     'columnType': 'String',
-#                     'unique:': True,
-#                     'visible': True,
-#                     'nullable': False
-#                 },
-#                 {
-#                     'name': 'col2',
-#                     'newName': 'col2',
-#                     'columnType': 'String',
-#                     'unique:': True,
-#                     'visible': True,
-#                     'nullable': False
-#                 }
-#             ]
-#         }
+@pytest.fixture
+def docs_to_merge():
+    DOC1 = [
+        {
+            'id': 1,
+            'name': fake.name()
+        },
+        {
+            'id': 6,
+            'name': fake.name()
+        }
+    ]
 
-#     def test_validate_file_size(self):
-#         pass
+    DOC2 = [
+        {
+            'id': 6,
+            'name': fake.name(),
+            'age': fake.random_int(min=18, max=99),
+        }
+    ]
 
-#     def test_serializer_save_with_json(self):
-#         data = '{"col1": ["val1"], "col2": ["val2"]}'
-#         content_file = SimpleUploadedFile("test.json", data.encode('utf-8'))
-#         self.request.FILES = {'file': content_file}
-        
-#         self.data['name'] = 'test.json'
-#         self.data['file'] = content_file
+    return [DOC1, DOC2]
 
-#         serializer = serializers.UploadFileSerializer(data=self.data)
-#         serializer._context = self._context
-#         serializer.is_valid(raise_exception=True)
 
-#         with patch('dbtables.api.serializers.tasks.create_json_file_from_data') as mcreate_json:
-#             document = serializer.save()
-#             self.assertIsNotNone(document)
+def test_upload_with_merge(docs_to_merge):
+    with patch('tabledocuments.django_tasks.create_csv_file_from_data') as m:
+        UPLOAD_DOCUMENT_DATA['merge'] = True
+        UPLOAD_DOCUMENT_DATA['documents'] = [
+            {
+                'name': fake.name(),
+                'url': '',
+                'file': None,
+                'entry_key': '',
+                'source_type': 'url',
+                'content_type': 'json',
+                'primary_key_field': False
+            }
+        ]
 
-#     def test_serializer_save_with_csv(self):
-#         data = b'col1,col2\nval1,val2'
-#         content_file = SimpleUploadedFile("test.csv", data)
-#         self.request.FILES = {'file': content_file}
-
-#         self.data['name'] = 'test.csv'
-#         self.data['file'] = content_file
-
-#         serializer = serializers.UploadFileSerializer(data=self.data)
-#         serializer._context = self._context
-#         serializer.is_valid(raise_exception=True)
-
-#         with patch('dbtables.api.serializers.tasks.create_csv_file_from_data') as mcreate_csv:
-#             document = serializer.save()
-#             self.assertIsNotNone(document)
+        serializer = UploadFileSerializer(data=UPLOAD_DOCUMENT_DATA)
+        serializer.is_valid(raise_exception=False)
+        serializer._merge_documents(docs_to_merge)

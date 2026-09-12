@@ -7,7 +7,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from dbtables.models import DatabaseTable
-from dbtables.tests.constants import OPENDATASOFT_COLUMN_TYPES, OPENDATASOFT_URL
+from dbtables.tests.constants import (
+    JSONPLACEHOLDER_URL,
+    OPENDATASOFT_COLUMN_TYPES,
+    OPENDATASOFT_URL,
+)
 from dbtables.tests.utils import DatabaseTableFactory
 from djangobackend.huey_app import huey_task
 
@@ -128,6 +132,37 @@ URL_DATA = pytest.mark.parametrize(
                     }
                 ],
                 'merge': False
+            }
+        },
+        {
+            'expected_status': 201,
+            'description': 'Test content merging',
+            'data': {
+                'name': '',
+                'using_columns': OPENDATASOFT_COLUMN_TYPES,
+                'documents': [
+                    {
+                        'name': 'Json Data',
+                        'url': JSONPLACEHOLDER_URL,
+                        'file': None,
+                        'entry_key': '',
+                        'source_type': 'url',
+                        'content_type': 'json',
+                        # 'primary_document': True, # TODO: Add this field
+                        'primary_key_field': False # TODO: Remove this field
+                    },
+                    {
+                        'name': 'Json Data',
+                        'url': JSONPLACEHOLDER_URL,
+                        'file': None,
+                        'entry_key': '',
+                        'source_type': 'url',
+                        'content_type': 'json',
+                        # 'primary_document': True,
+                        'primary_key_field': False
+                    }
+                ],
+                'merge': True
             }
         }
     ]

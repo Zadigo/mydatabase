@@ -1,6 +1,5 @@
-import type { SelectMenuItem } from '@nuxt/ui'
-import type { DocumentData, SimpleTable, EditableTableRef } from '~/types'
-import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption } from '~/types/api/tables/columns'
+import type { DocumentData, SimpleTable, EditableTableRef } from '#shared/types'
+import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption } from '#shared/types/api/tables/columns'
 
 /**
  * Composable used to manage the state of table edition
@@ -196,37 +195,6 @@ export const useTableEditionComposable = createGlobalState(() => {
   }
 })
 
-export const columnTypesMenuItem: SelectMenuItem[] = [
-  {
-    label: 'String',
-    icon: 'i-lucide-text'
-  },
-  {
-    label: 'Number',
-    icon: 'i-lucide-superscript'
-  },
-  {
-    label: 'Boolean',
-    icon: 'i-lucide-check-square'
-  },
-  {
-    label: 'Date',
-    icon: 'i-lucide-calendar'
-  },
-  {
-    label: 'DateTime',
-    icon: 'i-lucide-clock'
-  },
-  {
-    label: 'Array',
-    icon: 'i-lucide-list'
-  },
-  {
-    label: 'Dict',
-    icon: 'i-lucide-folder'
-  }
-]
-
 /**
  * Composable used for working with table columns
  * e.g. search, modifying column types etc.
@@ -256,9 +224,16 @@ export const useTableColumnsComposable = createGlobalState(() => {
     column[ option ] = !column[ option ]
 
     if (isDefined(selectedTableDocument)) {
-      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      // $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      //   method: 'PATCH',
+      //   baseURL: useRuntimeConfig().public.prodDomain,
+      //   body: {
+      //     column_options: columnOptions.value
+      //   }
+      // })
+      
+      $fetch(`/api/documents/${selectedTableDocument.value.id}/column-types`, {
         method: 'PATCH',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_options: columnOptions.value
         }
@@ -282,9 +257,15 @@ export const useTableColumnsComposable = createGlobalState(() => {
 
   function save() {
     if (isDefined(selectedTableDocument)) {
-      $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      // $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
+      //   method: 'PATCH',
+      //   baseURL: useRuntimeConfig().public.prodDomain,
+      //   body: {
+      //     column_types: columnTypeOptions.value
+      //   }
+      // })
+      $fetch(`/api/documents/${selectedTableDocument.value.id}/column-types`, {
         method: 'PATCH',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: {
           column_types: columnTypeOptions.value
         }

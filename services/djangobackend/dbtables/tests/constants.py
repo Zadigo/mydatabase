@@ -1,5 +1,6 @@
 OPENDATASOFT_URL = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/panneaux4x3-feuille1@issy-les-moulineaux/records?limit=5'
 
+
 OPENDATASOFT_COLUMN_TYPES = [
     {
         'name': 'numero',
@@ -90,3 +91,60 @@ OPENDATASOFT_COLUMN_TYPES = [
         'visible': True,
     }
 ]
+
+
+JSONPLACEHOLDER_URL = 'https://jsonplaceholder.typicode.com/posts'
+
+
+JSONPLACEHOLDER_COLUMN_TYPES = [
+    {
+        'name': 'userId',
+        'newName': 'userId',
+        'columnType': 'Integer',
+        'unique': False,
+        'nullable': True,
+        'visible': True,
+    },
+    {
+        'name': 'id',
+        'newName': 'id',
+        'columnType': 'Integer',
+        'unique': False,
+        'nullable': True,
+        'visible': True,
+    },
+    {
+        'name': 'title',
+        'newName': 'title',
+        'columnType': 'String',
+        'unique': False,
+        'nullable': True,
+        'visible': True,
+    },
+    {
+        'name': 'body',
+        'newName': 'body',
+        'columnType': 'String',
+        'unique': False,
+        'nullable': True,
+        'visible': True,
+    }
+]
+
+
+UPLOAD_DOCUMENT_COLUMN_TYPE = {
+    'name': 'firstname',
+    'newName': 'firstname',
+    'columnType': 'String',
+    'unique': False,
+    'nullable': True,
+    'visible': True,
+}
+
+
+UPLOAD_DOCUMENT_DATA = {
+    'name': 'Some file',
+    'using_columns': [],
+    'documents': [],
+    'merge': False
+}

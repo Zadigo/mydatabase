@@ -48,7 +48,7 @@
 import GoogleSheets from '~/components/database/connections/GoogleSheets.vue'
 import Scheduling from '~/components/database/connections/Scheduling.vue'
 
-import type { Nullable, IntegrationTool } from '~/types'
+import type { IntegrationTool } from '#shared/types'
 import type { Component } from 'vue'
 
 definePageMeta({
