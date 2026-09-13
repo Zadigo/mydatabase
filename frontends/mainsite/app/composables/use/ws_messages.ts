@@ -1,11 +1,11 @@
-import type { ColumnOptions, ColumnTypeOptions } from '#shared/types'
+import type { ColumnOptions } from '#shared/types'
 
 interface DocumentData {
   document_data: string
   columns: {
     names: Arrayable<string>
     options: Arrayable<ColumnOptions>
-    type_options: Arrayable<ColumnTypeOptions>
+    type_options: Arrayable<ColumnOptions>
   }
 }
 

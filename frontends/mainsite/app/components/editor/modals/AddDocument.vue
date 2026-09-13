@@ -66,13 +66,8 @@ const { selectedTable, selectedTableDocument } = useTableEditionComposable()
 
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal, updateStep, addDocument } = useCreateDocument(wsObject)
-const { checkedOut } = useDocumentCheckoutCompoable(newDocument)
 
-/**
- * File checkout
- */
-
-const { fileCheckoutResponse } = usePrefetchProvider(selectedTable, newDocument)
+const { checkedOut } = useDocumentCheckoutProvider(newDocument)
 
 /**
  * Checks

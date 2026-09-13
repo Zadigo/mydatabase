@@ -1,7 +1,7 @@
 import type { FileCheckoutResponse } from '#shared/types'
 import type { NewDocument } from '#shared/types/documents'
 
-export function useDocumentCheckoutCompoable(source: Ref<NewDocument>) {
+const [useDocumentCheckoutProvider, _useDocumentCheckoutStore] = createInjectionState((source: Ref<NewDocument>) => {
   const checkedOut = ref<Record<string, boolean>>({})
   const checkedoutResponses = ref<Record<string, FileCheckoutResponse>>({})
   const { table } = useRoute().query as { table: string }
@@ -40,9 +40,22 @@ export function useDocumentCheckoutCompoable(source: Ref<NewDocument>) {
     checkedOut.value = {}
   }
 
+  const names = computed(() => Object.keys(checkedOut.value))
+
   return {
     resetCheckedOut,
     checkedOut,
-    checkedoutResponses
+    checkedoutResponses,
+    names
   }
+})
+
+export { useDocumentCheckoutProvider }
+
+export function useDocumentCheckoutStore() {
+  const store = _useDocumentCheckoutStore()
+  if (!store) {
+    throw new Error('useDocumentCheckoutStore must be used within a provider')
+  }
+  return store
 }

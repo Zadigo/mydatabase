@@ -24,7 +24,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
       }
     ],
     merge: false,
-    column_type_options: []
+    column_options: []
   })
 
   const getNewDocumentByIndex = reactive((index: number) => newDocument.value.documents[index])
@@ -48,7 +48,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
         }
       ],
       merge: false,
-      column_type_options: []
+      column_options: []
     } as NewDocument
   }
 

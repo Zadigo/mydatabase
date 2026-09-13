@@ -1,6 +1,5 @@
-import type { Nullable } from '~/types'
 import type { _BaseDatabaseObject } from '..'
-import type { ColumnOptions, ColumnTypeOptions, ColumnTypes } from './columns'
+import type { ColumnOptions, ColumnTypes } from './columns'
 
 export type * from './columns'
 
@@ -35,11 +34,6 @@ export interface TableDocument extends _BaseDatabaseObject {
    * @default []
    */
   column_types: ColumnTypes[]
-  /**
-   * The column type options used for this document
-   * @default []
-   */
-  column_type_options: ColumnTypeOptions[]
 }
 
 export type TableComponent = 'data-table' | 'graph-table'

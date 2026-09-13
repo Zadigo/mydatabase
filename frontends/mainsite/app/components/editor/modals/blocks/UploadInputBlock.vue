@@ -30,19 +30,8 @@ const { newDocument, removeDocument, selectPrimaryKeyFile, getNewDocumentByIndex
 
 const selectedDocumentParams = getNewDocumentByIndex(props.idx)
 
-/**
- * Prefetch
- * @description Prefetch the headers of the documents to be able to select the columns
- */
-
 const { selectedTable } = useTableEditionComposable()
-const { prefetch } = usePrefetchProvider(selectedTable, newDocument)
 
-watch(() => selectedDocumentParams?.url, (newValue) => {
-  if (newValue) {
-    void prefetch(selectedDocumentParams)
-  }
-}, { immediate: false })
 
 /**
  * Inputs

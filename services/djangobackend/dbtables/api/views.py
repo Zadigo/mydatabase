@@ -67,21 +67,22 @@ class CheckoutDocument(GenericAPIView):
 
         url = serializer.validated_data.get('url', None)
         if url is not None:
-            task = django_tasks.prefetch_data_from_url(url)
-            data = task.get()
-            df = pandas.DataFrame(data['data'])
+            json_response = django_tasks.prefetch_data_from_url.call_local(url)
+            if json_response is not None:
+                df = pandas.DataFrame(json_response['data'])
 
-        sample = df.head(2).to_dict(orient='records')
+                sample = df.head(2).to_dict(orient='records')
 
-        template = {
-            'sample': sample,
-            'numberOfRows': df.shape[0],
-            'numberOfColumns': df.shape[1],
-            'columns': df.columns.tolist(),
-            'columnTypes': resolve_models(create_column_options(df.columns.tolist()))
-        }
+                template = {
+                    'sample': sample,
+                    'numberOfRows': df.shape[0],
+                    'numberOfColumns': df.shape[1],
+                    'columns': df.columns.tolist(),
+                    'columnTypes': resolve_models(create_column_options(df.columns.tolist()))
+                }
 
-        return Response(template, status=status.HTTP_201_CREATED)
+                return Response(template, status=status.HTTP_201_CREATED)
+        return Response({'error': 'No data available.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UploadNewDocument(CreateAPIView):

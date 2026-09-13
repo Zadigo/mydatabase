@@ -38,10 +38,10 @@
 </template>
 
 <script setup lang="ts">
-import type { ColumnTypeOptions } from '#shared/types'
+import type { ColumnOptions } from '#shared/types'
 
 const props = defineProps<{
-  columnType: Undefineable<ColumnTypeOptions>
+  columnType: Undefineable<ColumnOptions>
 }>()
 
 const editedColumn = computed({

@@ -1,5 +1,5 @@
 import type { DocumentData, SimpleTable } from '#shared/types'
-import type { ColumnOptions, ColumnType, DefaultColumnOption, ColumnTypeOptions } from '#shared/types/api/tables/columns'
+import type { ColumnOptions, ColumnType, DefaultColumnOption } from '#shared/types/api/tables/columns'
 import type { EditableTableRef } from '#shared/types'
 
 /**
@@ -227,11 +227,11 @@ export const useTableColumnsStore = defineStore('tableColumns', () => {
 
   const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: value => value })
 
-  function changeTypeOption(column: ColumnTypeOptions, columnType: ColumnType) {
+  function changeTypeOption(column: ColumnOptions, columnType: ColumnType) {
     column.columnType = columnType
   }
 
-  function toggleConstraint(column: ColumnTypeOptions, constraint: 'unique' | 'nullable') {
+  function toggleConstraint(column: ColumnOptions, constraint: 'unique' | 'nullable') {
     column[constraint] = !column[constraint]
   }
 

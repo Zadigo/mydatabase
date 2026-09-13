@@ -2,10 +2,10 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, it, expect } from 'vitest'
 import BaseColumnTypeOption from '~/components/BaseColumnTypeOption.vue'
 import { columnTypeOptionsFixture } from '~~/test/__fixtures__'
-import type { ColumnTypeOptions } from '~/types'
+import type { ColumnOptions } from '#shared/types'
 
 describe.todo('BaseColumnTypeOption component', () => {
-  const testCases: { title: string, props: { columnType: ColumnTypeOptions | undefined } }[] = [
+  const testCases: { title: string, props: { columnType: ColumnOptions | undefined } }[] = [
     {
       title: 'default props',
       props: {

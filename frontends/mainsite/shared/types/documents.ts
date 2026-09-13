@@ -1,4 +1,4 @@
-import type { ColumnTypeOptions } from './api/tables/columns'
+import type { ColumnOptions } from './api/tables/columns'
 
 export type DocumentTypes = 'csv' | 'json' | 'google_sheet'
 
@@ -14,7 +14,7 @@ export interface DocumentParams {
 
 export interface NewDocument {
   name: string
-  column_type_options: ColumnTypeOptions[]
+  column_options: ColumnOptions[]
   documents: DocumentParams[]
   merge: boolean
 }

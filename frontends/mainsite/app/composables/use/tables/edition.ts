@@ -1,5 +1,5 @@
 import type { DocumentData, SimpleTable, EditableTableRef } from '#shared/types'
-import type { ColumnOptions, ColumnType, ColumnTypeOptions, DefaultColumnOption } from '#shared/types/api/tables/columns'
+import type { ColumnOptions, ColumnType, DefaultColumnOption } from '#shared/types/api/tables/columns'
 
 /**
  * Composable used to manage the state of table edition
@@ -243,12 +243,12 @@ export const useTableColumnsComposable = createGlobalState(() => {
 
   const columnTypeOptions = computed({ get: () => isDefined(selectedTableDocument) ? selectedTableDocument.value.column_types : [], set: value => value })
 
-  function changeTypeOption(column: ColumnTypeOptions, columnType: ColumnType) {
+  function changeTypeOption(column: ColumnOptions, columnType: ColumnType) {
     column.columnType = columnType
   }
 
-  function toggleConstraint(column: ColumnTypeOptions, constraint: 'unique' | 'nullable') {
-    column[ constraint ] = !column[ constraint ]
+  function toggleConstraint(column: ColumnOptions, constraint: 'unique' | 'nullable') {
+    column[constraint] = !column[constraint]
   }
 
   /**
@@ -257,13 +257,6 @@ export const useTableColumnsComposable = createGlobalState(() => {
 
   function save() {
     if (isDefined(selectedTableDocument)) {
-      // $fetch(`/v1/documents/${selectedTableDocument.value.id}/column-types`, {
-      //   method: 'PATCH',
-      //   baseURL: useRuntimeConfig().public.prodDomain,
-      //   body: {
-      //     column_types: columnTypeOptions.value
-      //   }
-      // })
       $fetch(`/api/documents/${selectedTableDocument.value.id}/column-types`, {
         method: 'PATCH',
         body: {

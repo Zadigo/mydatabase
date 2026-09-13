@@ -1,4 +1,4 @@
-import type { ColumnTypeOptions, SimpleTable, TableDocument } from '../../app/types'
+import type { ColumnOptions, SimpleTable, TableDocument } from '#shared/types'
 import { faker } from '@faker-js/faker'
 
 export const mockDataSource = {
@@ -29,7 +29,6 @@ export const tableDocumentFixture: TableDocument = {
   column_names: [faker.lorem.word(), faker.lorem.word(), faker.lorem.word()],
   column_options: [],
   column_types: [],
-  column_type_options: [],
   created_at: faker.date.past().toISOString(),
   updated_at: faker.date.recent().toISOString()
 }
@@ -46,7 +45,10 @@ export const staticTableDocumentFixture: TableDocument = {
       sortable: true,
       columnType: 'Number',
       editable: false,
-      visible: true
+      visible: true,
+      unique: true,
+      nullable: false,
+      newName: 'id'
     },
     {
       name: 'name',
@@ -54,7 +56,10 @@ export const staticTableDocumentFixture: TableDocument = {
       sortable: true,
       columnType: 'String',
       editable: true,
-      visible: true
+      visible: true,
+      unique: false,
+      nullable: false,
+      newName: 'name'
     },
     {
       name: 'email',
@@ -62,7 +67,10 @@ export const staticTableDocumentFixture: TableDocument = {
       sortable: true,
       columnType: 'String',
       editable: true,
-      visible: true
+      visible: true,
+      unique: true,
+      nullable: false,
+      newName: 'email'
     }
   ],
   column_types: [
@@ -79,14 +87,14 @@ export const staticTableDocumentFixture: TableDocument = {
       columnType: 'String'
     }
   ],
-  column_type_options: [
-    { name: 'id', newName: 'id', columnType: 'Number', unique: true, nullable: false, visible: true },
-    { name: 'name', newName: 'name', columnType: 'String', unique: false, nullable: false, visible: true },
-    { name: 'email', newName: 'email', columnType: 'String', unique: true, nullable: false, visible: true }
+  column_options: [
+    { name: 'id', newName: 'id', columnType: 'Number', unique: true, nullable: false, visible: true, editable: false, searchable: true, sortable: true },
+    { name: 'name', newName: 'name', columnType: 'String', unique: false, nullable: false, visible: true, editable: true, searchable: true, sortable: true },
+    { name: 'email', newName: 'email', columnType: 'String', unique: true, nullable: false, visible: true, editable: true, searchable: true, sortable: true }
   ]
 }
 
-export const columnTypeOptionsFixture: ColumnTypeOptions = {
+export const columnTypeOptionsFixture: ColumnOptions = {
   name: faker.lorem.word(),
   newName: faker.lorem.word(),
   columnType: 'String',
