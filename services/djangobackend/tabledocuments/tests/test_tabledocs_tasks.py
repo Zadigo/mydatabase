@@ -167,7 +167,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data={'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
             document_id=instance.pk,
-            column_options=build_column_options('firstname', 'lastname'),
+            column_options=build_column_options_json('firstname', 'lastname'),
             entry_key='items'
         )
 
@@ -181,7 +181,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data={'firstname': 'Jane', 'lastname': 'Doe'},
             document_id=instance.pk,
-            column_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options_json('firstname', 'lastname')
         )
         
 
@@ -195,7 +195,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data=[{'firstname': 'Jane', 'lastname': 'Doe'}],
             document_id=instance.pk,
-            column_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options_json('firstname', 'lastname')
         )
 
         instance.refresh_from_db()

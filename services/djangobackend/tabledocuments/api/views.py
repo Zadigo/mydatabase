@@ -1,12 +1,14 @@
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, UpdateAPIView
+from pydantic import ValidationError as PydanticValidationError
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 
 from tabledocuments.api.serializer import (
     SimpleDocumentSerializer,
-    UpdateColumnTypesSerializer,
     UpdateDocumentSerializer,
 )
 from tabledocuments.models import TableDocument
+from tabledocuments.validation_models import ColumnOptionsModel
 
 
 class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
@@ -36,10 +38,25 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
         return Response(response_serializer.data)
 
 
-class UpdateColumnTypes(UpdateAPIView):
+class UpdateColumnTypes(GenericAPIView):
     """View to update the column types of a given document.
     Column types are a mapping of column names to their data types."""
 
     queryset = TableDocument.objects.all()
-    serializer_class = UpdateColumnTypesSerializer
+    http_method_names = ('patch',)
     permission_classes = ()
+
+    def patch(self, request, *args, **kwargs):
+        instance: TableDocument = self.get_object()
+
+        try:
+            model = ColumnOptionsModel(**request.data)
+        except PydanticValidationError as e:
+            raise ValidationError(f"Invalid column options: {e}")
+        else:
+            validated_data = model.model_dump()
+
+            instance.column_options = validated_data.get('column_options', instance.column_options)
+            instance.save()
+
+            return Response(validated_data  )

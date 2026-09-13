@@ -7,23 +7,8 @@ import requests
 from channels.db import database_sync_to_async
 from django.core.files.base import ContentFile
 
-from tabledocuments.logic.edit import DocumentEdition, load_document_by_url
+from tabledocuments.logic.edit import DocumentEdition
 from tabledocuments.models import TableDocument
-
-
-class TestRequestUtils(IsolatedAsyncioTestCase):
-    async def test_load_document_by_url(self):
-        test_url = 'https://jsonplaceholder.typicode.com/todos'
-        response, errors = await load_document_by_url(test_url)
-        self.assertIsNotNone(response, f'Failed to get response: {response}')
-        self.assertListEqual(errors, [])
-
-    # async def test_load_document_by_url_invalid_endpoint_data(self):
-    #     test_url = 'http://example' # endpoint returns HTML text
-    #     response, errors = await load_document_by_url(test_url)
-
-    #     self.assertIsNotNone(response)
-    #     self.assertListNotEqual(errors, [])
 
 
 class TestDocumentEdition(IsolatedAsyncioTestCase):

@@ -13,6 +13,20 @@ class ColumnTypes(enum.Enum):
 
 
 class ColumnOptionsModel(BaseModel):
+    """Model representing the options for a column in a table document.
+    
+    Attributes:
+        name (str): The name of the column.
+        newName (str | None): The new name of the column, if it is being renamed.
+        columnType (Literal['String', 'Number', 'Boolean', 'Array', 'Dict']): The data type of the column.
+        visible (bool): Whether the column is visible.
+        editable (bool): Whether the column is editable.
+        sortable (bool): Whether the column is sortable.
+        searchable (bool): Whether the column is searchable.
+        nullable (bool): Whether the column can contain null values.
+        unique (bool): Whether the column values must be unique.
+    """
+    
     name: str = Field(...)
     newName: str | None = Field(default=None)
     columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')

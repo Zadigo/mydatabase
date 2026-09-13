@@ -2,6 +2,7 @@ import csv
 import datetime
 import io
 import json
+import logging
 from collections.abc import Sequence
 from typing import Any
 
@@ -29,6 +30,8 @@ from tabledocuments.models import TableDocument
 from tabledocuments.utils import Document
 from tabledocuments.utils.constants import DOCUMENT_CACHE_KEY_PREFIX
 from tabledocuments.utils.file_manipulation import create_dataframe
+
+logger = logging.getLogger(__name__)
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=10)
