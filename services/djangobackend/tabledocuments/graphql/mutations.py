@@ -1,17 +1,16 @@
 from graphene import Field, Mutation, String
-from graphql.type import GraphQLResolveInfo
 from graphene.types.generic import GenericScalar
+from graphql.type import GraphQLResolveInfo
 
-from tabledocuments.models import TableDocument
 from tabledocuments.graphql.utils import TableDocumentsType
-
+from tabledocuments.models import TableDocument
 
 
 class MutateTableDocument(Mutation):
     class Arguments:
         document_uuid = String(required=True)
         name = String(required=False)
-        column_type_options = GenericScalar(required=False)
+        column_options = GenericScalar(required=False)
 
     tableDocument = Field(TableDocumentsType)
 

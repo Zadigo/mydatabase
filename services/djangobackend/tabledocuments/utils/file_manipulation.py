@@ -1,10 +1,11 @@
 import json
+from collections.abc import Sequence
 from typing import Any
 
 import numpy
 import pandas
 
-from tabledocuments.validation_models import ColumnTypes
+from tabledocuments.validation_models import ColumnOptionsModel, ColumnTypes
 
 
 def is_csv_file(name: str):
@@ -16,14 +17,14 @@ def is_json_file(name: str):
     return name.endswith('.json')
 
 
-def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_options: list[dict[str, str | bool]]):
+def create_dataframe(clean_data: list[dict[str, Any]], column_options: Sequence[ColumnOptionsModel]):
     """Create a pandas dataframe from the cleaned data
     after applying the column options such as renaming,
     filtering visible columns, enforcing unique columns
     
     Args:
         clean_data (list[dict[str, Any] | list[Any]]): The cleaned data to create the dataframe from.
-        column_options (list[dict[str, str | bool]]): The column options to apply to the dataframe.
+        column_options (Sequence[ColumnOptionsModel]): The column options to apply to the dataframe.
 
     Returns:
         pandas.DataFrame: The created dataframe after applying the column options.
@@ -44,48 +45,41 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
         except Exception:
             return value
 
-    all_column_names = [x['name'] for x in column_options]
+    
 
     # Create the dataframe with the original
     # column names that will be renamed later
-    df = pandas.DataFrame(
-        clean_data,
-        columns=all_column_names
-    )
+    column_names = [x.name for x in column_options]
+    df = pandas.DataFrame(clean_data, columns=column_names)
 
     # For each column, apply the type 
     # conversion based on the column options
     for column in column_options:
-        column_name = column['name']
-        item_series = df[column_name]
-        column_type = column['columnType']
+        item_series = df[column.name]
 
-        # print(f"Processing column: {column_name} with type {column_type}")
-
-        if column_type == ColumnTypes.STRING.value or column_type == ColumnTypes.STRING:
-            df[column_name] = item_series.astype(str)
-        elif column_type == ColumnTypes.NUMBER.value or column_type == ColumnTypes.NUMBER:
-            df[column_name] = item_series.astype(numpy.int64)
-        elif column_type == ColumnTypes.BOOLEAN.value or column_type == ColumnTypes.BOOLEAN:
-            df[column_name] = item_series.apply(boolean_converter)
-        elif column_type == ColumnTypes.ARRAY.value or column_type == ColumnTypes.ARRAY or column_type == ColumnTypes.DICT.value or column_type == ColumnTypes.DICT:
-            df[column_name] = item_series.map(json_converter)
+        if column.columnType == ColumnTypes.STRING.value:
+            df[column.name] = item_series.astype(str)
+        elif column.columnType == ColumnTypes.NUMBER.value:
+            df[column.name] = item_series.astype(numpy.int64)
+        elif column.columnType == ColumnTypes.BOOLEAN.value:
+            df[column.name] = item_series.apply(boolean_converter)
+        elif column.columnType == ColumnTypes.ARRAY.value or column.columnType == ColumnTypes.DICT.value:
+            df[column.name] = item_series.map(json_converter)
 
     # Resolve column name change
     renamed_columns = {}
     for col in column_options:
-        new_name = col['newName']
-        if new_name is None:
+        if col.newName is None:
             continue
 
-        renamed_columns[col['name']] = new_name
+        renamed_columns[col.name] = col.newName
     
     if renamed_columns:
         df = df.rename(columns=renamed_columns)
 
     visible_columns = list(
         filter(
-            lambda x: x['visible'],
+            lambda x: x.visible,
             column_options
         )
     )
@@ -93,11 +87,11 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
     # Resolve fields with "null" values
     none_nullable_columns = list(
         filter(
-            lambda x: not x['nullable'],
+            lambda x: not x.nullable,
             visible_columns
         )
     )
-    none_nullable_columns_names = [x['newName'] or x['name'] for x in none_nullable_columns]
+    none_nullable_columns_names = [x.newName or x.name for x in none_nullable_columns]
 
     if none_nullable_columns:
         df.dropna(subset=none_nullable_columns_names, inplace=True)
@@ -105,11 +99,11 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
     # Resolve unique data in each columns
     unique_columns = list(
         filter(
-            lambda x: x['unique'],
+            lambda x: x.unique,
             visible_columns
         )
     )
-    unique_columns_names = [x['newName'] or x['name'] for x in unique_columns]
+    unique_columns_names = [x.newName or x.name for x in unique_columns]
 
     if unique_columns:
         df.drop_duplicates(
@@ -120,11 +114,11 @@ def create_dataframe(clean_data: list[dict[str, Any] | list[Any]], column_option
     # Resolve hidden/unhidden columns
     visible_columns = list(
         filter(
-            lambda x: x['visible'],
+            lambda x: x.visible,
             column_options
         )
     )
-    visible_column_names = [x['newName'] or x['name'] for x in visible_columns]
+    visible_column_names = [x.newName or x.name for x in visible_columns]
 
     if visible_column_names:
         df = df[visible_column_names]

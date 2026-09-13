@@ -22,18 +22,17 @@ from dbtables.models import DatabaseTable
 from djangobackend.huey_app import huey_task
 from tabledocuments.logic.utils import (
     create_column_options,
-    create_column_type_options,
+    create_column_options_from_dict,
     resolve_models,
 )
 from tabledocuments.models import TableDocument
 from tabledocuments.utils import Document
 from tabledocuments.utils.constants import DOCUMENT_CACHE_KEY_PREFIX
 from tabledocuments.utils.file_manipulation import create_dataframe
-from tabledocuments.validation_models import ColumnTypeOptionsModel
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=10)
-def update_document_options(document_uuid: str, column_type_options: Sequence[dict[str, str | bool | None]] | None = None, from_file: bool = False):
+def update_document_options(document_uuid: str, column_options: Sequence[dict[str, str | bool | None]] | None = None, from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
     the column names, etc."""
@@ -43,7 +42,7 @@ def update_document_options(document_uuid: str, column_type_options: Sequence[di
         # logger.error(f"Document with UUID {document_uuid} does not exist.")
         return
 
-    _column_type_options = column_type_options or []
+    _column_options = column_options or []
 
     # If the task is triggered from the admin interface, then we need to
     # load the document from the file to update the column options
@@ -51,15 +50,14 @@ def update_document_options(document_uuid: str, column_type_options: Sequence[di
     # column options provided as arguments when the task is triggered from Nuxt
     if from_file and document.file is not None:
         df = pandas.read_csv(document.file.path)
-        _column_type_options = create_column_type_options(df.columns.tolist())
+        _column_options = create_column_options(df.columns.tolist())
     else:
-        _column_type_options = [ColumnTypeOptionsModel(**option) for option in _column_type_options]
+        _column_options = create_column_options_from_dict(_column_options)
 
-    document.column_type_options = resolve_models(_column_type_options)
-    document.column_names = [item.newName or item.name for item in _column_type_options]
+    document.column_names = [item.newName or item.name for item in _column_options]
 
     column_types = {}
-    for item in _column_type_options:
+    for item in _column_options:
         column_name = item.newName or item.name
         column_types[column_name] = item.columnType
 
@@ -76,24 +74,16 @@ def update_document_options(document_uuid: str, column_type_options: Sequence[di
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_csv_file_from_data', 100, 60)
-def create_csv_file_from_data(data: Any, document_id: str | int, column_type_options: Sequence[dict[str, Any]] | None = None):
+def create_csv_file_from_data(data: Any, document_id: str | int, column_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
         # logger.warning(f'No data provided? Received {data}')
         return
-
-    df_params = {
-        'index': True,
-        'header': True,
-        'index_label': 'record_id',
-        'encoding': 'utf-8',
-        'doublequote': True
-    }
-
+    
     try:
         document = TableDocument.objects.get(id=document_id)
     except TableDocument.DoesNotExist:
         # logger.error(f"Document with ID {document_id} does not exist.")
-        return
+        return None
     else:
         if isinstance(data, bytes):
             data = data.decode('utf-8-sig')
@@ -105,27 +95,14 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_type_opt
             if ';' in first_item:
                 clean_data = list(csv.reader(data.splitlines(), delimiter=';'))
 
-            df = create_dataframe(clean_data[1:], column_type_options)
-            csv_content = df.to_csv(**df_params)
+            create_json_file_from_data(clean_data[1:], document.pk, column_options=column_options)
 
-            content = ContentFile(csv_content)
-            document.file.save(f'{document.name}.csv', content)
-            document.save()
-            
-            # logger.warning(
-            #     "Successfully created Feather "
-            #     f"document from csv string: {document.name}"
-            # )
-
-        # Once the document is created, we need to populate
-        # column_options, column_types and column_names
-        t1 = update_document_options.s(str(document.document_uuid), column_type_options)
-        huey_task.enqueue(t1)
+        return str(document.document_uuid)
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
 @huey_task.rate_limit('create_json_file_from_data', 100, 60)
-def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_type_options: Sequence[dict[str, Any]] | None = None):
+def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
         # logger.warning(f'No data provided? Received {data}')
         return
@@ -142,7 +119,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
         document = TableDocument.objects.get(id=document_id)
     except TableDocument.DoesNotExist:
         # logger.error(f"Document with ID {document_id} does not exist.")
-        return
+        return None
     else:
         if isinstance(data, dict):
             if entry_key is None:
@@ -162,7 +139,8 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
                     data = data['data'].get(token, {})
 
         if isinstance(data, list):
-            df = create_dataframe(data, column_type_options)
+            options = create_column_options_from_dict(column_options)
+            df = create_dataframe(data, options)
             csv_content = df.to_csv(**df_params)
 
             content = ContentFile(csv_content)
@@ -176,7 +154,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
 
        # Once the document is created, we need to populate
         # column_options, column_types and column_names
-        t1 = update_document_options.s(str(document.document_uuid), column_type_options)
+        t1 = update_document_options.s(str(document.document_uuid), column_options)
         huey_task.enqueue(t1)
 
         date = str(datetime.datetime.now(tz=pytz.UTC))
@@ -184,6 +162,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
 
         raw_data = df.to_csv(index=False, encoding='utf-8', doublequote=True)
         document = Document(cache_key, raw_data, metadata={'date': date})
+    return str(document.document_uuid)
 
 
 @huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
@@ -315,7 +294,7 @@ def create_csv_from_url(url: str, **kwargs: Any):
         data=data,
         document_id=instance.pk,
         entry_key=entry_key,
-        column_type_options=using_columns
+        column_options=using_columns
     )
     huey_task.enqueue(t1)
 

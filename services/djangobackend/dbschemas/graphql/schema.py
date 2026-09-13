@@ -21,7 +21,7 @@ class DatabaseSchemaQuery(graphene.ObjectType):
     
     def resolve_db_schema(root, info: GraphQLResolveInfo, id: int):
         database = DatabaseSchema.objects.get(id=id)
-        return {'column_options': database.column_options, 'column_type_options': database.column_type_options}
+        return {'column_options': database.column_options}
 
 
 class DatabaseProviderQuery(graphene.ObjectType):

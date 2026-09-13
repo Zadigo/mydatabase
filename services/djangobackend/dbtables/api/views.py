@@ -1,3 +1,5 @@
+import json
+
 import pandas
 from rest_framework import status
 from rest_framework.generics import (
@@ -74,7 +76,17 @@ class UploadNewDocument(CreateAPIView):
     permission_classes = ()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        # Copy data to make it mutable
+        data = {key: value for key, value in request.data.items()}
+        
+        # Manually decode JSON strings back into Python objects
+        if 'column_options' in data and isinstance(data['column_options'], str):
+            data['column_options'] = json.loads(data['column_options'])
+            
+        if 'documents' in data and isinstance(data['documents'], str):
+            data['documents'] = json.loads(data['documents'])
+
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
         self.perform_create(serializer)

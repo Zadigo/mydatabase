@@ -33,11 +33,6 @@ class TableDocument(models.Model):
         blank=True,
         help_text='A mapping of the column names present in the document'
     )
-    column_type_options = models.JSONField(
-        default=list,
-        blank=True,
-        help_text='A mapping of column names to their type options e.g. uniqueness, not null, etc...'
-    )
     column_options = models.JSONField(
         default=list,
         blank=True,

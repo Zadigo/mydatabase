@@ -1,8 +1,8 @@
 import csv
-import pathlib
+import json
 
 import pytest
-from django.conf import settings
+from django.core.files import File
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -18,10 +18,9 @@ from djangobackend.huey_app import huey_task
 huey_task.immediate = True
 
 @pytest.fixture
-def csv_file():
-    filename = 'test.csv'
-    filepath = pathlib.Path(settings.MEDIA_ROOT) / filename
-    with open(filepath, mode='w', encoding='utf-8') as f:
+def csv_file(tmp_path):
+    filepath = tmp_path / 'test.csv'
+    with filepath.open('w', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['name', 'age'])
         writer.writerow(['Alice', 30])
@@ -30,40 +29,74 @@ def csv_file():
 
 
 @pytest.fixture
+def csv_django_file(csv_file):
+    return File(open(csv_file, 'rb'))
+
+
+@pytest.fixture
+def json_file(tmp_path):
+    filepath = tmp_path / 'test.json'
+    with filepath.open('w', encoding='utf-8') as f:
+        json.dump([{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}], f)
+    return filepath
+
+@pytest.fixture
+def json_django_file(json_file):
+    return File(open(json_file, 'rb'))
+
+
+@pytest.fixture
 def table() -> DatabaseTable:
     return DatabaseTableFactory.create()
 
 
-UPDATE_DATA = pytest.mark.parametrize(
-    "update_data",
-    [
+@pytest.fixture
+def document_metadata():
+    documents_metadata = [
         {
-            'expected_status': 200,
-            'description': 'Update table name successfully',
-            'data': {
-                'name': 'Updated Table Name'
-            }
+            'name': 'file_0',  # Matches the key in the root data dict
+            'url': None,
+            'source_type': 'file',
+            'content_type': 'csv',
+            'primary_key_field': False,
+            'entry_key': None
         },
-        # {
-        #     'description': 'No database table with this id exists',
-        #     'data': {
-        #         'name': 'Updated Table Name'
-        #     }
-        # }
+        {
+            'name': 'file_1',  # Matches the key in the root data dict
+            'url': None,
+            'source_type': 'file',
+            'content_type': 'csv',
+            'primary_key_field': False,
+            'entry_key': None
+        }
     ]
-)
-
-@pytest.mark.django_db
-@UPDATE_DATA
-def test_udpate_table(api_client: APIClient, table, update_data):
-    path = reverse('database_tables:update_table', args=[table.pk])
-    response = api_client.patch(path, data=update_data['data'], format='json')
-    assert response.status_code == update_data['expected_status'], f"Response: {response.json()}"
-
-    data = response.json()
-    assert 'name' in data
-    assert 'documents' in data
-    assert data['name'] == update_data['data']['name']
+    
+    using_columns = [
+        {
+            'name': 'name',
+            'newName': 'name',
+            'unique': False,
+            'visible': True,
+            'nullable': True
+        },
+        {
+            'name': 'age',
+            'newName': 'age',
+            'unique': False,
+            'visible': True,
+            'nullable': True
+        }
+    ]
+    
+    data = {
+        'merge': 'False',
+        'name': 'Test Table',
+        'documents': json.dumps(documents_metadata),
+        'column_options': json.dumps(using_columns),        
+        'file_0': None,  
+        'file_1': None,
+    }
+    return data
 
 
 UPLOAD_DATA = pytest.mark.parametrize(
@@ -82,8 +115,9 @@ UPLOAD_DATA = pytest.mark.parametrize(
 
 
 @pytest.mark.django_db
+@pytest.mark.api
 @UPLOAD_DATA
-def test_upload_document(api_client: APIClient, table, upload_data):
+def test_upload_document_edge_cases(api_client: APIClient, table, upload_data):
     path = reverse('database_tables:upload_document', args=[table.pk])
     response = api_client.post(
         path,
@@ -94,6 +128,20 @@ def test_upload_document(api_client: APIClient, table, upload_data):
 
 
 @pytest.mark.django_db
+@pytest.mark.api
+def test_upload_document_with_multiple_valid_csv_files(api_client: APIClient, document_metadata, table, csv_django_file):
+    path = reverse('database_tables:upload_document', args=[table.pk])
+    
+    document_metadata['file_0'] = csv_django_file
+    document_metadata['file_1'] = csv_django_file
+    
+    response = api_client.post(path, data=document_metadata)    
+    assert response.status_code == 201, response.content
+    assert 'documents' in response.json()
+
+
+@pytest.mark.django_db
+@pytest.mark.api
 def test_upload_file_via_csv(api_client: APIClient, table, csv_file):
     path = reverse('database_tables:upload_document', args=[table.pk])
     with csv_file.open('rb') as f:
@@ -169,6 +217,7 @@ URL_DATA = pytest.mark.parametrize(
 )
 
 @pytest.mark.django_db
+@pytest.mark.api
 @URL_DATA
 def test_upload_via_url(api_client: APIClient, table, url_data):
     path = reverse('database_tables:upload_document', args=[table.pk])
@@ -177,23 +226,7 @@ def test_upload_via_url(api_client: APIClient, table, url_data):
 
 
 @pytest.mark.django_db
+@pytest.mark.api
 def test_upload_file_via_google_sheet_id(api_client: APIClient, table):
     pass
 
-
-
-# class TestCheckoutDocument(TransactionTestCase):
-#     # fixtures = ['fixtures/databases']
-    
-#     def setUp(self):
-#         self.table: DatabaseTable = DatabaseTableFactory.create()
-
-#         file_content = b'name,age\nAlice,30\nBob,25'
-#         self.content_file = ContentFile(file_content, name='test.csv')
-
-#     def test_checkout_file(self):
-#         path = reverse('database_tables:checkout_document', args=[self.table.pk])
-#         response = self.client.post(path, data={'file': self.content_file})
-#         self.assertEqual(response.status_code, 200, response.content)
-#         self.assertIn('sample', response.json())
-#         self.assertIn('columns', response.json())

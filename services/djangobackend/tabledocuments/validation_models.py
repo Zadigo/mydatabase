@@ -14,6 +14,8 @@ class ColumnTypes(enum.Enum):
 
 class ColumnOptionsModel(BaseModel):
     name: str = Field(...)
+    newName: str | None = Field(default=None)
+    columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')
     visible: bool = Field(default=True)
     editable: bool = Field(default=True)
     sortable: bool = Field(default=True)
@@ -26,12 +28,12 @@ class UserSelectedColumnOptionsModel(ColumnOptionsModel):
     newName: str | None = Field(default=None)
 
 
-class ColumnTypeOptionsModel(BaseModel):
-    name: str = Field(...)
-    newName: str | None = Field(default=None)
-    columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')
-    unique: bool = Field(default=False)
-    nullable: bool = Field(default=True)
+# class ColumnTypeOptionsModel(BaseModel):
+#     name: str = Field(...)
+#     newName: str | None = Field(default=None)
+#     columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')
+#     unique: bool = Field(default=False)
+#     nullable: bool = Field(default=True)
 
 
 class DocumentInfoModel(BaseModel):

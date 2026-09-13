@@ -77,7 +77,6 @@ class DocumentEdition:
 
         self.column_names: list[str] = []
         self.column_types: list[dict[str, str]] = []
-        self.column_type_options: list[dict[str, str | bool]] = []
         self.column_options: list[dict[str, str | bool]] = []
 
     async def finalize(self, document_cache_key: str, df: pandas.DataFrame, metadata: dict[str, str | bool] = {}):
@@ -146,7 +145,6 @@ class DocumentEdition:
             
             self.column_names = document.column_names
             self.column_options = document.column_options
-            self.column_type_options = document.column_type_options
             self.column_types = document.column_types
 
             # This function reads the csv document on every call.

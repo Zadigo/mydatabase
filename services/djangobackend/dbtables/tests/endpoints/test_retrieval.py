@@ -1,9 +1,11 @@
+import pytest
 from django.test import TransactionTestCase
 from django.urls import reverse
 
 from dbtables.models import DatabaseTable
 
 
+@pytest.mark.api
 class TestTablesRetrieval(TransactionTestCase):
     fixtures = ('fixtures/databases',)
 
@@ -11,7 +13,7 @@ class TestTablesRetrieval(TransactionTestCase):
         self.instance = DatabaseTable.objects.first()
 
     def test_get_table(self):
-        path = reverse('database_tables:update_table', args=[self.instance.pk])
+        path = reverse('database_tables:retrieve_update_delete_table', args=[self.instance.pk])
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200, response.content)
 

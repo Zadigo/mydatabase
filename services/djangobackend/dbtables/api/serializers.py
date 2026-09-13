@@ -74,9 +74,9 @@ class _ValidateDocuments(serializers.Serializer):
         allow_blank=True,
         allow_null=True
     )
-    file = serializers.FileField(
-        allow_null=True
-    )
+    # file = serializers.FileField(
+    #     allow_null=True
+    # )
     entry_key = serializers.CharField(
         allow_blank=True,
         allow_null=True
@@ -101,13 +101,13 @@ class _ValidateDocuments(serializers.Serializer):
         default=False
     )
 
-    def validate(self, attrs: dict):
-        url = attrs.get('url')
-        file = attrs.get('file')
+    # def validate(self, attrs: dict):
+    #     url = attrs.get('url')
+    #     file = attrs.get('file')
 
-        if url is None and file is None:
-            raise ValidationError('Both url and file cannot be None')
-        return attrs
+    #     if url is None and file is None:
+    #         raise ValidationError('Both url and file cannot be None')
+    #     return attrs
 
 
 class UploadFileSerializer(serializers.Serializer):
@@ -126,7 +126,7 @@ class UploadFileSerializer(serializers.Serializer):
         max_length=255,
         help_text='Name used in case the user wants to merge the documents. This will be the unified name of the document.'
     )
-    using_columns = _ValidateColumnTypes(
+    column_options = _ValidateColumnTypes(
         write_only=True,
         many=True
     )
@@ -147,13 +147,17 @@ class UploadFileSerializer(serializers.Serializer):
         Args:
             entry_key (str, optional): The entry key to resolve the data in the JSON response. Defaults to None.
             content_type (str): The content type of the document. Can be either 'csv' or 'json'.
-            using_columns (list): List of column type options to use when creating the document. Each item in the list should be a dictionary with the following keys:
+            column_options (list): List of column type options to use when creating the document. Each item in the list should be a dictionary with the following keys:
                 - name (str): The name of the column.
                 - type (str): The type of the column.
         """
         request: HttpRequest = self._context['request']
-        file = request.FILES.get('file', None)
 
+        document: TableDocument | None = kwargs.get('document', None)
+        if document is None:
+            return
+        
+        file = request.FILES.get(document.name, None)
         if file is not None:
             file_content = ''
 
@@ -162,15 +166,16 @@ class UploadFileSerializer(serializers.Serializer):
 
             params = {
                 'data': file_content,
-                'column_type_json': []
+                'document_id': str(document.pk),
+                'column_options': kwargs.get('column_options', []),
             }
 
             if kwargs['content_type'] == 'csv':
-                django_tasks.create_csv_file_from_data(**params)
+                result = django_tasks.create_csv_file_from_data(**params)
 
             if kwargs['content_type'] == 'json':
                 params['entry_key'] = kwargs['entry_key']
-                django_tasks.create_json_file_from_data(**params)
+                result = django_tasks.create_json_file_from_data(**params)
 
     def _upload_with_url(self, url: str, **kwargs: str):
         """Upload a document from an url. The url can point to a CSV or JSON file.
@@ -253,7 +258,7 @@ class UploadFileSerializer(serializers.Serializer):
 
         table = DatabaseTable.objects.get(id=table_id)
 
-        using_columns = validated_data['using_columns']
+        column_options = validated_data['column_options']
         instances: list[TableDocument] = []
 
         if validated_data['merge']:
@@ -261,7 +266,7 @@ class UploadFileSerializer(serializers.Serializer):
             # and merge them into a single document
             self._merge_documents(
                 validated_data['documents'], 
-                using_columns=using_columns
+                column_options=column_options
             )
             return
 
@@ -269,140 +274,35 @@ class UploadFileSerializer(serializers.Serializer):
         for i, params in enumerate(documents):
             url = params.get('url', None)
 
-            file = params.pop('file', None)
+            # file = params.pop('file', None)
             entry_key = params.pop('entry_key', None)
             source_type = params.pop('source_type')
             content_type = params.pop('content_type')
             primary_key_field = params.pop('primary_key_field')
+            primary_document = params.pop('primary_document', False)
 
-            if file is None and url is None:
-                raise ValidationError(f'Both file and url cannot be None for document: {i}')
+            # if file is None and url is None:
+            #     raise ValidationError(f'Both file and url cannot be None for document: {i}')
 
-            # instance = TableDocument.objects.create(**params)
-            # table.documents.add(instance)
-            # instances.append(instance)
+            instance = TableDocument.objects.create(**params)
+            table.documents.add(instance)
+            instances.append(instance)
 
             if source_type == 'file':
                 self._upload_with_file(
+                    document=instance,
                     entry_key=entry_key,
                     content_type=content_type,
-                    using_columns=using_columns,
+                    column_options=column_options,
                 )
 
             if source_type == 'url':
                 self._upload_with_url(
                     url,
-                    name = params.get('name', None),
+                    document=instance,
                     entry_key=entry_key, 
                     content_type=content_type,
-                    using_columns=using_columns,
+                    column_options=column_options,
                 )
 
         return instances
-
-
-
-    # def create(self, validated_data):
-    #     request: Request = self._context['request']
-    #     table_id = request.parser_context['kwargs']['pk']
-
-    #     entry_key = None
-    #     if 'entry_key' in validated_data:
-    #         entry_key = validated_data.pop('entry_key')
-
-    #         if entry_key == '':
-    #             entry_key = None
-
-    #     user_column_type_options = validated_data.pop('using_columns')
-
-    #     column_type_serializer = _ValidateColumnTypes(
-    #         data=user_column_type_options,
-    #         many=True
-    #     )
-
-    #     try:
-    #         column_type_serializer.is_valid(raise_exception=True)
-    #     except ValidationError as e:
-    #         field_errors = {}
-    #         for error in e.detail:
-    #             for field, errors in error.items():
-    #                 field_errors[field] = str(errors[-1])
-    #         raise ValidationError({'using_columns': field_errors})
-
-    #     # At least one column should be visible
-    #     column_type_json = column_type_serializer.validated_data
-    #     column_state = list(map(lambda x: x['visible'], column_type_json))
-
-    #     if not any(column_state):
-    #         raise ValidationError('At least one column should be visible')
-
-    #     # TODO: Even when the tasks fails, the document
-    #     # is still created. We should handle that case
-    #     # and delete the document if the task fails or
-    #     # not create the document until the task succeeds
-    #     table = DatabaseTable.objects.get(id=table_id)
-    #     document = TableDocument.objects.create(**validated_data)
-    #     table.documents.add(document)
-
-    #     # When we are dealing with a file
-    #     file = request.FILES.get('file', None)
-    #     if file is not None:
-    #         file_content = ''
-
-    #         for chunk in file.chunks():
-    #             file_content += chunk.decode('utf-8')
-
-    #         if is_csv_file(file.name):
-    #             tasks.create_csv_file_from_data.apply_async(
-    #                 args=[
-    #                     file_content,
-    #                     document.pk,
-    #                     column_type_json
-    #                 ],
-    #                 countdown=5
-    #             )
-
-    #         if is_json_file(file.name):
-    #             tasks.create_json_file_from_data.apply_async(
-    #                 args=[
-    #                     file_content,
-    #                     document.pk,
-    #                     entry_key,
-    #                     column_type_json
-    #                 ],
-    #                 countdown=5
-    #             )
-
-    #     # If we are dealing with an url, then we need to
-    #     # create the csv document asynchronously
-    #     if document.url and document.file is None:
-    #         tasks.get_document_from_url.apply_async(
-    #             args=[document.url],
-    #             link=[
-    #                 tasks.create_csv_file_from_data.s(
-    #                     document.pk,
-    #                     entry_key,
-    #                     columns_serializer.validated_data
-    #                 )
-    #             ]
-    #         )
-
-    #     # In the same manner, if we have a google sheet id
-    #     # we need to fetch the data from the sheet and create
-    #     # the csv file locally
-    #     if document.google_sheet_id and document.file is None:
-    #         tasks.get_document_from_google_sheet.apply_async(
-    #             args=[
-    #                 table.id,
-    #                 document.google_sheet_id
-    #             ],
-    #             link=[
-    #                 tasks.create_csv_file_from_data.s(
-    #                     document.pk, 
-    #                     entry_key, 
-    #                     columns_serializer.validated_data
-    #                 )
-    #             ]
-    #         )
-                
-    #     return document

@@ -60,9 +60,7 @@ class DocumentEditionConsumer(BaseConsumerMixin, AsyncJsonWebsocketConsumer):
                     columns=LoadedViaIdColumns(
                         names=self.document_edition.column_names,
                         options=self.document_edition.column_options,
-                        types=self.document_edition.column_types,
-                        type_options=self.document_edition.column_type_options
-
+                        types=self.document_edition.column_types
                     )
                 )
                 await self.send_json(response.model_dump())

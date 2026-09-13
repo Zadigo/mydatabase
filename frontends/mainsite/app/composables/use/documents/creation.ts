@@ -1,6 +1,7 @@
-import type { Database, VueUseWsReturnType } from '~/types'
-import type { NewDocument, DocumentTypes, DocumentParams } from '.'
+import type { Database } from '#shared/types'
+import type { NewDocument, DocumentTypes, DocumentParams } from '#shared/types/documents'
 import type { StepperItem } from '@nuxt/ui'
+import type { VueUseWsReturnType } from '~/types'
 
 /**
  * Composable used for creating a new document
@@ -23,7 +24,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
       }
     ],
     merge: false,
-    using_columns: []
+    column_type_options: []
   })
 
   const getNewDocumentByIndex = reactive((index: number) => newDocument.value.documents[index])
@@ -47,8 +48,8 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
         }
       ],
       merge: false,
-      using_columns: []
-    }
+      column_type_options: []
+    } as NewDocument
   }
 
   function selectPrimaryKeyFile(documentParams: DocumentParams | undefined) {
@@ -68,7 +69,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
         file: undefined,
         entry_key: null,
         primary_key_file: false
-      }
+      } as DocumentParams
     } else {
       newDocument.value.documents.splice(index, 1)
     }

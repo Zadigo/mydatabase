@@ -11,7 +11,7 @@ class SimpleDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TableDocument
         fields = (
-            'id', 'document_uuid', 'name', 'column_names', 'column_type_options',
+            'id', 'document_uuid', 'name', 'column_names',
             'column_options', 'column_types', 'updated_at', 'created_at'
         )
 

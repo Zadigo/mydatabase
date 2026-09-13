@@ -1,9 +1,11 @@
+import pytest
 from django.test import TransactionTestCase
 from django.urls import reverse
 
 from dbtables.models import DatabaseTable
 
 
+@pytest.mark.api
 class TestTablesCreation(TransactionTestCase):
     fixtures = ('fixtures/databases',)
 

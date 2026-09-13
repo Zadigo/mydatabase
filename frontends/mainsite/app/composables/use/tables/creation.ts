@@ -1,4 +1,4 @@
-import type { SimpleTable } from '~/types'
+import type { SimpleTable } from '#shared/types'
 import type { NewTable } from '~~/shared/types'
 
 /**

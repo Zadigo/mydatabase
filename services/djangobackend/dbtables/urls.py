@@ -23,6 +23,6 @@ urlpatterns = [
     re_path(
         r'^(?P<pk>\d+)$',
         views.UpdateTable.as_view(),
-        name='update_table'
+        name='retrieve_update_delete_table'
     )
 ]

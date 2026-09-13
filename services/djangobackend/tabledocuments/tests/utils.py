@@ -1,3 +1,4 @@
+
 from collections.abc import Sequence
 
 from django.core.files.base import ContentFile
@@ -69,7 +70,7 @@ def build_column_options(
 
     default_options = default_options | kwargs
 
-    options = []
+    options: list[UserSelectedColumnOptionsModel] = []
     for column in columns:
         instance = UserSelectedColumnOptionsModel(name=column, **default_options)
 
@@ -83,5 +84,5 @@ def build_column_options(
         if column in new_names:
             instance.newName = new_names.get(column, None)
 
-        options.append(instance.model_dump())
+        options.append(instance)
     return options

@@ -1,5 +1,5 @@
-import type { Empty, FileCheckoutResponse, SimpleTable, Undefineable } from '~/types'
-import type { DocumentParams, NewDocument } from '.'
+import type { FileCheckoutResponse, SimpleTable } from '#shared/types'
+import type { DocumentParams, NewDocument } from '#shared/types/documents'
 
 const [usePrefetchProvider, _usePrefetchStore] = createInjectionState((selectedTable: WritableComputedRef<Undefineable<SimpleTable>>, newDocument: Ref<NewDocument>) => {
   const fileCheckoutResponse = ref<FileCheckoutResponse | null>(null)

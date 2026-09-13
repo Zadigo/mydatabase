@@ -68,9 +68,9 @@ class TestUpdateDocumentOptions:
             }
         ]
         db.refresh_from_db()
-        assert db.column_type_options == expected_column_options
+        assert db.column_options == expected_column_options
 
-    def test_with_column_type_options_param(self, db):
+    def test_with_column_options_param(self, db):
         options = [
             ColumnOptionsModel(
                 name='name',
@@ -81,10 +81,10 @@ class TestUpdateDocumentOptions:
             )
         ]
         column_options = [item.model_dump() for item in options]
-        django_tasks.update_document_options(db.document_uuid, column_type_options=column_options)
+        django_tasks.update_document_options(db.document_uuid, column_options=column_options)
 
         db.refresh_from_db()
-        assert len(db.column_type_options) > 0
+        assert len(db.column_options) > 0
 
 
 class TestCreateFromCsvFile:
@@ -100,7 +100,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data=data,
             document_id=instance.pk,
-            column_type_options=[]
+            column_options=[]
         )
 
     @pytest.mark.django_db
@@ -110,7 +110,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data= b'firstname,lastname\nJane,Doe',
             document_id=instance.pk,
-            column_type_options= build_column_options('firstname', 'lastname')
+            column_options= build_column_options('firstname', 'lastname')
         )
 
         instance.refresh_from_db()
@@ -123,7 +123,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data= b'firstname;lastname\nJane;Doe',
             document_id=instance.pk,
-            column_type_options= build_column_options('firstname', 'lastname')
+            column_options= build_column_options('firstname', 'lastname')
         )
 
         instance.refresh_from_db()
@@ -136,7 +136,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data='firstname,lastname\nJane,Doe',
             document_id=instance.pk,
-            column_type_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options('firstname', 'lastname')
         )
 
         instance.refresh_from_db()
@@ -156,7 +156,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data=data,
             document_id=instance.pk,
-            column_type_options=[]
+            column_options=[]
         )
 
     @pytest.mark.django_db
@@ -166,7 +166,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data={'items': [{'firstname': 'Jane', 'lastname': 'Doe'}]},
             document_id=instance.pk,
-            column_type_options=build_column_options('firstname', 'lastname'),
+            column_options=build_column_options('firstname', 'lastname'),
             entry_key='items'
         )
 
@@ -180,7 +180,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data={'firstname': 'Jane', 'lastname': 'Doe'},
             document_id=instance.pk,
-            column_type_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options('firstname', 'lastname')
         )
         
 
@@ -194,7 +194,7 @@ class TestCreateJsonFileFromData:
         django_tasks.create_json_file_from_data(
             data=[{'firstname': 'Jane', 'lastname': 'Doe'}],
             document_id=instance.pk,
-            column_type_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options('firstname', 'lastname')
         )
 
         instance.refresh_from_db()

@@ -24,4 +24,3 @@ class TestTableDocument(TestCase):
 
         self.assertIsNotNone(instance.column_options)
         self.assertIsNotNone(instance.column_types)
-        self.assertIsNotNone(instance.column_type_options)

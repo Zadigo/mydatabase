@@ -1,3 +1,5 @@
+import { DATABASE_TRIGGER_EVENT } from '~/constants/triggers'
+
 export type DatabaseTriggerEvent = (typeof DATABASE_TRIGGER_EVENT)[number]
 
 interface Condition {
