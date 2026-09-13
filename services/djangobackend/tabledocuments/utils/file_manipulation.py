@@ -111,13 +111,6 @@ def create_dataframe(clean_data: list[dict[str, Any]], column_options: Sequence[
             inplace=True
         )
 
-    # Resolve hidden/unhidden columns
-    visible_columns = list(
-        filter(
-            lambda x: x.visible,
-            column_options
-        )
-    )
     visible_column_names = [x.newName or x.name for x in visible_columns]
 
     if visible_column_names:

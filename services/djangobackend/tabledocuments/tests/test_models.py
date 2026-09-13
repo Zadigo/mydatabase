@@ -1,26 +1,25 @@
-from django.test import TestCase
+import pytest
 
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.utils import DocumentFactory, create_file_based_instance
-from tabledocuments.validation_models import ColumnOptionsModel, ColumnTypeOptionsModel
+from tabledocuments.validation_models import ColumnOptionsModel
 
 
-class TestTableDocument(TestCase):
-    def test_model_creation(self):
-        instance = create_file_based_instance()
-        self.assertIsNotNone(instance.file, instance.file)
-        instance.file.delete(save=True)
+@pytest.mark.django_db
+def test_model_creation():
+    instance = create_file_based_instance()
+    assert instance.file is not None, instance.file
+    instance.file.delete(save=True)
 
-    def test_mixed_options(self):
-        instance: TableDocument = DocumentFactory.create()
 
-        options = ColumnOptionsModel(name='firstname')
-        instance.column_options = [options.model_dump()]
-        
-        type_options = ColumnTypeOptionsModel(name='firstname')
-        instance.column_types = [type_options.model_dump()]
+@pytest.mark.django_db
+def test_mixed_options():
+    instance: TableDocument = DocumentFactory.create()
 
-        instance.save()
+    options = ColumnOptionsModel(name='firstname')
+    instance.column_options = [options.model_dump()]
+    
+    instance.save()
 
-        self.assertIsNotNone(instance.column_options)
-        self.assertIsNotNone(instance.column_types)
+    assert instance.column_options is not None
+    assert instance.column_types is not None

@@ -10,7 +10,7 @@ from tabledocuments import django_tasks
 from tabledocuments.models import TableDocument
 from tabledocuments.tests.utils import (
     DocumentFactory,
-    build_column_options,
+    build_column_options_json,
     create_file_based_instance,
 )
 from tabledocuments.validation_models import ColumnOptionsModel
@@ -110,7 +110,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data= b'firstname,lastname\nJane,Doe',
             document_id=instance.pk,
-            column_options= build_column_options('firstname', 'lastname')
+            column_options= build_column_options_json('firstname', 'lastname')
         )
 
         instance.refresh_from_db()
@@ -123,7 +123,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data= b'firstname;lastname\nJane;Doe',
             document_id=instance.pk,
-            column_options= build_column_options('firstname', 'lastname')
+            column_options= build_column_options_json('firstname', 'lastname')
         )
 
         instance.refresh_from_db()
@@ -136,7 +136,7 @@ class TestCreateFromCsvFile:
         django_tasks.create_csv_file_from_data(
             data='firstname,lastname\nJane,Doe',
             document_id=instance.pk,
-            column_options=build_column_options('firstname', 'lastname')
+            column_options=build_column_options_json('firstname', 'lastname')
         )
 
         instance.refresh_from_db()

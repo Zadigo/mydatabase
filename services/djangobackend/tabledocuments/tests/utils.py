@@ -1,12 +1,13 @@
 
 from collections.abc import Sequence
+from typing import Any
 
 from django.core.files.base import ContentFile
 from factory.django import DjangoModelFactory
 from faker import Faker as FakerClass
 
 from tabledocuments.models import TableDocument
-from tabledocuments.validation_models import UserSelectedColumnOptionsModel
+from tabledocuments.validation_models import ColumnOptionsModel
 
 fake = FakerClass()
 
@@ -56,6 +57,7 @@ def build_column_options(
     not_searchable: Sequence[str] = (), 
     nullable: Sequence[str] = (),
     unique: Sequence[str] = (),
+    column_types: dict[str, str] = {},
     **kwargs: bool
 ):
     """Returns a dictionnary of mixed options"""
@@ -70,19 +72,26 @@ def build_column_options(
 
     default_options = default_options | kwargs
 
-    options: list[UserSelectedColumnOptionsModel] = []
+    options: list[ColumnOptionsModel] = []
     for column in columns:
-        instance = UserSelectedColumnOptionsModel(name=column, **default_options)
+        instance = ColumnOptionsModel(name=column, **default_options)
 
         instance.visible = column not in not_visible 
         instance.editable = column not in not_editable
-        instance.sortable = column in not_sortable 
-        instance.searchable = column in not_searchable
-        instance.nullable = not column in nullable
+        instance.sortable = column not in not_sortable 
+        instance.searchable = column not in not_searchable
+        instance.nullable = column not in nullable
         instance.unique = column in unique
+        instance.newName = None
+        instance.columnType = column_types.get(column, 'String')
 
         if column in new_names:
             instance.newName = new_names.get(column, None)
 
         options.append(instance)
     return options
+
+
+def build_column_options_json(*args: str, **kwargs: Any) -> list[dict]:
+    options = build_column_options(*args, **kwargs)
+    return [item.model_dump() for item in options]

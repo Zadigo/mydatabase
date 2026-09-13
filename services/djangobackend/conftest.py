@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from faker import Faker
+from rest_framework.test import APIClient
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
@@ -115,3 +116,19 @@ def authenticated_client():
     token = response.json()['access']
     client.headers = {'HTTP_AUTHORIZATION': f'Token {token}'}
     return client
+
+
+@pytest.fixture
+def json_data():
+    return [
+        {
+            "name": "Alice", 
+            "age": 30,
+            "meta": '{"age": 30, "city": "New York"}'
+        },
+        {
+            "name": "Bob", 
+            "age": 25,
+            "meta": '{"age": 30, "city": "New York"}'
+        }
+    ]

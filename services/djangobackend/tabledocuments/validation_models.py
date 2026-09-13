@@ -24,18 +24,6 @@ class ColumnOptionsModel(BaseModel):
     unique: bool = Field(default=False)
 
 
-class UserSelectedColumnOptionsModel(ColumnOptionsModel):
-    newName: str | None = Field(default=None)
-
-
-# class ColumnTypeOptionsModel(BaseModel):
-#     name: str = Field(...)
-#     newName: str | None = Field(default=None)
-#     columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')
-#     unique: bool = Field(default=False)
-#     nullable: bool = Field(default=True)
-
-
 class DocumentInfoModel(BaseModel):
     uuid: str = Field(...)
     name: str = Field(...)
