@@ -74,9 +74,6 @@ class _ValidateDocuments(serializers.Serializer):
         allow_blank=True,
         allow_null=True
     )
-    # file = serializers.FileField(
-    #     allow_null=True
-    # )
     entry_key = serializers.CharField(
         allow_blank=True,
         allow_null=True
@@ -101,24 +98,12 @@ class _ValidateDocuments(serializers.Serializer):
         default=False
     )
 
-    # def validate(self, attrs: dict):
-    #     url = attrs.get('url')
-    #     file = attrs.get('file')
-
-    #     if url is None and file is None:
-    #         raise ValidationError('Both url and file cannot be None')
-    #     return attrs
-
 
 class UploadFileSerializer(serializers.Serializer):
     """Serializer used to validate file uploads. In the specific
     case of using an url, the user can indicate an entry key that
     will be used to get the actual data nested in the JSON response."""
 
-    # new_documents = SimpleDocumentSerializer(
-    #     many=True, 
-    #     read_only=True
-    # )
     name = serializers.CharField(
         write_only=True,
         allow_blank=True,
@@ -170,12 +155,16 @@ class UploadFileSerializer(serializers.Serializer):
                 'column_options': kwargs.get('column_options', []),
             }
 
+            result = None
+
             if kwargs['content_type'] == 'csv':
                 result = django_tasks.create_csv_file_from_data(**params)
 
             if kwargs['content_type'] == 'json':
                 params['entry_key'] = kwargs['entry_key']
                 result = django_tasks.create_json_file_from_data(**params)
+
+            return result
 
     def _upload_with_url(self, url: str, **kwargs: str):
         """Upload a document from an url. The url can point to a CSV or JSON file.
@@ -201,7 +190,7 @@ class UploadFileSerializer(serializers.Serializer):
             headers['Accept'] = 'text/csv'
 
         kwargs['headers'] = headers
-        django_tasks.create_csv_from_url(url, **kwargs)
+        return django_tasks.create_csv_from_url(url, **kwargs)
 
     def _merge_documents(self, documents: list[dict], **kwargs: str):
         """Retrieve the content of all the documents and merge them into a single one.
@@ -231,16 +220,17 @@ class UploadFileSerializer(serializers.Serializer):
         other_documents: list[pandas.DataFrame] = []
 
         for document in documents:
-            if document['primary_document'] and primary_document is not None:
-                result = django_tasks.prefetch_data_from_url(document['url'])
-                response_data: dict = result.get()
+            result = django_tasks.prefetch_data_from_url(document['url'])
+            response_data: dict = result.get()
+
+            if document['primary_document'] and primary_document is None:
                 primary_document = pandas.DataFrame(response_data['data'])
                 continue
 
-            result = django_tasks.prefetch_data_from_url(document['url'])
-            response_data: dict = result.get()
             other_documents.append(pandas.DataFrame(response_data['data']))
 
+        # Only use the columns of the primary document
+        # to merge the other documents
         columns = primary_document.columns.tolist()
 
         dfs = [pandas.DataFrame(item, columns=columns) for item in other_documents]
@@ -288,21 +278,17 @@ class UploadFileSerializer(serializers.Serializer):
             table.documents.add(instance)
             instances.append(instance)
 
+            task_params = {
+                'document': instance,
+                'entry_key': entry_key,
+                'content_type': content_type,
+                'column_options': column_options,
+            }
+
             if source_type == 'file':
-                self._upload_with_file(
-                    document=instance,
-                    entry_key=entry_key,
-                    content_type=content_type,
-                    column_options=column_options,
-                )
+                self._upload_with_file(**task_params)
 
             if source_type == 'url':
-                self._upload_with_url(
-                    url,
-                    document=instance,
-                    entry_key=entry_key, 
-                    content_type=content_type,
-                    column_options=column_options,
-                )
+                self._upload_with_url(url, **task_params,)
 
         return instances

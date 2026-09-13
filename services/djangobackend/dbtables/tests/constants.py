@@ -1,95 +1,21 @@
+from tabledocuments.validation_models import ColumnOptionsModel
+
 OPENDATASOFT_URL = 'https://data.opendatasoft.com/api/explore/v2.1/catalog/datasets/panneaux4x3-feuille1@issy-les-moulineaux/records?limit=5'
 
 
 OPENDATASOFT_COLUMN_TYPES = [
-    {
-        'name': 'numero',
-        'newName': 'numero',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'etat',
-        'newName': 'etat',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'date_de_1er_montage',
-        'newName': 'date_de_1er_montage',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'type_panneau',
-        'newName': 'type_panneau',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'affichage',
-        'newName': 'affichage',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'adresse_emplacement',
-        'newName': 'adresse_emplacement',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'details_emplacements',
-        'newName': 'details_emplacements',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'code_postal',
-        'newName': 'code_postal',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'commune',
-        'newName': 'commune',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'coordonnees_gps',
-        'newName': 'coordonnees_gps',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'street_view',
-        'newName': 'street_view',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    }
+    ColumnOptionsModel(name='numero').model_dump(),
+    ColumnOptionsModel(name='numero').model_dump(),
+    ColumnOptionsModel(name='etat').model_dump(),
+    ColumnOptionsModel(name='date_de_1er_montage').model_dump(),
+    ColumnOptionsModel(name='type_panneau').model_dump(),
+    ColumnOptionsModel(name='affichage').model_dump(),
+    ColumnOptionsModel(name='adresse_emplacement').model_dump(),
+    ColumnOptionsModel(name='details_emplacements').model_dump(),
+    ColumnOptionsModel(name='code_postal').model_dump(),
+    ColumnOptionsModel(name='commune').model_dump(),
+    ColumnOptionsModel(name='coordonnees_gps').model_dump(),
+    ColumnOptionsModel(name='street_view').model_dump()
 ]
 
 
@@ -97,38 +23,10 @@ JSONPLACEHOLDER_URL = 'https://jsonplaceholder.typicode.com/posts'
 
 
 JSONPLACEHOLDER_COLUMN_TYPES = [
-    {
-        'name': 'userId',
-        'newName': 'userId',
-        'columnType': 'Integer',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'id',
-        'newName': 'id',
-        'columnType': 'Integer',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'title',
-        'newName': 'title',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    },
-    {
-        'name': 'body',
-        'newName': 'body',
-        'columnType': 'String',
-        'unique': False,
-        'nullable': True,
-        'visible': True,
-    }
+    ColumnOptionsModel(name='userId').model_dump(),
+    ColumnOptionsModel(name='id').model_dump(),
+    ColumnOptionsModel(name='title').model_dump(),
+    ColumnOptionsModel(name='body').model_dump()
 ]
 
 

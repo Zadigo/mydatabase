@@ -1,3 +1,5 @@
+import csv
+import json
 import pathlib
 
 import pytest
@@ -5,6 +7,7 @@ from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from django.urls import reverse
 from environ import Env
 from faker import Faker
@@ -138,3 +141,31 @@ def json_data():
             "meta": '{"age": 30, "city": "New York"}'
         }
     ]
+
+
+@pytest.fixture
+def csv_file(tmp_path):
+    filepath = tmp_path / 'test.csv'
+    with filepath.open('w', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['name', 'age'])
+        writer.writerow(['Alice', 30])
+        writer.writerow(['Bob', 25])
+    return filepath
+
+
+@pytest.fixture
+def csv_django_file(csv_file):
+    return File(open(csv_file, 'rb'))
+
+
+@pytest.fixture
+def json_file(tmp_path):
+    filepath = tmp_path / 'test.json'
+    with filepath.open('w', encoding='utf-8') as f:
+        json.dump([{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}], f)
+    return filepath
+
+@pytest.fixture
+def json_django_file(json_file):
+    return File(open(json_file, 'rb'))

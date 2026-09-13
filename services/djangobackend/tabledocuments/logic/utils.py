@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from tabledocuments.validation_models import ColumnOptionsModel
 
+
 def create_column_options(columns: Sequence[str]):
     """Function that creates column options that is used
     in the frontend to toggle visibility, editability or

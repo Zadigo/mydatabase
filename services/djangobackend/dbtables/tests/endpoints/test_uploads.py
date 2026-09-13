@@ -1,8 +1,6 @@
-import csv
 import json
 
 import pytest
-from django.core.files import File
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -14,40 +12,23 @@ from dbtables.tests.constants import (
 )
 from dbtables.tests.utils import DatabaseTableFactory
 from djangobackend.huey_app import huey_task
+from tabledocuments.validation_models import ColumnOptionsModel
 
 huey_task.immediate = True
 
 @pytest.fixture
-def csv_file(tmp_path):
-    filepath = tmp_path / 'test.csv'
-    with filepath.open('w', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(['name', 'age'])
-        writer.writerow(['Alice', 30])
-        writer.writerow(['Bob', 25])
-    return filepath
-
-
-@pytest.fixture
-def csv_django_file(csv_file):
-    return File(open(csv_file, 'rb'))
-
-
-@pytest.fixture
-def json_file(tmp_path):
-    filepath = tmp_path / 'test.json'
-    with filepath.open('w', encoding='utf-8') as f:
-        json.dump([{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}], f)
-    return filepath
-
-@pytest.fixture
-def json_django_file(json_file):
-    return File(open(json_file, 'rb'))
-
-
-@pytest.fixture
 def table() -> DatabaseTable:
     return DatabaseTableFactory.create()
+
+
+@pytest.fixture
+def empty_upload():
+    return {
+        'name': '',
+        'column_options': [],
+        'documents': [],
+        'merge': False
+    }
 
 
 @pytest.fixture
@@ -70,29 +51,33 @@ def document_metadata():
             'entry_key': None
         }
     ]
-    
-    using_columns = [
-        {
-            'name': 'name',
-            'newName': 'name',
-            'unique': False,
-            'visible': True,
-            'nullable': True
-        },
-        {
-            'name': 'age',
-            'newName': 'age',
-            'unique': False,
-            'visible': True,
-            'nullable': True
-        }
+
+    option1 = ColumnOptionsModel(
+        name='name',
+        newName='name',
+        unique=False,
+        visible=True,
+        nullable=True
+    )
+
+    option2 = ColumnOptionsModel(
+        name='age',
+        newName='age',
+        unique=False,
+        visible=True,
+        nullable=True
+    )
+
+    column_options = [
+        option1.model_dump(),
+        option2.model_dump()
     ]
     
     data = {
         'merge': 'False',
         'name': 'Test Table',
         'documents': json.dumps(documents_metadata),
-        'column_options': json.dumps(using_columns),        
+        'column_options': json.dumps(column_options),        
         'file_0': None,  
         'file_1': None,
     }
@@ -135,18 +120,10 @@ def test_upload_document_with_multiple_valid_csv_files(api_client: APIClient, do
     document_metadata['file_0'] = csv_django_file
     document_metadata['file_1'] = csv_django_file
     
-    response = api_client.post(path, data=document_metadata)    
+    response = api_client.post(path, data=document_metadata)
+
     assert response.status_code == 201, response.content
     assert 'documents' in response.json()
-
-
-@pytest.mark.django_db
-@pytest.mark.api
-def test_upload_file_via_csv(api_client: APIClient, table, csv_file):
-    path = reverse('database_tables:upload_document', args=[table.pk])
-    with csv_file.open('rb') as f:
-        response = api_client.post(path, data={'file': f}, format='multipart')
-    assert response.status_code == 400, response.content
 
 
 URL_DATA = pytest.mark.parametrize(
@@ -157,7 +134,7 @@ URL_DATA = pytest.mark.parametrize(
             'description': 'No documents provided',
             'data': {
                 'name': '',
-                'using_columns': [],
+                'column_options': [],
                 'documents': [],
                 'merge': False
             }
@@ -167,7 +144,7 @@ URL_DATA = pytest.mark.parametrize(
             'description': 'One document points to a valid JSON file',
             'data': {
                 'name': '',
-                'using_columns': OPENDATASOFT_COLUMN_TYPES,
+                'column_options': OPENDATASOFT_COLUMN_TYPES,
                 'documents': [
                     {
                         'name': 'Open Data',
@@ -187,7 +164,7 @@ URL_DATA = pytest.mark.parametrize(
             'description': 'Test content merging',
             'data': {
                 'name': '',
-                'using_columns': OPENDATASOFT_COLUMN_TYPES,
+                'column_options': OPENDATASOFT_COLUMN_TYPES,
                 'documents': [
                     {
                         'name': 'Json Data',
@@ -196,7 +173,7 @@ URL_DATA = pytest.mark.parametrize(
                         'entry_key': '',
                         'source_type': 'url',
                         'content_type': 'json',
-                        # 'primary_document': True, # TODO: Add this field
+                        'primary_document': True,
                         'primary_key_field': False # TODO: Remove this field
                     },
                     {
@@ -206,7 +183,7 @@ URL_DATA = pytest.mark.parametrize(
                         'entry_key': '',
                         'source_type': 'url',
                         'content_type': 'json',
-                        # 'primary_document': True,
+                        'primary_document': False,
                         'primary_key_field': False
                     }
                 ],

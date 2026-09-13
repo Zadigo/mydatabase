@@ -13,7 +13,10 @@ from rest_framework.response import Response
 from dbtables.api.serializers import DatabaseTableSerializer, UploadFileSerializer
 from dbtables.models import DatabaseTable
 from tabledocuments.api.serializer import SimpleDocumentSerializer
-from tabledocuments.logic.utils import user_preference_column_options
+from tabledocuments.logic.utils import (
+    create_column_options,
+    resolve_models,
+)
 
 
 class UpdateTable(RetrieveUpdateDestroyAPIView):
@@ -60,7 +63,7 @@ class CheckoutDocument(GenericAPIView):
             'numberOfRows': df.shape[0],
             'numberOfColumns': df.shape[1],
             'columns': df.columns.tolist(),
-            'columnTypes': user_preference_column_options(df.columns.tolist()),
+            'columnTypes': resolve_models(create_column_options(df.columns.tolist()))
         }
 
         return Response(template, status=status.HTTP_201_CREATED)

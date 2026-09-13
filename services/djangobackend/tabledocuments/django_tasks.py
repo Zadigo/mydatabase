@@ -271,6 +271,7 @@ def create_csv_from_url(url: str, **kwargs: Any):
     try:
         table = DatabaseTable.objects.get(id=table_id)
     except DatabaseTable.DoesNotExist:
+        logger.error(f"DatabaseTable with id {table_id} does not exist.")
         return
 
     template: dict[str, Any] = {'cache_key': '', 'data': None, 'errors': []}
