@@ -17,7 +17,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
         name: '',
         content_type: 'json',
         source_type: 'url',
-        url: null,
+        url: '',
         file: undefined,
         entry_key: null,
         primary_key_file: false
@@ -41,7 +41,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
           name: '',
           content_type: 'json',
           source_type: 'url',
-          url: null,
+          url: '',
           file: undefined,
           entry_key: null,
           primary_key_file: false
@@ -59,19 +59,22 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
     }
   }
 
-  function removeDocument(index: number) {
+  function removeDocument(index: number, callback?: () => void) {
     if (newDocument.value.documents.length === 1) {
       newDocument.value.documents[0] = {
         name: '',
         content_type: 'json',
         source_type: 'url',
-        url: null,
+        url: '',
         file: undefined,
         entry_key: null,
         primary_key_file: false
       } as DocumentParams
     } else {
       newDocument.value.documents.splice(index, 1)
+    }
+    if (callback) {
+      callback()
     }
   }
 
@@ -80,7 +83,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
       name: '',
       content_type: documentType,
       source_type: 'url',
-      url: null,
+      url: '',
       file: undefined,
       entry_key: null,
       primary_key_file: false
@@ -136,14 +139,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
     currentStep.value = item.title || 'Documents'
   }
 
-  // const canSend = computed(() => isDefined(newDocument.value.file))
-
-
   return {
-    /**
-     * Whether the "Create Document" button can be clicked or not. Only when the user has reached the last step of the stepper, which is "Select columns"
-     */
-    // canSend,
     /**
      * The current step of the stepper when creating a new document
      */

@@ -16,9 +16,7 @@
   
                 <!-- Add Document -->
                 <nuxt-dropdown-menu :filter="{ icon: 'i-lucide-search', loading: false }" :items="addDocumentMenuItems" ignore-filter>
-                  <nuxt-button>
-                    <icon name="i-lucide-plus" />
-                  </nuxt-button>
+                  <nuxt-button icon="i-lucide-plus" />
                 </nuxt-dropdown-menu>
               </div>
               
@@ -68,6 +66,7 @@ const { selectedTable, selectedTableDocument } = useTableEditionComposable()
 
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal, updateStep, addDocument } = useCreateDocument(wsObject)
+const { checkedOut } = useDocumentCheckoutCompoable(newDocument)
 
 /**
  * File checkout

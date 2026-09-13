@@ -99,6 +99,11 @@ class _ValidateDocuments(serializers.Serializer):
     )
 
 
+class CheckoutSerializer(serializers.Serializer):
+    url = fields.URLField(required=False)
+    file = fields.FileField(required=False)
+
+
 class UploadFileSerializer(serializers.Serializer):
     """Serializer used to validate file uploads. In the specific
     case of using an url, the user can indicate an entry key that

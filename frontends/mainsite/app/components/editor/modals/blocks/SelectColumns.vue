@@ -1,7 +1,7 @@
 <template>
-  <div id="select-columns">
+  <form id="select-columns" @submit.prevent>
     <lazy-base-column-type-option v-for="(columnType, idx) in fileCheckoutResponse?.columnTypes" :key="idx" :column-type="columnType" hydrate-on-visible />
-  </div>
+  </form>
 </template>
 
 <script setup lang="ts">

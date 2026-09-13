@@ -1,42 +1,48 @@
-import type { FileCheckoutResponse, SimpleTable } from '#shared/types'
-import type { DocumentParams, NewDocument } from '#shared/types/documents'
+import type { FileCheckoutResponse } from '#shared/types'
+import type { NewDocument } from '#shared/types/documents'
 
-const [usePrefetchProvider, _usePrefetchStore] = createInjectionState((selectedTable: WritableComputedRef<Undefineable<SimpleTable>>, newDocument: Ref<NewDocument>) => {
-  const fileCheckoutResponse = ref<FileCheckoutResponse | null>(null)
-  const columnTypes = computed(() => fileCheckoutResponse.value?.columnTypes || [])
+export function useDocumentCheckoutCompoable(source: Ref<NewDocument>) {
+  const checkedOut = ref<Record<string, boolean>>({})
+  const checkedoutResponses = ref<Record<string, FileCheckoutResponse>>({})
+  const { table } = useRoute().query as { table: string }
 
-  const prefetch = useDebounceFn(async (documentParams: Empty<DocumentParams>) => {
-    console.log('prefetched', documentParams)
+  watchDebounced(source, (newValue) => {
+    if (newValue.documents.length > 0) {
+      newValue.documents.forEach((doc) => {
+        checkedOut.value[ doc.url ] = true
 
-    //     const formData = new FormData()
+        const formData = new FormData()
 
-    //     formData.append('name', newDocument.value.name)
-    //     formData.append('file', newValue || '')
+        formData.append('url', doc.url)
+        if (doc.file) {
+          formData.append('file', doc.file)
+        }
 
-    //     fileCheckoutResponse.value = await $fetch<FileCheckoutResponse>(`/v1/tables/${selectedTable.value?.id}/checkout`, {
-    //       method: 'POST',
-    //       baseURL: useRuntimeConfig().public.prodDomain,
-    //       body: formData
-    //     })
-  }, 200)
+        $fetch<FileCheckoutResponse>(`/api/tables/${table}/checkout`, {
+          method: 'POST',
+          body: formData
+        }).then(response => {
+          if (doc.url) {
+            checkedoutResponses.value[ doc.url ] = response
+          }
+        })
+
+        if (doc.url && !checkedOut.value[ doc.url ]) {
+        }
+      })
+    }
+  }, {
+    deep: true,
+    debounce: 4000
+  })
+
+  const resetCheckedOut = () => {
+    checkedOut.value = {}
+  }
 
   return {
-    prefetch,
-    /**
-     * A sample content for what the file contains
-     */
-    fileCheckoutResponse
+    resetCheckedOut,
+    checkedOut,
+    checkedoutResponses
   }
-})
-
-export { usePrefetchProvider }
-
-export function usePrefetchStore() {
-  const store = _usePrefetchStore()
-
-  if (!store) {
-    throw new Error('useFileCheckoutStore must be used within a component that calls useFileCheckout')
-  }
-
-  return store
 }

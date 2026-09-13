@@ -10,8 +10,13 @@ from rest_framework.generics import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from dbtables.api.serializers import DatabaseTableSerializer, UploadFileSerializer
+from dbtables.api.serializers import (
+    CheckoutSerializer,
+    DatabaseTableSerializer,
+    UploadFileSerializer,
+)
 from dbtables.models import DatabaseTable
+from tabledocuments import django_tasks
 from tabledocuments.api.serializer import SimpleDocumentSerializer
 from tabledocuments.logic.utils import (
     create_column_options,
@@ -34,6 +39,8 @@ class CheckoutDocument(GenericAPIView):
     """Endpoint used to checkout a document for a given table.
     The file is parsed and a sample of the data is returned to the client."""
 
+    serializer_class = CheckoutSerializer
+
     def post(self, request: Request, pk, *args, **kwargs):
         qs = DatabaseTable.objects.filter(pk=pk)
         table = qs.first()
@@ -41,21 +48,29 @@ class CheckoutDocument(GenericAPIView):
         if table is None:
             return Response({'error': 'Table document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
+        df: pandas.DataFrame | None = None
+
         file = request.FILES.get('file')
-        if file is None:
-            return Response({'error': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        if file is not None:
+            if file.name.endswith('.csv'):
+                df = pandas.read_csv(file)
 
-        df = None
+            if file.name.endswith('.json'):
+                df = pandas.read_json(file)
 
-        if file.name.endswith('.csv'):
-            df = pandas.read_csv(file)
-
-        if file.name.endswith('.json'):
-            df = pandas.read_json(file)
-
-        if df is None:
-            return Response({'error': 'Unsupported file format. Please upload a CSV or JSON file.'}, status=status.HTTP_400_BAD_REQUEST)
+            if df is None:
+                return Response({'error': 'Unsupported file format. Please upload a CSV or JSON file.'}, status=status.HTTP_400_BAD_REQUEST)
             
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        url = serializer.validated_data.get('url', None)
+        if url is not None:
+            task = django_tasks.prefetch_data_from_url(url)
+            data = task.get()
+            df = pandas.DataFrame(data['data'])
+
         sample = df.head(2).to_dict(orient='records')
 
         template = {

@@ -34,7 +34,7 @@ from tabledocuments.utils.file_manipulation import create_dataframe
 logger = logging.getLogger(__name__)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=10)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 def update_document_options(document_uuid: str, column_options: Sequence[dict[str, str | bool | None]] | None = None, from_file: bool = False):
     """A trigger that gets fired once the document is created. It fixes
     elements such as the columns, the document# encoding references,
@@ -75,7 +75,7 @@ def update_document_options(document_uuid: str, column_options: Sequence[dict[st
     # )
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 @huey_task.rate_limit('create_csv_file_from_data', 100, 60)
 def create_csv_file_from_data(data: Any, document_id: str | int, column_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
@@ -103,7 +103,7 @@ def create_csv_file_from_data(data: Any, document_id: str | int, column_options:
         return str(document.document_uuid)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 @huey_task.rate_limit('create_json_file_from_data', 100, 60)
 def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str | None = None, column_options: Sequence[dict[str, Any]] | None = None):
     if data is None or data == '':
@@ -168,7 +168,7 @@ def create_json_file_from_data(data: Any, document_id: str | int, entry_key: str
     return str(document.document_uuid)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
 def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str | None:
     """Loads data from a Google Sheet using a service account and sheet ID and
@@ -226,7 +226,7 @@ def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str | None:
             return df.to_csv(index=False, encoding='utf-8', doublequote=True)
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 @huey_task.rate_limit('prefetch_data_from_url', 100, 30)
 def prefetch_data_from_url(url: str, **params):
     with httpx2.Client() as client:
@@ -247,7 +247,7 @@ def prefetch_data_from_url(url: str, **params):
             return template
 
 
-@huey_task.task(retries=3, retry_delay=10, timeout=60, priority=90)
+@huey_task.task(retries=3, retry_delay=10, timeout=60)
 @huey_task.rate_limit('create_csv_from_google_sheet', 100, 60)
 def create_csv_from_url(url: str, **kwargs: Any):
     """Task used to load the content of document returned via an API endpoint
