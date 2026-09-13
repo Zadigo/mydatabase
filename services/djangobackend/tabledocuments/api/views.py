@@ -1,6 +1,7 @@
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from tabledocuments.api.serializer import (
@@ -8,7 +9,9 @@ from tabledocuments.api.serializer import (
     UpdateDocumentSerializer,
 )
 from tabledocuments.models import TableDocument
-from tabledocuments.validation_models import ColumnOptionsModel
+from tabledocuments.validation_models import (
+    OptionalColumnOptionsModel,
+)
 
 
 class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
@@ -46,15 +49,19 @@ class UpdateColumnTypes(GenericAPIView):
     http_method_names = ('patch',)
     permission_classes = ()
 
-    def patch(self, request, *args, **kwargs):
+    def patch(self, request: Request, *args, **kwargs):
         instance: TableDocument = self.get_object()
 
+        _copied_data = request.data.copy()
+        if 'name' in _copied_data:
+            _copied_data.pop('name')
+
         try:
-            model = ColumnOptionsModel(**request.data)
+            model = OptionalColumnOptionsModel(**_copied_data)
         except PydanticValidationError as e:
             raise ValidationError(f"Invalid column options: {e}")
         else:
-            validated_data = model.model_dump()
+            validated_data = model.model_dump(exclude_none=True)
 
             instance.column_options = validated_data.get('column_options', instance.column_options)
             instance.save()

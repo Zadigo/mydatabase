@@ -3,7 +3,10 @@ from django.urls import reverse
 
 from djangobackend.utils import authenticated_client
 from tabledocuments.tests.utils import DocumentFactory
-from tabledocuments.validation_models import ColumnOptionsModel
+from tabledocuments.validation_models import (
+    ColumnOptionsModel,
+    OptionalColumnOptionsModel,
+)
 
 
 @pytest.fixture
@@ -48,7 +51,7 @@ def test_update_column_types(document):
     client = authenticated_client()
     response = client.patch(
         path, 
-        data={'name': 'Some name'},
+        data=OptionalColumnOptionsModel().model_dump(),
         content_type='application/json'
     )
     

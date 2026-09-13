@@ -38,6 +38,13 @@ class ColumnOptionsModel(BaseModel):
     unique: bool = Field(default=False)
 
 
+class OptionalColumnOptionsModel(ColumnOptionsModel):
+    """Model representing the options for a column in a table document 
+    where all fields are optional."""
+
+    name: str | None = Field(default=None)
+
+
 class DocumentInfoModel(BaseModel):
     uuid: str = Field(...)
     name: str = Field(...)
