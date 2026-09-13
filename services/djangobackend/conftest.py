@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from faker import Faker
-from rest_framework.test import APIClient
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
@@ -91,6 +90,8 @@ async def ws_documents(ws_router):
 
 @pytest.fixture(scope='session')
 def authenticated_client():
+    from rest_framework.test import APIClient
+
     user_model = get_user_model()
     user_model.objects.create_user(username='testuser', password='touparet')
 
