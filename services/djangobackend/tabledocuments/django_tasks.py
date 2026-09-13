@@ -183,7 +183,7 @@ def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str | None:
     try:
         table = TableDocument.objects.get(id=table_id)
     except TableDocument.DoesNotExist:
-        # logger.error(f"TableDocument with ID {table_id} does not exist.")
+        logger.error(f"TableDocument with ID {table_id} does not exist.")
         return
     else:
         providers: QuerySet[DatabaseProvider] = table.database_schema.databaseprovider_set.all()
@@ -194,7 +194,7 @@ def create_csv_from_google_sheet(table_id: int, sheet_id: str) -> str | None:
                 raise ValidationError(
                     'No provider with Google Sheet connection found')
 
-            # Attacj the crendtials to the provider for use with gspread
+            # Attach the credentials to the provider for use with gspread
             instance = gspread.service_account_from_dict(provider.google_sheet_credentials)
 
             try:

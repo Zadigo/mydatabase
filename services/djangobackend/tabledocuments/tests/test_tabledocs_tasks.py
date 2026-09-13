@@ -205,29 +205,34 @@ class TestCreateJsonFileFromData:
 class TestCreateCsvFromGoogleSheet:
     @classmethod
     def setup_class(cls):
-        django_tasks.huey_task.immediate = True
+        pass
         
-
     @pytest.mark.django_db
     @patch('gspread.client.Client')
     def test_create_document(self, mgspread):
         table = DatabaseTableFactory.create()
         provider = table.database_schema.databaseprovider_set.create()
+
         add_provider_credentials(provider, force_credentials=False)
 
         headers = ['firstname', 'lastname']
         records = [{'firstname': 'Jane', 'lastname': 'Doe'}]
 
         sheet = MagicMock(
-            sheet1=MagicMock(row_values=lambda: headers, get_all_records=lambda: records)
+            sheet1=MagicMock(
+                row_values=lambda: headers, 
+                get_all_records=lambda: records
+            )
         )
 
-        client = MagicMock(open_by_key=sheet)
+        client = MagicMock(
+            open_by_key=sheet
+        )
 
         mgspread.service_account_from_dict.return_value = client
 
         result = django_tasks.create_csv_from_google_sheet(
-            table_id=table.id, 
+            table_id=table.pk, 
             sheet_id='sheet1'
         )
         

@@ -6,16 +6,21 @@ from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from environ import Env
 from faker import Faker
 
 BASE_DIR = pathlib.Path(__file__).parent.resolve()
 
 fake = Faker()
 
+environ = Env()
+environ.read_env()
+
 def pytest_configure(config):
     if not settings.configured:
         settings.configure(
             DEBUG=True,
+            BASE_DIR=BASE_DIR,
             SECRET_KEY=fake.uuid4(),
             PY_UTILITIES_JWT_SECRET=fake.uuid4(),
             DATABASES={

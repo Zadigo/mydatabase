@@ -32,13 +32,12 @@ class DatabaseProviderFactory(DjangoModelFactory):
 
 
 def add_provider_credentials(provider: DatabaseProvider, force_credentials: bool = False):
+    """Add the Google Sheet API key and credentials to the provider."""
     api_key = os.environ.get('GOOGLE_SHEET_API_KEY', None)
     google_sheet_credentials = os.environ.get('GOOGLE_SHEET_CREDENTIALS', None)
 
     if force_credentials and (api_key is None or google_sheet_credentials is None):
-        raise ValueError(
-            "Environment variables GOOGLE_SHEET_API_KEY and GOOGLE_SHEET_CREDENTIALS must be set."
-        )
+        raise ValueError("Environment variables GOOGLE_SHEET_API_KEY and GOOGLE_SHEET_CREDENTIALS must be set.")
     
     provider.google_sheet_api_key = api_key
 
