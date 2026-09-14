@@ -121,7 +121,6 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
           method: 'POST',
           body: formData,
         }),
-
         $fetch<Database>(`/api/databases/${currentDatabase.value?.id}`, {
           method: 'GET',
         })

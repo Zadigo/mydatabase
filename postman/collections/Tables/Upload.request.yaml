@@ -1,0 +1,32 @@
+$kind: http-request
+url: "{{django}}v1/tables/{{tableId}}/upload"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "name": "Some document",
+      "column_options": [
+        {
+          "name": "firstname",
+          "newName": null,
+          "columnType": "String",
+          "unique": false,
+          "visible": true,
+          "nullable": true
+        }
+      ],
+      "documents": [
+        {
+          "name": "string",
+          "url": "https://jsonplaceholder.typicode.com/todos",
+          "entry_key": null,
+          "source_type": "file",
+          "content_type": "json",
+          "primary_document": false,
+          "primary_key_field": false
+        }
+      ],
+      "merge": false
+    }
+order: 3951945436586018

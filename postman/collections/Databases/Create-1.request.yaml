@@ -1,0 +1,24 @@
+$kind: http-request
+name: Create
+url: "{{django}}v1/databases/create"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": "Some other name",
+        "database_functions": [],
+        "database_triggers": [],
+        "document_relationships": [],
+        "slug": null,
+        "active": true,
+        "paused": false
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Retrieve databases", () => {
+          pm.expect(pm.response.code).to.eql(200)
+      })
+    language: text/javascript
+order: 4484537314593328

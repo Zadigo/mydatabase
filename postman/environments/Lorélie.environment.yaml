@@ -1,0 +1,8 @@
+name: Lorélie
+values:
+  - key: django
+    value: ''
+  - key: databaseId
+    value: ''
+  - key: tableId
+    value: ''

@@ -2,10 +2,19 @@ import { createErrorTemplate } from '~/utils/errors'
 
 export default defineEventHandler(async (event) => {
   try {
-    const id = getRouterParam(event, 'id')
-    const formData = await readBody(event)
+    const tableId = getRouterParam(event, 'id')
 
-    return await $fetch<{ name: string }>(`/v1/tables/${id}/upload`, {
+    if(!tableId) {
+      throw new Error('No table ID provided')
+    }
+
+    const formData = await readMultipartFormData(event)
+    
+    if (!formData || formData.length === 0) {
+      throw new Error('No form data provided')
+    }
+
+    return await $fetch<{ name: string }>(`/v1/tables/${tableId}/upload`, {
       method: 'POST',
       baseURL: useRuntimeConfig().public.prodDomain,
       body: formData

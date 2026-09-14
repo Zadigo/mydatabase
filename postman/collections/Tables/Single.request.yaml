@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{django}}v1/tables/{{tableId}}"
+method: GET
+order: 2136419768077078

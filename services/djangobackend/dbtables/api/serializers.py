@@ -55,9 +55,12 @@ class _ValidateColumnTypes(serializers.Serializer):
         default=True
     )
 
-    def validate_newName(self, value):
+    def validate_newName(self, value: str | None):
         # Name should not contain special
         # characters other than "_" or "-"
+        if value is None:
+            return value 
+        
         if not re.match(r'^[\w-]+$', value):
             raise serializers.ValidationError({
                 'newName': 'Column name can only contain letters, numbers, underscores, and hyphens'

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{django}}v1/databases/{{databaseId}}"
+method: PATCH
+body:
+  type: json
+  content: |-
+    {
+        "name": "Some other name",
+        "database_functions": [],
+        "database_triggers": [],
+        "document_relationships": [],
+        "slug": null,
+        "active": true,
+        "paused": false
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Retrieve databases", () => {
+          pm.expect(pm.response.code).to.eql(200)
+      })
+    language: text/javascript
+order: 4355516583743749

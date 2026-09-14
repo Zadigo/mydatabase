@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{django}}v1/databases/{{databaseId}}/delete"
+method: DELETE
+order: 4493947282163115
