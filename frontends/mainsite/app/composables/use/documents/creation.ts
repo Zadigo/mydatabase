@@ -70,14 +70,10 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
       
       // Append each document to the form 
       // data under their respective keys
-      newDocument.value.documents.forEach((item, idx) => {
-        if (item.source_type === 'file' && item.file) {
-          formData.append(`file_${idx}`, item.file)
-        } else {
-          formData.append(`url_${idx}`, item.url || '')
-        }
-
+      newDocument.value.documents.forEach((item, idx) => {        
         formData.append(`index_${idx}`, idx.toString())
+        formData.append(`file_${idx}`, item.file || new Blob())
+        formData.append(`url_${idx}`, item.url || '')
         formData.append(`name_${idx}`, item.name)
         formData.append(`content_type_${idx}`, item.content_type)
         formData.append(`source_type_${idx}`, item.source_type)
@@ -87,7 +83,6 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
         if (item.entry_key) {
           formData.append(`entry_key_${idx}`, item.entry_key)
         }
-
       })
 
       return Promise.all([

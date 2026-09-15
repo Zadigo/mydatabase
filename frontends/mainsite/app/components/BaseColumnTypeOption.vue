@@ -1,5 +1,4 @@
 <template>
-  {{ currentOption }}
   <div v-if="editedColumn" class="grid grid-cols-12 gap-1 content-center space-y-2">
     <div class="col-span-1">
       <nuxt-checkbox v-model="editedColumn.visible">
