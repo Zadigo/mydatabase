@@ -35,3 +35,18 @@ class PublicApiEndpointSerializer(serializers.ModelSerializer):
             'endpoint_uuid', 
             'database_schema'
         )
+
+
+class UpdatePublicApiEndpointSerializer(serializers.ModelSerializer):
+    database_schema = SimpleDatabaseSerializer(read_only=True)
+
+    class Meta:
+        model = PublicApiEndpoint
+        read_only_fields = ('id',)
+        fields = (
+            'id', 
+            'methods', 
+            'endpoint',
+            'endpoint_uuid', 
+            'database_schema'
+        )

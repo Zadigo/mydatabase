@@ -2,7 +2,7 @@
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 
 from dbschemas.models import DatabaseSchema
@@ -158,6 +158,16 @@ class ListEndpoints(ListAPIView):
     
     queryset = PublicApiEndpoint.objects.all()
     serializer_class = PublicApiEndpointSerializer
+    permission_classes = ()
+
+
+class RetrieveUpdateEndpoint(RetrieveUpdateAPIView):
+    """Retrieve or update a specific Public API Endpoint"""
+
+    queryset = PublicApiEndpoint.objects.all()
+    serializer_class = PublicApiEndpointSerializer
+    lookup_field = 'database_schema__id'
+    lookup_url_kwarg = 'database'
     permission_classes = ()
 
 

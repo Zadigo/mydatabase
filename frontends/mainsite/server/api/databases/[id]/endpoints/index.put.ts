@@ -4,14 +4,12 @@ import { createErrorTemplate } from '~/utils/errors'
 export default defineEventHandler(async (event) => {
   try {
     const id = getRouterParam(event, 'id')
+    const body = await readBody(event)
 
-    return await $fetch<DatabaseEndpoint[]>(`/v1/databases/${id}/endpoints`, {
-      method: 'GET',
+    return await $fetch<DatabaseEndpoint[]>(`/v1/endpoints/${id}`, {
+      method: 'PUT',
       baseURL: useRuntimeConfig().public.prodDomain,
-      headers: [
-        ['Content-Type', 'application/json'],
-        ['Accept', 'application/json']
-      ]
+      body
     })
   } catch (error) {
     const template = createErrorTemplate(error)

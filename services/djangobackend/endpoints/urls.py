@@ -26,6 +26,11 @@ urlpatterns = [
         name='create'
     ),
     re_path(
+        r'^(?P<database>\d+)$',
+        views.RetrieveUpdateEndpoint.as_view(),
+        name='retrieve-update'
+    ),
+    re_path(
         r'^$',
         views.ListEndpoints.as_view(),
         name='list-endpoints'
