@@ -10,15 +10,14 @@
             </h2>
           </template>
           
-          <div v-for="column in selectDocument(table)?.column_options || []" :key="column.name" class="py-2 px-5 border border-slate-100 flex items-center gap-2">
+          <div v-for="column in selectDocument(table)?.column_options || []" :key="column.name" class="py-2 px-5 border border-slate-100 dark:border-slate-700 first:rounded-tr-lg first:rounded-tl-lg last:rounded-bl-lg last:rounded-br-lg flex items-center gap-2">
             <icon :name="getTypeIcon(column.columnType)" class="text-2xl" />
             <span>{{ column.name }}</span>
           </div>
-          
-          NO DATASOURCE SELECTED
         </nuxt-card>
       </div>
       <div v-else>
+        NO DATASOURCE SELECTED
         <nuxt-skeleton class="w-full h-4/6" />
       </div>
     </nuxt-container>

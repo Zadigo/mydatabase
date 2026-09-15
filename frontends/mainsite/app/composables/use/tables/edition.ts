@@ -101,12 +101,6 @@ export const useTableEditionComposable = createGlobalState(() => {
 
   async function update() {
     if (isDefined(selectedTable)) {
-      // const data = await $fetch<SimpleTable>(`/v1/tables/${selectedTable.value.id}`, {
-      //   method: 'PATCH',
-      //   baseURL: useRuntimeConfig().public.prodDomain,
-      //   body: editableTableRef.value
-      // })
-
       const data = await $fetch<SimpleTable>(`/api/tables/${selectedTable.value.id}/update`, {
         method: 'PATCH',
         body: editableTableRef.value
@@ -119,16 +113,11 @@ export const useTableEditionComposable = createGlobalState(() => {
     }
   }
 
-  // FIXME: Does not update on Django
   watch(selectedTableDocument, (doc) => {
     // When the user changes the datasource for the table,
     // we need to update it on Django
     if (isDefined(selectedTable) && isDefined(doc)) {
-      const data = { ...selectedTable.value }
-
-      data.active_document_datasource = doc.document_uuid
-      selectedTable.value = toValue(data)
-
+      editableTableRef.value.active_document_datasource = doc.document_uuid
       update()
     }
   })
