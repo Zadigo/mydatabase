@@ -84,13 +84,7 @@ definePageMeta({
   layout: 'dashboard'
 })
 
-// const databasesStore = useDatabasesStore()
-// const { search, searched } = storeToRefs(databasesStore)
-
-// databasesStore.fetch()
-
 const { search, searched } = _useDatabases()
-
 const { showModal, newDatabase, create, toggleCreationModal } = useDatabaseCreation()
 
 // Since data is persisted, we should reset

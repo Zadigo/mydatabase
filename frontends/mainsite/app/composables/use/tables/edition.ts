@@ -11,11 +11,17 @@ export const useTableEditionComposable = createGlobalState(() => {
   const { currentDatabase } = _useDatabases()
   const selectedTableDocumentName = ref<string>()
 
-  const queryParams = useUrlSearchParams() as { table: string }
+  const queryParams = computed({
+    get: () => useUrlSearchParams('history') as { table: string },
+    set: (value: { table: string }) => {
+      const searchParams = useUrlSearchParams('history')
+      searchParams.table = value.table
+    }
+  })
 
   watch(selectedTableDocumentName, (value) => {
     if (isDefined(value)) {
-      queryParams.table = useToString(selectedTable.value?.id || '').value
+      queryParams.value.table = useToString(selectedTable.value?.id || '').value
     }
   })
 

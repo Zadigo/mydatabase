@@ -1,4 +1,5 @@
 <template>
+  {{ currentOption }}
   <div v-if="editedColumn" class="grid grid-cols-12 gap-1 content-center space-y-2">
     <div class="col-span-1">
       <nuxt-checkbox v-model="editedColumn.visible">
@@ -41,15 +42,19 @@
 import type { ColumnOptions } from '#shared/types'
 
 const props = defineProps<{
-  columnType: Undefineable<ColumnOptions>
+  index: number
+  columnOption: Undefineable<ColumnOptions>
 }>()
 
 const editedColumn = computed({
   get() {
-    return props.columnType
+    return props.columnOption
   },
   set() {
     // Do nothing, changes are emitted on blur to avoid excessive emissions while editing
   }
 })
+
+const { getNewDocumentByIndex } = useCreateDocument()
+const currentOption = getNewDocumentByIndex(props.index)
 </script>

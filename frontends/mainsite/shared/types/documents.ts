@@ -10,11 +10,11 @@ export interface DocumentParams {
   source_type: 'file' | 'url'
   content_type: DocumentTypes
   primary_key_file: boolean
+  column_options: ColumnOptions[]
 }
 
 export interface NewDocument {
-  name: string
-  column_options: ColumnOptions[]
+  global_name: string
   documents: DocumentParams[]
   merge: boolean
 }

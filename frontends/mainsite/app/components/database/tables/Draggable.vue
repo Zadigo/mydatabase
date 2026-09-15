@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Table } from '~/types'
+import type { Table } from '#shared/types'
 
 const { table, containerEl } = defineProps<{ table: Table, containerEl: HTMLElement | null }>()
 
@@ -52,7 +52,6 @@ const { style } = useDraggable(tableEl, {
  * Current Database
  */
 
-// const dbStore = useDatabasesStore()
 const { currentDatabase } = _useDatabases() 
 
 /**

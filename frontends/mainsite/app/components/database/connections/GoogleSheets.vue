@@ -16,9 +16,6 @@
 const file = ref<File | null>(null)
 const isLoading = ref<boolean>(false)
 
-// const databaseStore = useDatabasesStore()
-// const { currentDatabase } = storeToRefs(databaseStore)
-
 const { currentDatabase } = _useDatabases() 
 
 /**

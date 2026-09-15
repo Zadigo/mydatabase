@@ -15,7 +15,6 @@
 <script setup lang="ts">
 import type { BreadcrumbItem, DropdownMenuItem } from '@nuxt/ui'
 
-// const dbStore = useDatabasesStore()
 const { currentDatabase } = _useDatabases()
 
 const baseItems = computed(() => {

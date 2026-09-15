@@ -1,5 +1,5 @@
-import type { Database } from '~/types'
-import type { DatabaseEndpoint } from '~/types/api/databases/endpoints'
+import type { Database } from '#shared/types'
+import type { DatabaseEndpoint } from '#shared/types/api/databases/endpoints'
 import type { NewDatabase } from '#shared/types'
 
 export type NewEndpoint = Pick<DatabaseEndpoint, 'endpoint'>
@@ -20,7 +20,6 @@ export function useDatabaseCreation() {
     description: ''
   })
 
-  // const dbStore = useDatabasesStore()
   const { push } = _useDatabases() 
 
   async function create() {

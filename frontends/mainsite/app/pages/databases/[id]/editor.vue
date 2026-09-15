@@ -59,9 +59,6 @@ definePageMeta({
 
  const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef, toggleEditTableDrawer } = useTableEditionComposable()
 
-// const tableEditionStore = useTableEditionStore()
-// const { selectedTable, tableData, hasDocuments, hasData, selectedTableDocument, editableTableRef } = storeToRefs(tableEditionStore)
-
 const componentMapping: Record<TableComponent, Component> = {
   'data-table': EditorTablesDataTable,
   'graph-table': EditorTablesDataTable

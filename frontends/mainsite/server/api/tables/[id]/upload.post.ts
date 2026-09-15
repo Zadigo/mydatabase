@@ -8,16 +8,10 @@ export default defineEventHandler(async (event) => {
       throw new Error('No table ID provided')
     }
 
-    const formData = await readMultipartFormData(event)
-    
-    if (!formData || formData.length === 0) {
-      throw new Error('No form data provided')
-    }
-
-    return await $fetch<{ name: string }>(`/v1/tables/${tableId}/upload`, {
-      method: 'POST',
-      baseURL: useRuntimeConfig().public.prodDomain,
-      body: formData
+    return await proxyRequest(event, `${useRuntimeConfig().public.prodDomain}/v1/tables/${tableId}/upload`, {
+      headers: {
+        // inject/override headers here (e.g. internal auth token)
+      }
     })
   } catch (error) {
     const template = createErrorTemplate(error)

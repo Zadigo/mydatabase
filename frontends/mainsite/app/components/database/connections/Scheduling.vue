@@ -56,9 +56,6 @@ interface NewSchedule {
   }
 }
 
-// const databaseStore = useDatabasesStore()
-// const { allTableDocuments } = storeToRefs(databaseStore)
-
 const { allTableDocuments } = _useDatabases() 
 
 const showCron = ref<boolean>(false)
@@ -68,7 +65,7 @@ const showCron = ref<boolean>(false)
  */
 
 const newSchedule = reactive<NewSchedule>({
-  datasource: null,
+  datasource: '',
   interval: '',
   interval_unit: 'Day',
   cron: {

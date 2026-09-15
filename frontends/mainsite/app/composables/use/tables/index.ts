@@ -1,4 +1,4 @@
-import type { MaybeTable } from '~/types'
+import type { MaybeTable } from '#shared/types'
 
 export * from './creation'
 export * from './edition'
@@ -11,9 +11,6 @@ export * from './ws_manager'
  * @param currentTable The current table being viewed/edited
  */
 export function useEditorPageRefresh(currentTable: MaybeTable) {
-  // const dbStore = useDatabasesStore()
-  // const { availableTables } = storeToRefs(dbStore)
-
   const { availableTables, currentDatabase, databases } = _useDatabases()
 
   const _currentTable = toRef(currentTable)

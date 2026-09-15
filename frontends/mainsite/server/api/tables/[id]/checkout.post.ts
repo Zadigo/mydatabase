@@ -1,4 +1,3 @@
-import { createErrorTemplate } from '~/utils/errors'
 import type { FileCheckoutResponse } from '#shared/types'
 
 export default defineEventHandler(async (event) => {
@@ -23,7 +22,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const params = getRouterParams(event) as { id: string }
-    console.log(params.id)
 
     if (!params.id || params.id.trim() === '') {
       throw new Error('No table ID provided.')

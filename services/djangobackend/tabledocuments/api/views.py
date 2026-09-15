@@ -41,6 +41,22 @@ class RetrieveUpdateDestroyDocument(RetrieveUpdateDestroyAPIView):
         return Response(response_serializer.data)
 
 
+# @extend_schema_serializer(
+#     examples = [
+#          OpenApiExample(
+#             'Column options',
+#             summary='short summary',
+#             description='longer description',
+#             value=[
+#                 {
+#                     'name': 'string'
+#                 }
+#             ],
+#             # request_only=True, # signal that example only applies to requests
+#             response_only=True, # signal that example only applies to responses
+#         ),
+#     ]
+# )
 class UpdateColumnTypes(GenericAPIView):
     """View to update the column types of a given document.
     Column types are a mapping of column names to their data types."""

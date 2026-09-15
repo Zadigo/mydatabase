@@ -2,11 +2,15 @@
   <form id="select-columns" @submit.prevent>
     <div v-for="name in names" :key="name">
       <h4 class="font-semibold p-5 rounded-lg bg-slate-100 dark:bg-slate-800 mb-5">{{ name }}</h4>
-      <base-column-type-option v-for="(columnType, idx) in checkedoutResponses[name]?.columnTypes" :key="idx" :column-type="columnType" />
+      <base-column-type-option v-for="(columnOption, idx) in getColumnOptions(name)" :key="idx" :index="idx" :column-option="columnOption" />
     </div>
   </form>
 </template>
 
 <script setup lang="ts">
-const { checkedoutResponses, names } = useDocumentCheckoutStore()
+const { fileCheckoutResponse, names } = useDocumentCheckoutStore()
+
+const getColumnOptions = (name: string) => {
+  return fileCheckoutResponse.value[name]?.columnTypes || []
+}
 </script>

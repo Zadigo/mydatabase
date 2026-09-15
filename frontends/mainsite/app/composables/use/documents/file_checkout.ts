@@ -1,39 +1,41 @@
-import type { FileCheckoutResponse } from '#shared/types'
+import type { ColumnOptions, FileCheckoutResponse } from '#shared/types'
 import type { NewDocument } from '#shared/types/documents'
 
 const [useDocumentCheckoutProvider, _useDocumentCheckoutStore] = createInjectionState((source: Ref<NewDocument>) => {
   const checkedOut = ref<Record<string, boolean>>({})
-  const checkedoutResponses = ref<Record<string, FileCheckoutResponse>>({})
-  const { table } = useRoute().query as { table: string }
+  const fileCheckoutResponse = ref<Record<string, FileCheckoutResponse>>({})
 
   watchDebounced(source, (newValue) => {
+    const tableId = useUrlSearchParams('history').table
+
     if (newValue.documents.length > 0) {
-      newValue.documents.forEach((doc) => {
-        checkedOut.value[ doc.url ] = true
-
+      newValue.documents.forEach((doc, idx) => {
         const formData = new FormData()
-
         formData.append('url', doc.url)
-        if (doc.file) {
-          formData.append('file', doc.file)
-        }
 
-        $fetch<FileCheckoutResponse>(`/api/tables/${table}/checkout`, {
+        checkedOut.value[doc.url] = true
+
+        if (doc.file) formData.append('file', doc.file)
+
+        $fetch<FileCheckoutResponse>(`/api/tables/${tableId}/checkout`, {
           method: 'POST',
           body: formData
         }).then(response => {
           if (doc.url) {
-            checkedoutResponses.value[ doc.url ] = response
+            fileCheckoutResponse.value[doc.url] = response
+            if (source.value.documents[idx]) {
+              source.value.documents[idx].column_options = response.columnTypes
+            }
           }
         })
 
-        if (doc.url && !checkedOut.value[ doc.url ]) {
+        if (doc.url && !checkedOut.value[doc.url]) {
         }
       })
     }
   }, {
     deep: true,
-    debounce: 4000
+    debounce: 3000
   })
 
   const resetCheckedOut = () => {
@@ -45,7 +47,7 @@ const [useDocumentCheckoutProvider, _useDocumentCheckoutStore] = createInjection
   return {
     resetCheckedOut,
     checkedOut,
-    checkedoutResponses,
+    fileCheckoutResponse,
     names
   }
 })

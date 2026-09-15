@@ -3,29 +3,31 @@ import type { NewDocument, DocumentTypes, DocumentParams } from '#shared/types/d
 import type { StepperItem } from '@nuxt/ui'
 import type { VueUseWsReturnType } from '~/types'
 
+const documentTemplate: NewDocument['documents'][number] = {
+  name: '',
+  content_type: 'json',
+  source_type: 'url',
+  url: '',
+  file: undefined,
+  entry_key: null,
+  primary_key_file: false,
+  column_options: []
+}
+
+const newDocumentDataTemplate: NewDocument = {
+  global_name: '',
+  documents: [{ ...documentTemplate }],
+  merge: false,
+}
+
 /**
  * Composable used for creating a new document
  * @param wsObject The websocket object used to send messages to the server when the document is created. If not provided, the composable will not send any websocket messages.
  */
 export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnType) => {
-  const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle(true)
+  const [showAddDocumentModal, toggleShowAddDocumentModal] = useToggle(false)
 
-  const newDocument = ref<NewDocument>({
-    name: '',
-    documents: [
-      {
-        name: '',
-        content_type: 'json',
-        source_type: 'url',
-        url: '',
-        file: undefined,
-        entry_key: null,
-        primary_key_file: false
-      }
-    ],
-    merge: false,
-    column_options: []
-  })
+  const newDocument = ref<NewDocument>({ ...newDocumentDataTemplate })
 
   const getNewDocumentByIndex = reactive((index: number) => newDocument.value.documents[index])
 
@@ -34,22 +36,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
    */
 
   function resetNewDocument() {
-    newDocument.value = {
-      name: '',
-      documents: [
-        {
-          name: '',
-          content_type: 'json',
-          source_type: 'url',
-          url: '',
-          file: undefined,
-          entry_key: null,
-          primary_key_file: false
-        }
-      ],
-      merge: false,
-      column_options: []
-    } as NewDocument
+    newDocument.value = { ...newDocumentDataTemplate }
   }
 
   function selectPrimaryKeyFile(documentParams: DocumentParams | undefined) {
@@ -61,15 +48,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
 
   function removeDocument(index: number, callback?: () => void) {
     if (newDocument.value.documents.length === 1) {
-      newDocument.value.documents[0] = {
-        name: '',
-        content_type: 'json',
-        source_type: 'url',
-        url: '',
-        file: undefined,
-        entry_key: null,
-        primary_key_file: false
-      } as DocumentParams
+      newDocument.value.documents[0] = { ...documentTemplate }
     } else {
       newDocument.value.documents.splice(index, 1)
     }
@@ -79,15 +58,7 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
   }
 
   function addDocument(documentType: DocumentTypes = 'json') {
-    newDocument.value.documents.push({
-      name: '',
-      content_type: documentType,
-      source_type: 'url',
-      url: '',
-      file: undefined,
-      entry_key: null,
-      primary_key_file: false
-    })
+    newDocument.value.documents.push({ ...documentTemplate, content_type: documentType })
   }
 
   const { currentDatabase } = _useDatabases()
@@ -95,9 +66,10 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
 
   function create() {
     const { data } = useAsyncData('createDocument', async () => {
-      // Append each document to the form data under their respective keys
       const formData = new FormData()
-
+      
+      // Append each document to the form 
+      // data under their respective keys
       newDocument.value.documents.forEach((item, idx) => {
         if (item.source_type === 'file' && item.file) {
           formData.append(`file_${idx}`, item.file)
@@ -105,15 +77,17 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
           formData.append(`url_${idx}`, item.url || '')
         }
 
+        formData.append(`index_${idx}`, idx.toString())
         formData.append(`name_${idx}`, item.name)
         formData.append(`content_type_${idx}`, item.content_type)
         formData.append(`source_type_${idx}`, item.source_type)
+        formData.append(`column_options_${idx}`, JSON.stringify(item.column_options || {}))
+        formData.append(`primary_key_file_${idx}`, String(item.primary_key_file))
         
         if (item.entry_key) {
           formData.append(`entry_key_${idx}`, item.entry_key)
         }
 
-        formData.append(`primary_key_file_${idx}`, String(item.primary_key_file))
       })
 
       return Promise.all([
@@ -176,12 +150,17 @@ export const useCreateDocument = createGlobalState((_wsObject?: VueUseWsReturnTy
     selectPrimaryKeyFile,
     /**
      * Resets the new document being created to its initial state
+     * @param index The index of the document to reset
      */
     resetNewDocument,
     /**
      * Toggles the modal to add a new document
      */
     toggleShowAddDocumentModal,
+    /**
+     * Gets the new document being created by its index
+     * @param index The index of the document to retrieve
+     */
     getNewDocumentByIndex
   }
 })

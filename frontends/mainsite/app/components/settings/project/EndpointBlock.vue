@@ -43,14 +43,12 @@
 </template>
 
 <script setup lang="ts">
-import type { DatabaseEndpoint } from '~/types'
+import type { DatabaseEndpoint } from '#shared/types'
 
 const props = defineProps<{ endpoint: DatabaseEndpoint }>()
 
 const editableEndpoint = ref({ ...props.endpoint })
 
-// const databaseStore = useDatabasesStore()
-// const { currentDatabase } = storeToRefs(databaseStore)
 const { currentDatabase } = _useDatabases() 
 
 /**

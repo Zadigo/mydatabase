@@ -46,12 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import type { DatabaseFunction } from '~/types'
+import type { DatabaseFunction } from '#shared/types'
 
 const { databaseFunction } = defineProps<{ databaseFunction: DatabaseFunction }>()
-
-// const databaseStore = useDatabasesStore()
-// const { currentDatabase } = storeToRefs(databaseStore)
 
 const { currentDatabase } = _useDatabases() 
 

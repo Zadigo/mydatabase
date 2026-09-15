@@ -44,7 +44,6 @@
 <script lang="ts" setup>
 const devContainerEl = useTemplateRef('devContainerEl')
 
-// const { currentDatabase } = storeToRefs(useDatabasesStore())
 const { currentDatabase, routeId } = _useDatabases() 
 
 // const { selectedTable, selectedTableDocument, tableDocuments } = storeToRefs(useTableEditionStore())

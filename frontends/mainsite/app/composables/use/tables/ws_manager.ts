@@ -17,8 +17,6 @@ export const useTableWebocketManager = createGlobalState((selectedTable: Ref<Sim
   const config = useRuntimeConfig()
   const { stringify, parse } = useWebsocketMessage()
 
-  // const dbStore = useDatabasesStore()
-  // const { currentDatabase } = storeToRefs(dbStore)
   const { currentDatabase } = _useDatabases() 
 
   // const tableEditionStore = useTableEditionStore()

@@ -47,12 +47,8 @@
 </template>
 
 <script setup lang="ts">
-// const dbStore = useDatabasesStore()
-// const { availableTables } = storeToRefs(dbStore)
-
 const { availableTables } = _useDatabases() 
 
-// const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames, tableData } = storeToRefs(useTableEditionStore())
 const { hasDocuments, selectedTableName, selectedTable, selectedTableDocumentName, selectedTableDocumentNames } = useTableEditionComposable()
 
 /**

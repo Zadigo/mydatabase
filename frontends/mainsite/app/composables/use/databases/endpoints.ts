@@ -1,12 +1,10 @@
-import type { DatabaseEndpoint } from '~/types/api/databases/endpoints'
+import type { DatabaseEndpoint } from '#shared/types/api/databases/endpoints'
 
 /**
  * Composable used to fetch the endpoints for a database
  * @param database The database to fetch endpoints for
  */
 export const useDatabaseEndpoints = createSharedComposable(() => {
-  // const dbStore = useDatabasesStore()
-  // const { currentDatabase } = storeToRefs(dbStore)
   const { currentDatabase } = _useDatabases() 
 
   const endpoints = computedAsync(async () => {

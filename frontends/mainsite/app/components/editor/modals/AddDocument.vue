@@ -21,7 +21,7 @@
               </div>
               
               <!-- Global document name -->
-              <nuxt-input v-if="newDocument.merge" v-model="newDocument.name" class="my-5 w-full" variant="subtle" placeholder="Merged document name" />
+              <nuxt-input v-if="newDocument.merge" v-model="newDocument.global_name" class="my-5 w-full" variant="subtle" placeholder="Merged document name" />
               
               <!-- Inputs -->
               <div class="space-y-2">
@@ -63,7 +63,6 @@ const stepperEl = useTemplateRef('stepper')
  */
 
 const { selectedTable, selectedTableDocument } = useTableEditionComposable()
-
 const { wsObject } = useTableWebocketManager(selectedTable, selectedTableDocument)
 const { newDocument, create, showAddDocumentModal, toggleShowAddDocumentModal, updateStep, addDocument } = useCreateDocument(wsObject)
 

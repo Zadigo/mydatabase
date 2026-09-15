@@ -17,9 +17,6 @@
 </template>
 
 <script setup lang="ts">
-// const dbStore = useDatabasesStore()
-// const { currentDatabase } = storeToRefs(dbStore)
-
 const { currentDatabase } = _useDatabases() 
 
 const endpoints = [

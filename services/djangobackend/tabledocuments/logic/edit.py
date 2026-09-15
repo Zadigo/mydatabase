@@ -187,69 +187,6 @@ class DocumentEdition:
 
         return True, await self.clean(df)
 
-    @warnings.deprecated('Use huey task to process file data')
-    async def load_json_document_by_url(self, url: str, entry_key: str | None = None, **request_params: Any) -> Document | None:
-        """Function used to load the content of document returned via an API endpoint
-        as a json format. The content will be loaded and transformed back to a csv database file.
-
-        Since the the actual data in a JSON file is not always at the root, the entry key can be used 
-        to specify the path to the data. For example: items in `{'items': []}` or root.items
-        in `{'root': {'items': []}}`
-        """
-        if self.consumer is not None:
-            await self.consumer.send_json({'action': 'processing_url'})
-
-        response, errors = await load_document_by_url(url, **request_params)
-
-        if errors:
-            self.errors.extend(errors)
-
-        if response is not None and response.status_code == 200:
-            try:
-                data = response.json()
-            except ValueError:
-                self.errors.append("Failed to parse JSON response")
-                return None
-            else:
-                # Get the document type via the headers e.g application/csv
-                content_type = response.headers.get('Content-Type', '')
-
-                if 'application/json' not in content_type:
-                    self.errors.append(
-                        "Unhandled document type. "
-                        "Valid types are: json"
-                    )
-                    return None
-
-                if entry_key is not None:
-                    # Override the data with the entry key
-                    # since we do not really care about the
-                    # root structure
-                    keys = entry_key.split('.')
-                    for key in keys:
-                        data = data.get(key, {})
-
-                if isinstance(data, dict):
-                    self.errors.append(
-                        'Trying to build data from a dict? If this is not '
-                        'intended, please provide an entry key'
-                    )
-                    return None
-
-                try:
-                    # By any means, if the data is not valid, pandas
-                    # will also automatically raise an error
-                    df = pandas.DataFrame(data)
-                except ValueError:
-                    self.errors.append(
-                        "Failed to create DataFrame "
-                        "from JSON data"
-                    )
-                else:
-                    return await self.clean(df, {'url': url})
-        
-        return None
-
 
 class DocumentTransform:
     """This is the main class that handles live document
