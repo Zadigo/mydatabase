@@ -8,5 +8,5 @@ pytest --durations=10
 python -X importtime -m pytest
 
 # Huey
-huey_consumer djangobackend.huey_app.huey_task -w 4
+huey_consumer djangobackend.huey_server.huey_task -w 4
 ```

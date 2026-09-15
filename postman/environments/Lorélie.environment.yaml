@@ -6,3 +6,5 @@ values:
     value: ''
   - key: tableId
     value: ''
+  - key: documentUuid
+    value: ''

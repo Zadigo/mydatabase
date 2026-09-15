@@ -45,6 +45,13 @@ class OptionalColumnOptionsModel(ColumnOptionsModel):
     name: str | None = Field(default=None)
 
 
+class ColumnTypesModel(BaseModel):
+    """Model representing the type of a column in a table document."""
+
+    name: str = Field(...)
+    columnType: Literal['String', 'Number', 'Boolean', 'Array', 'Dict'] = Field(default='String')
+
+
 class DocumentInfoModel(BaseModel):
     uuid: str = Field(...)
     name: str = Field(...)

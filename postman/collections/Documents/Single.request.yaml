@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{django}}v1/documents/{{documentUuid}}"
+method: GET
+order: 1789464014059

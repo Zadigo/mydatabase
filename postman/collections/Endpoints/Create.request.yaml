@@ -1,0 +1,13 @@
+$kind: http-request
+description: ""
+url: "{{django}}v1/endpoints/{{databaseId}}/create"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "methods": "POST,GET",
+      "endpoint": "/something",
+      "endpoint_uuid": "0120e0e2-81ad-4dcb-a27b-653ab79a625e"
+    }
+order: 3882740921060149

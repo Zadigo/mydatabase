@@ -20,13 +20,11 @@ class TableDocumentsAdmin(admin.ModelAdmin):
     def update_document_options(self, request, queryset):
         for document in queryset:
             if document.file is not None:
-                update_document_options.s(
-                    kwargs={
-                        'document_uuid': str(document.document_uuid), 
-                        'from_file': True
-                    },
-                    countdown=3
+                task = update_document_options.s(
+                    document_uuid=str(document.document_uuid), 
+                    from_file=True
                 )
+                huey_task.enqueue(task)
 
         add_message(
             request,

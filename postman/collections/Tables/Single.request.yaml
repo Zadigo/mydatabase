@@ -1,4 +1,13 @@
 $kind: http-request
 url: "{{django}}v1/tables/{{tableId}}"
 method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("get table by ID", () => {
+          pm.expect(pm.response.code).to.equal(200)
+          const document = pm.response.json()["documents"][0]
+          pm.environment.set("documentUuid", document.document_uuid)
+      })
+    language: text/javascript
 order: 2136419768077078

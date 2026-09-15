@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{django}}v1/documents/{{documentUuid}}"
+method: PATCH
+body:
+  type: json
+  content: |-
+    {
+        "document_uuid": "{{documentUuid}}",
+        "name": "Some simple name",
+        "column_names": [
+            "firstname"
+        ],
+        "column_options": [
+            {
+                "name": "firstname"
+            }
+        ],
+        "column_types": {
+            "firstname": "String",
+            "lastname": "String"
+        }
+    }
+order: 351890327056085
