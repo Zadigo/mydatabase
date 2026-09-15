@@ -9,8 +9,8 @@
               {{ table.name }}
             </h2>
           </template>
-
-          <div v-for="column in selectDocument(table)?.column_type_options || []" :key="column.name" class="py-2 px-5 border border-slate-100 flex items-center gap-2">
+          
+          <div v-for="column in selectDocument(table)?.column_options || []" :key="column.name" class="py-2 px-5 border border-slate-100 flex items-center gap-2">
             <icon :name="getTypeIcon(column.columnType)" class="text-2xl" />
             <span>{{ column.name }}</span>
           </div>

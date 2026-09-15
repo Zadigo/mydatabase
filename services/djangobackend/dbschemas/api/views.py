@@ -127,6 +127,10 @@ class CreateIntegration(GenericAPIView):
         serializer = self.response_serializer(instance=instance)
         data = serializer.data
         return data
+    
+    def get(self, request, *args, **kwargs):
+        instance = get_object_or_404(DatabaseProvider, database_schema__pk=kwargs.get('pk'))
+        return Response(self.get_response_serializer(instance), status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

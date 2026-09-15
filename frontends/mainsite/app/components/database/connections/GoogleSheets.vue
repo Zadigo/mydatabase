@@ -31,19 +31,15 @@ async function uploadFile() {
   if (isDefined(currentDatabase)) {
     isLoading.value = true
 
-    const { data } = await useFetch<{ id: number, has_google_sheet_connection: boolean }>(`/v1/databases/${currentDatabase.value.id}/integrations`, {
-      immediate: true,
-      baseURL: useRuntimeConfig().public.prodDomain,
+    const data = await $fetch<{ id: number, has_google_sheet_connection: boolean }>(`/v1/databases/${currentDatabase.value.id}/integrations`, {
       method: 'POST',
       body: formData
     })
     
     isLoading.value = false
   
-    if (data.value) {
-      if (data.value.has_google_sheet_connection) {
-        file.value = null
-      }
+    if (data.has_google_sheet_connection) {
+      file.value = null
     }
   }
 }
