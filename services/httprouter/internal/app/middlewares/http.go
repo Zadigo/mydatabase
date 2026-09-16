@@ -1,10 +1,9 @@
-package app
+package middlewares
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/Zadigo/httprouter/internal/utils"
 )
 
 // CORS middleware to handle cross-origin requests
@@ -21,7 +20,7 @@ func Cors(next http.Handler) http.Handler {
 
 		origin := r.Header.Get("Origin")
 
-		if _, ok := AllowedOrigins[origin]; !ok {
+		if _, ok := utils.AllowedOrigins[origin]; !ok {
 			http.Error(w, "Origin not allowed", http.StatusForbidden)
 			return
 		}
@@ -40,20 +39,6 @@ func Authorization(next http.Handler) http.Handler {
 			// return
 		}
 		next.ServeHTTP(w, r)
-	}
-	return http.HandlerFunc(fn)
-}
-
-// DatabaseIdMiddleware is a middleware that retrieves the database ID
-// from the URL parameters and adds it to the request context.
-func DatabaseIdMiddleware(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		databaseUuid := chi.URLParam(r, "databaseUuid")
-		
-		var ctx context.Context
-		
-		ctx = context.WithValue(r.Context(), "databaseUuid", databaseUuid)
-		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
 }
