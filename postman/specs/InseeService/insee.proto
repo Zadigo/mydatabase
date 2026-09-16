@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package insee;
+
+option go_package = "services/goproto/insee";
+
+service InseeService {
+    rpc Siren (SirenRequest) returns (SirenResponse);
+    rpc Siret (SiretRequest) returns (SiretResponse);
+}
+
+message SirenRequest {
+    string siren = 1;
+}
+
+message SirenResponse {
+    repeated Business items = 1;
+}
+
+message SiretRequest {
+    string siren = 1;
+}
+
+message SiretResponse {
+    repeated Business items = 1;
+}
+
+message Business {
+    string name = 1;
+    string city = 2;
+}

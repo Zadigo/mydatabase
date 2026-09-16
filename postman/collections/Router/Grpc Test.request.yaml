@@ -1,0 +1,10 @@
+$kind: grpc-request
+description: ""
+url: localhost:9001
+methodPath: insee.InseeService.Siret
+methodDescriptor: CvMBCgtpbnNlZS5wcm90bxIFaW5zZWUiIQoMU2lyZXRSZXF1ZXN0EhEKBXNpcmVuGAEgASgJQgIQASIsCg1TaXJldFJlc3BvbnNlEhsKBWl0ZW1zGAEgAygLMghCdXNpbmVzc0ICEAEiLgoIQnVzaW5lc3MSEAoEbmFtZRgBIAEoCUICEAESEAoEY2l0eRgCIAEoCUICEAEyQgoMSW5zZWVTZXJ2aWNlEjIKBVNpcmV0EhMuaW5zZWUuU2lyZXRSZXF1ZXN0GhQuaW5zZWUuU2lyZXRSZXNwb25zZUIYWhZzZXJ2aWNlcy9nb3Byb3RvL2luc2Vl
+settings: {}
+schema:
+  source: file
+  location: /Volumes/Coding/Projects/Websites/django_kubes/services/goproto/insee.proto
+order: 1789586110026
