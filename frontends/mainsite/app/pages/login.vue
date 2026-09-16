@@ -24,5 +24,5 @@
 
 preloadRouteComponents('/') // Preload home page for faster navigation after login
 
-const { login, usernameField, password } = useLogin('email')
+const { login, usernameField, password } = useLogin('username')
 </script>

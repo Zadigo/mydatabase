@@ -24,7 +24,6 @@ export const useDatabaseEndpoints = createSharedComposable(() => {
     if (isDefined(currentDatabase)) {
       const data = await $fetch<DatabaseEndpoint[]>(`/api/databases/${currentDatabase.value?.id}/endpoints/create`, {
         method: 'POST',
-        baseURL: useRuntimeConfig().public.prodDomain,
         body: { endpoint: newEndpointName.value }
       })
 

@@ -58,7 +58,10 @@ export default defineNuxtConfig({
   },
 
   nuxtAuthentication: {
-    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN
+    domain: process.env.NUXT_PUBLIC_PROD_DOMAIN,
+    accessEndpoint: '/v1/auth/token/',
+    refreshEndpoint: '/v1/auth/refresh/',
+    verifyEndpoint: '/v1/auth/verify/'
   },
 
   imports: {

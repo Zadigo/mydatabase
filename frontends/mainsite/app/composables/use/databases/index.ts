@@ -6,36 +6,35 @@ export * from './endpoints'
 export * from './edition'
 
 export const _useDatabases = createGlobalState(() => {
-  const { state, execute } = useAsyncState(
+  const { data: databases } = useAsyncData<Database[]>(
+    'databases',
     () => $fetch<Database[]>('/api/databases', { method: 'GET' }),
-    [],
     {
-      immediate: true,
-      resetOnExecute: false
+      default: () => []
     }
   )
 
-  // Local mutable source of truth
-  const localMutableDatabases = ref<Database[]>([])
+  // // Local mutable source of truth
+  // const localMutableDatabases = ref<Database[]>([])
 
-  // Sync fetched data into local state whenever a fetch resolves
-  watch(state, (value) => {
-    localMutableDatabases.value = value ?? []
-  })
+  // // Sync fetched data into local state whenever a fetch resolves
+  // watch(data, (value) => {
+  //   localMutableDatabases.value = value ?? []
+  // })
 
-  const databases = computed<Database[]>({
-    get: () => localMutableDatabases.value,
-    set: (value) => {
-      localMutableDatabases.value = value
-    }
-  })
+  // const databases = computed<Database[]>({
+  //   get: () => localMutableDatabases.value,
+  //   set: (value) => {
+  //     localMutableDatabases.value = value
+  //   }
+  // })
 
-  async function refresh() {
-    await execute()
-  }
+  // async function refresh() {
+  //   await execute()
+  // }
 
   function push(database: Database) {
-    localMutableDatabases.value = [ ...localMutableDatabases.value, database ]
+    databases.value = [ ...databases.value, database ]
   }
 
   /**
@@ -120,7 +119,7 @@ export const _useDatabases = createGlobalState(() => {
     /**
      * Refresh the database data
      */
-    refresh,
+    // refresh,
     /**
      * Push a newly created database in the existing ones
      */
