@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+    <a href="{% url 'admin:index' %}" class="btn btn-xl btn-primary">
+        Admin
+    </a>
+
+    <a href="/o/applications/register/" class="btn btn-xl btn-primary">
+        Apps
+    </a>
+{% endblock %}

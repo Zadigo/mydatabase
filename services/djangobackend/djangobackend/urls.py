@@ -8,11 +8,20 @@ from graphene_django.views import GraphQLView
 from oauth_dcr import views as oauth_dcr_views
 from rest_framework_simplejwt import views as auth_views
 
+from djangobackend import views
+
 urlpatterns = [
     path(
+        '__reload__/', 
+        include('django_browser_reload.urls')
+    ),
+    path(
         'o/',
-        include(('oauth2_provider.urls', 'oauth2_provider'),
-                namespace='oauth2_provider')
+        include(
+            ('oauth2_provider.urls', 'oauth2_provider'),
+            namespace='oauth2_provider'
+        ),
+        name='oauth'
     ),
     path(
         'o/register/',
@@ -71,6 +80,11 @@ urlpatterns = [
     path(
         'admin/',
         admin.site.urls
+    ),
+    re_path(
+        r'^$',
+        views.HomeView.as_view(),
+        name='home'
     )
 ]
 
